@@ -1,10 +1,10 @@
-use v6;
 use Test;
 use Test::Mock;
 use Gamed::Engine;
 use Gamed::Network::INET;
 
 my $network = Gamed::Network::INET.new(9999);
+#note $network.perl
 my $engine = Gamed::Engine.new(
 	network => $network
 );
@@ -18,4 +18,5 @@ $sock.send('{"user":"test"}');
 $network.poll;
 my $res = $sock.recv;
 is($res, '{"version":'~$Gamed::Engine::version~'"games":[]}');
+
 done;
