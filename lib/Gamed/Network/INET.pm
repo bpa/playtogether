@@ -1,15 +1,21 @@
 module Gamed::Network;
 
 class INET {
-	has IO::Socket::INET $.sock;
+	has IO::Socket $.sock;
+	has IO::Socket @.clients;
 	
-	method new (Int $port) {
+	submethod new (Int $port) {
 		self.bless(*, sock => IO::Socket::INET.new(:localhost('0.0.0.0'), :localport($port), :listen));
 	}
 
 	method poll() {
-		my \c = $.sock.accept();
-		note c;
-		c.send(c.recv);
+		if self.sock.poll(1,0) {
+			self.clients.push(self.sock.accept());
+		}
+		for self.clients -> $c {
+			if $c.poll(1,0) {
+				$c.write($c.read(1024));
+			}
+		}
 	}
 }
