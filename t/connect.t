@@ -1,27 +1,15 @@
-use v6;
-use Test;
-use Gamed::Engine;
-use Gamed::Network::INET;
+use Test::More;
+use Test::Mojo;
 
-my $network = Gamed::Network::INET.new(9999);
-my $engine = Gamed::Engine.new(
-	network => $network
-);
+use FindBin;
+require "$FindBin::Bin/../echo.pl";
 
-my $sock = IO::Socket::INET.new(
-	host => '127.0.0.1',
-	port => 9999);
+# Test echo web service
+my $t = Test::Mojo->new;
+$t->websocket_ok('/echo')
+->send_ok('Hello Mojo!')
+->message_ok
+->message_is('echo: Hello Mojo!')
+->finish_ok;
 
-$network.poll;
-$sock.send('{"user":"test"}');
-$network.poll;
-my $res = recv($sock);
-is($res, '{"version":"'~$Gamed::Engine::version~'","games":[]}');
-done;
-
-sub recv (IO::Socket $sock) {
-	if $sock.poll(1, .05) {
-		return $sock.recv();
-	}
-	return;
-}
+done_testing();

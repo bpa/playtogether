@@ -1,0 +1,15 @@
+% layout 'default';
+% title 'Gamed';
+  <script>
+	var ws = new WebSocket('<%= url_for('join')->to_abs->scheme('ws') %>');
+
+	// Incoming messages
+	ws.onmessage = function(event) {
+	  document.body.innerHTML += event.data + '<br/>';
+	};
+
+	// Outgoing messages
+	window.setInterval(function() {
+	  ws.send('Hello Mojo!');
+	}, 1000);
+  </script>
