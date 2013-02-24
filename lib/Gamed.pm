@@ -1,4 +1,5 @@
 use Mojolicious::Lite;
+use Mojolicious::Sessions;
 use Mojo::Server::Daemon;
 use EV;
 use AnyEvent;
@@ -7,7 +8,28 @@ use File::Basename 'dirname';
 use File::Spec::Functions 'catdir';
 use Gamed::Server;
 
-get '/' => 'index';
+my $sessions = Mojolicious::Sessions->new;
+$sessions->cookie_name('gamed');
+$sessions->default_expiration(86400);
+
+get '/' => sub {
+	my $self = shift;
+	my $user = $self->session('user');
+	$self->app->log->debug("User: $user");
+	$self->render( defined $user ? 'index' : 'login', user => $user);
+};
+
+post '/login' => sub {
+	my $self = shift;
+	my $user = $self->param('username');
+	if (defined $user) {
+		$self->session(user => $user);
+		$self->render('index', user => $user);
+	}
+	else {
+		$self->render('login');
+	}
+};
 
 websocket '/join' => sub {
 	my $self = shift;

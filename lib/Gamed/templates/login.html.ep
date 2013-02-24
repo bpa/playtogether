@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Login to Gamed</title>
+  </head>
+  <body>
+    <form method="post" action="/login">
+      <div style="margin-left: auto; margin-right: auto">
+        <label for="user">Username</label>
+        <input name="username">
+        <input type="submit" value="Login">
+      </div>
+    </form>
+  </body>
+</html>
