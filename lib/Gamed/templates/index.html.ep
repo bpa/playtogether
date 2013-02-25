@@ -2,6 +2,8 @@
 <html>
   <head>
     <title>Gamed</title>
+	%= javascript 'http://code.jquery.com/jquery-1.9.1.min.js'
+	%= javascript '/client.js'
     <style>
       html, body { height: 100%; width: 100%; margin: 0; overflow: hidden; }
       #top { border: thin solid black; }

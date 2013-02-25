@@ -31,7 +31,7 @@ post '/login' => sub {
 	}
 };
 
-websocket '/join' => sub {
+websocket '/websocket' => sub {
 	my $self = shift;
 	$self->app->log->debug('WebSocket connected.');
 	Mojo::IOLoop->stream($self->tx->connection)->timeout(300);
