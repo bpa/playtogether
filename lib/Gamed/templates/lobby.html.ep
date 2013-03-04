@@ -4,6 +4,12 @@
     <title>Lobby</title>
   </head>
   <body>
-    Welcome
+    Welcome<br>
+  Available games:
+  <ul>
+  % for my $g (@$games) {
+    <li><a href="/<%= $g %>.html"><%= $g %></a></li>
+  % }
+  </ul>
   </body>
 </html>
