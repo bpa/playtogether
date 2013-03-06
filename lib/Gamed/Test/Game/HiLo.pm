@@ -1,4 +1,4 @@
-package Gamed::Game::HiLo;
+package Gamed::Game::Test::HiLo;
 
 use parent 'Gamed::Game';
 
