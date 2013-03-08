@@ -1,12 +1,18 @@
 use Gamed qw/Gamed Test Game/;
 
-package SocketMock;
-
-use JSON::Any;
-use Test::Builder;
-use Data::Dumper;
+package Gamed::Test;
+use Exporter 'import';
+our @EXPORT = qw/json text/;
 
 my $j = JSON::Any->new;
+sub json ($) { $j->to_json( $_[0] ) }
+sub hash ($) { $j->from_json( $_[0] ) }
+
+package SocketMock;
+
+use Test::Builder;
+use Data::Dumper;
+$Data::Dumper::Terse = 1;
 
 sub new {
     bless {}, shift;
@@ -24,28 +30,28 @@ sub got_one {
     $desc ||= 'gotOne';
     my $tb = Test::Builder->new;
 
-    $tb->subtest( $desc, 
-        sub {
-        	local $Test::Builder::Level = $Test::Builder::Level + 4;
-            if ( @{ $self->{packets} } == 1 ) {
-                local $msg = shift @{ $self->{packets} };
-                while ( my ( $k, $v ) = each(%$hash) ) {
-                    print Dumper [ $k, $v ];
-                    print "[" . ref($v) . "]\n";
-                    if ( ref($v) eq 'CODE' ) {
-                        print Dumper $msg;
-                        $tb->ok( $v->( $msg->{$k} ), $k );
-                    }
-                    else {
-                        $tb->is_eq( $msg->{$k}, $v, $k );
-                    }
+    if ( @{ $self->{packets} } == 1 ) {
+        local $msg = shift @{ $self->{packets} };
+        my $pass = 1;
+        while ( my ( $k, $v ) = each(%$hash) ) {
+            if ( ref($v) eq 'CODE' ) {
+                if ( !$tb->ok( $v->( $msg->{$k} ), $k ) ) {
+                    $pass = 0;
+                    last;
                 }
             }
             else {
-                $tb->is_eq( scalar @{ $self->{packets} }, 1, "Received one message" );
+                if ( $msg->{$k} ne $v ) {
+                    $pass = 0;
+                    last;
+                }
             }
         }
-    );
+        $pass ? $tb->ok( 1, $desc ) : $tb->is_eq( Dumper($msg), Dumper($hash), $desc );
+    }
+    else {
+        $tb->is_eq( scalar @{ $self->{packets} }, 1, "Received one message" );
+    }
 }
 
 1;

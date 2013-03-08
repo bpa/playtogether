@@ -1,5 +1,8 @@
 package Gamed;
 
+use strict;
+use warnings;
+
 use EV;
 use AnyEvent;
 use File::Basename 'dirname';
@@ -13,7 +16,7 @@ our %games;
 our %game_instances;
 our %player;
 our $VERSION = 0.1;
-our %commands = { join => \&on_join, };
+my %commands = ( join => \&on_join, chat => \&on_chat, game => \&on_game );
 
 sub import {
     my ( $pgk, @path ) = @_;
@@ -31,45 +34,46 @@ sub import {
 sub on_connect {
     my ( $name, $sock ) = @_;
     $player{$name} = $sock;
-    $sock->send( $json->to_json( { type => 'gamed', version => $VERSION, games => [ keys(%games) ] } ) );
+    $sock->send( $json->to_json( { cmd => 'gamed', version => $VERSION, games => [ keys(%games) ] } ) );
 }
 
 sub on_message {
-    my ( $name, $msg ) = @_;
+    my ( $name, $msg_json ) = @_;
+	my $msg = $json->from_json($msg_json);
     my $sock = $player{$name};
-    if ( $msg->{type} eq 'game' ) {
-    }
-    elsif ( $msg->{type} eq 'chat' ) {
-        $sock->send(
-            $json->to_json(
-                {
-                    type => 'chat',
-                    text => $msg->{'text'},
-                    user => $name,
-                }
-            )
-        );
-    }
-    elsif ( $msg->{type} eq 'main' ) {
-        my $action = $msg->{action};
-        my $cmd    = $commands{$action};
-        if ( ref($cmd) eq 'CODE' ) {
-            $cmd->($sock, $msg);
-        }
-        else {
-            $sock->send( $json->to_json( { type => 'main', action => 'error', reason => "Unknown action '$action'" } ) );
-        }
-    }
+	my $cmd = $msg->{cmd};
+	if (!defined($cmd)) {
+        $sock->send( $json->to_json( { cmd => 'err', reason => "No cmd specified" } ) );
+		return;
+	}
+	if (exists $commands{$cmd}) {
+		$commands{$cmd}($name, $sock, $msg);
+	}
+	else {
+        $sock->send( $json->to_json( { cmd => 'err', reason => "Unknown cmd '$cmd'" } ) );
+	}
+}
+
+sub on_chat {
+    my ( $name, $sock, $msg ) = @_;
+    $sock->send(
+        $json->to_json(
+            {
+                cmd  => 'chat',
+                text => $msg->{'text'},
+                user => $name,
+            }
+        )
+    );
+}
+
+sub on_join {
+    my ( $name, $sock, $msg ) = @_;
 }
 
 sub on_disconnect {
     my $name = shift;
     delete $player{$name};
-}
-
-sub on_join {
-	my ($sock, $msg) = @_;
-
 }
 
 1;

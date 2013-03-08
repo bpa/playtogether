@@ -13,13 +13,11 @@ use AnyEvent;
 use Mojo::IOLoop;
 use File::Basename 'dirname';
 use File::Spec::Functions 'catdir';
-use JSON::Any;
 use File::Find;
 
 my $sessions = Mojolicious::Sessions->new;
 $sessions->cookie_name('gamed');
 $sessions->default_expiration(86400);
-my $json = JSON::Any->new;
 
 get '/' => sub {
     my $self = shift;
@@ -62,8 +60,7 @@ websocket '/websocket' => sub {
     $self->on(
         message => sub {
             my ( $self, $msg ) = @_;
-            my $obj = $json->jsonToObj($msg);
-			Gamed::on_message($self->session('user'), $self);
+			Gamed::on_message($self->session('user'), $self, $msg);
 			$self->app->log->debug($self);
         }
     );
