@@ -1,4 +1,4 @@
-package Gamed::Game::Test::HiLo;
+package Gamed::Test::Game::HiLo;
 
 use parent 'Gamed::Game';
 
@@ -15,7 +15,7 @@ sub on_message {
     my %resp = ( guesses => $self->{guesses} );
     if ( $guess == $self->{num} ) {
         $resp{answer} = 'Correct!';
-		$self->on_create;
+        $self->on_create;
     }
     else {
         $resp{answer} = $guess < $self->{num} ? 'Too low' : 'Too high';
@@ -24,7 +24,9 @@ sub on_message {
 }
 
 sub on_join {
-    die 'Game full' if scalar( shift->{players} );
+	my $self = shift;
+    die 'Game full' if scalar( %{ $self->{players} } );
+    $self->SUPER::on_join(@_);
 }
 
 1;
