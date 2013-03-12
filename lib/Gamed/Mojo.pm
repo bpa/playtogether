@@ -54,13 +54,14 @@ websocket '/websocket' => sub {
     $self->app->log->debug('WebSocket connected.');
     Mojo::IOLoop->stream( $self->tx->connection )->timeout(3600);
 	my $user = $self->session('user');
-	Gamed::on_connect($user, $self);
+	my $id = Gamed::on_connect($user, $self);
 	$self->app->log->debug($self);
 
     $self->on(
         message => sub {
             my ( $self, $msg ) = @_;
-			Gamed::on_message($self->session('user'), $self, $msg);
+			$self->app->log->debug($msg);
+			Gamed::on_message($id, $msg);
 			$self->app->log->debug($self);
         }
     );

@@ -12,7 +12,7 @@ sub on_message {
     my ( $self, $player, $message ) = @_;
     $self->{guesses}++;
     my $guess = $message->{guess};
-    my %resp = ( guesses => $self->{guesses} );
+    my %resp = ( cmd => game, guesses => $self->{guesses} );
     if ( $guess == $self->{num} ) {
         $resp{answer} = 'Correct!';
         $self->on_create;
@@ -24,7 +24,7 @@ sub on_message {
 }
 
 sub on_join {
-	my $self = shift;
+    my $self = shift;
     die 'Game full' if scalar( %{ $self->{players} } );
     $self->SUPER::on_join(@_);
 }

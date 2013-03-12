@@ -1,20 +1,29 @@
 <html>
 <head>
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+<script src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.10.1/jquery-ui.min.js"></script>
+<link href="http://code.jquery.com/ui/1.10.1/themes/le-frog/jquery-ui.css" media="screen" rel="stylesheet" />
 <script>
-	parent.ws.send(JSON.stringify({type: "server", action: "create", game: "HiLo"}));
+	$(function () {
+		parent.ws.send(JSON.stringify({cmd: "create", name: "test", game: "HiLo"}));
+	});
+	
 	function callback (msg) {
-		val r = $('#results')
-		r.val(r.val() + msg['guesses'] + ': ' + msg['result'])
+		console.log(msg);
+		var r = $('#results');
+		r.val(r.val() + msg['guesses'] + ': ' + msg['answer'] + "\n");
 	}
 	function pick() {
-		
+		console.log($('#pick'));
+		console.log($('#pick').val());
+		parent.ws.send(JSON.stringify({cmd: "game", guess: $('#pick').val()}));
+		$('#pick').focus();
 	}
 </script>
 </head>
 <body>
-<form onSubmit="pick()">
-Pick a number: <input name="pick"> <input type="submit" value="Pick">
+Pick a number: <input name="pick" id="pick"> <input type="submit" value="Pick" onClick="pick()">
+<br>
 <textarea id="results"></textarea>
-</form>
 </body>
 </html>

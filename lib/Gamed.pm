@@ -9,12 +9,12 @@ use File::Basename 'dirname';
 use File::Spec::Functions 'catdir';
 use Gamed::Game;
 use Gamed::Player;
-use JSON::Any;
 use File::Find;
 use Data::UUID;
+use JSON::Any;
 
-my $json = JSON::Any->new;
 my $uuid = Data::UUID->new;
+my $json = JSON::Any->new;
 
 our %games;
 our %game_instances;
@@ -41,94 +41,95 @@ sub import {
     closedir(DIR);
 }
 
-sub json ($$) { $_[0]->send( $json->to_json( $_[1] ) ) }
-
 sub err ($$) {
-    $_[0]->send( $json->to_json( { cmd => "error", reason => $_[1] } ) );
+    $_[0]->send( { cmd => "error", reason => $_[1] } );
 }
 
 sub on_connect {
     my ( $name, $sock ) = @_;
 	my $id = $uuid->create_b64;
-	my $player = Gamed::Player($name, $sock, $id);
+	my $player = Gamed::Player->new({ name=>$name, sock=>$sock, id=>$id});
     $connection{$id} = $player;
-    json $sock,
+    $player->send(
       { cmd     => 'gamed',
         version => $VERSION,
-        games   => [ keys(%games) ] };
+        games   => [ keys(%games) ] });
 	return $id;
 }
 
 sub on_message {
-    my ( $name, $msg_json ) = @_;
+    my ( $id, $msg_json ) = @_;
     my $msg  = $json->from_json($msg_json);
-    my $sock = $player{$name};
+    my $player = $connection{$id};
+	return unless defined $player;
     my $cmd  = $msg->{cmd};
     if ( !defined($cmd) ) {
-          err $sock, "No cmd specified";
+          err $player, "No cmd specified";
     }
     elsif ( exists $commands{$cmd} ) {
-        $commands{$cmd}( $name, $sock, $msg );
+        $commands{$cmd}( $player, $msg );
     }
     else {
-          err $sock, "Unknown cmd '$cmd'";
+          err $player, "Unknown cmd '$cmd'";
     }
 }
 
 sub on_chat {
-    my ( $name, $sock, $msg ) = @_;
-    json $sock, { cmd => 'chat', text => $msg->{'text'}, user => $name };
+    my ( $player, $msg ) = @_;
+    $player->send({ cmd => 'chat', text => $msg->{'text'}, user => $player->{name} });
 }
 
 sub on_create {
-    my ( $name, $sock, $msg ) = @_;
+    my ( $player, $msg ) = @_;
     if ( exists $game_instances{ $msg->{name} } ) {
-          err $sock, "A game named '" . $msg->{name} . "' already exists";
+          err $player, "A game named '" . $msg->{name} . "' already exists";
         return;
     }
     if ( exists $games{ $msg->{game} } ) {
         eval {
             my $game = Gamed::Game::create( $games{ $msg->{game} } );
             $game_instances{ $msg->{name} } = $game;
-            $game->on_join( $name, $sock );
+            $game->on_join( $player );
+			$player->{game} = $game;
             $msg->{cmd} = 'join';
-            json $sock, $msg;
+            $player->send($msg);
         };
         if ($@) {
             $game_instances{ $msg->{name} }->on_destroy
               if exists $game_instances{ $msg->{name} };
             delete $game_instances{ $msg->{name} };
-              err $sock, $@;
+              err $player, $@;
         }
     }
 }
 
 sub on_join {
-    my ( $name, $sock, $msg ) = @_;
+    my ( $player, $msg ) = @_;
     my $game = $msg->{'game'};
     if ( !defined( $game_instances{$game} ) ) {
-          err $sock, "No game named '$game' exists";
+          err $player, "No game named '$game' exists";
     }
     else {
         eval {
             my $instance = $game_instances{$game};
-            $instance->on_join( $name, $sock );
-            json $sock, $msg;
+            $instance->on_join( $player );
+			$player->{game} = $instance;
+            $player->send($msg);
         };
         if ($@) {
-              err $sock, $@;
+              err $player, $@;
         }
     }
 }
 
 sub on_game {
-    my ( $name, $sock, $msg ) = @_;
-	my $game = 
+    my ( $player, $msg ) = @_;
+	my $game = $player->{game};
+	$game->on_message($player, $msg);
 }
 
 sub on_disconnect {
-    my $name = shift;
-    delete $player{$name};
+    delete $connection{shift};
 }
 
 1;

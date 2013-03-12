@@ -53,4 +53,13 @@ sub on_quit {
 	die GAME_OVER if !$self->{players};
 }
 
+=head2 on_destroy
+
+Do any cleanup needed before the game is deleted
+
+=cut
+
+sub on_destroy {
+}
+
 1;
