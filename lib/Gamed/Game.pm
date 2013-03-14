@@ -1,7 +1,6 @@
 package Gamed::Game;
 
 use Gamed::Const;
-use Gamed::State;
 
 =head1 NAME
 
@@ -35,18 +34,25 @@ Handle a player joining.  If the game is full, or there is any issue joining, th
 
 sub on_join {
 	my ($self, $player) = @_;
-	die GAME_FULL
+	die GAME_FULL()
 		if exists $self->{'max-players'}
-		&& scalar(@{$self->{players}}) >= $self->{'max-players'};
+		&& scalar(keys %{$self->{players}}) >= $self->{'max-players'};
 	$self->{players}{$player} = ();
-	
+	return OK;
 }
 
 =head2 on_message($player, $message)
 
 Handle a message from a player.
 
-sub on_quit($player)
+=cut
+
+sub on_message {
+	my ($self, $message) = @_;
+	$self->{state}->on_message($self, $message);
+}
+
+=head2 on_quit($player)
 
 Handle a player leaving.
 
@@ -55,7 +61,7 @@ Handle a player leaving.
 sub on_quit {
 	my ($self, $player) = @_;
 	delete $self->{players}{$player};
-	die GAME_OVER if !$self->{players};
+	die GAME_OVER() if !$self->{players};
 }
 
 =head2 on_destroy

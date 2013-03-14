@@ -15,10 +15,4 @@ sub on_message {
 sub on_leave_state {
 }
 
-sub on_join {
-}
-
-sub on_quit {
-}
-
 1;

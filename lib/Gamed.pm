@@ -7,6 +7,7 @@ use EV;
 use AnyEvent;
 use File::Basename 'dirname';
 use File::Spec::Functions 'catdir';
+use Gamed::Const;
 use Gamed::Game;
 use Gamed::Player;
 use File::Find;
@@ -42,6 +43,7 @@ sub import {
 }
 
 sub err ($$) {
+	chomp($_[1]);
     $_[0]->send( { cmd => "error", reason => $_[1] } );
 }
 
@@ -89,7 +91,7 @@ sub on_create {
         eval {
             my $game = Gamed::Game::create( $games{ $msg->{game} } );
             $game_instances{ $msg->{name} } = $game;
-            $game->on_join( $player );
+            my $r = $game->on_join( $player );
 			$player->{game} = $game;
             $msg->{cmd} = 'join';
             $player->send($msg);
@@ -101,17 +103,20 @@ sub on_create {
               err $player, $@;
         }
     }
+	else {
+		err $player, "No game type '".$msg->{game}."' exists";
+	}
 }
 
 sub on_join {
     my ( $player, $msg ) = @_;
-    my $game = $msg->{'game'};
-    if ( !defined( $game_instances{$game} ) ) {
-          err $player, "No game named '$game' exists";
+    my $name = $msg->{'name'};
+    if ( !defined( $game_instances{$name} ) ) {
+          err $player, "No game named '$name' exists";
     }
     else {
         eval {
-            my $instance = $game_instances{$game};
+            my $instance = $game_instances{$name};
             $instance->on_join( $player );
 			$player->{game} = $instance;
             $player->send($msg);
@@ -129,7 +134,8 @@ sub on_game {
 }
 
 sub on_disconnect {
-    delete $connection{shift};
+	my $id = shift;
+    delete $connection{$id};
 }
 
 1;

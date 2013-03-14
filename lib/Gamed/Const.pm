@@ -1,9 +1,10 @@
 package Gamed::Const;
 
 use Exporter 'import';
-our @EXPORT = qw/GAME_OVER/;
+our @EXPORT = qw/GAME_OVER GAME_FULL/;
 
-use constant GAME_OVER => 'game over';
-use constant GAME_FULL => 'game full';
+use constant OK => "ok\n";
+use constant GAME_OVER => "Game over\n";
+use constant GAME_FULL => "Game full\n";
 
 1;
