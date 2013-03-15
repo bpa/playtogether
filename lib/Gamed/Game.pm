@@ -1,6 +1,7 @@
 package Gamed::Game;
 
 use Gamed::Const;
+use Gamed::State;
 
 =head1 NAME
 
@@ -12,19 +13,19 @@ Override whatever you need
 
 =head1 METHODS
 
-=head2 on_create 
+=head2 build 
 
-Initialize a game.  L<joined> will be called immediately following return with the creator of the game.
+Initialize a game.  L<on_join> will be called immediately following return with the creator of the game.
 
 =cut
 
-sub on_create {}
-
-sub create {
-	my $self = bless { players => {} }, shift;
-	$self->on_create;
+sub new {
+	my $self = bless { state => Gamed::State->new }, shift;
+	$self->build;
 	return $self;
 }
+
+sub build {}
 
 =head2 on_join($player) => Game::Const
 
@@ -33,12 +34,8 @@ Handle a player joining.  If the game is full, or there is any issue joining, th
 =cut
 
 sub on_join {
-	my ($self, $player) = @_;
-	die GAME_FULL()
-		if exists $self->{'max-players'}
-		&& scalar(keys %{$self->{players}}) >= $self->{'max-players'};
-	$self->{players}{$player} = ();
-	return OK;
+	my ($self, $player, $message) = @_;
+	$self->{state}->on_join($self, $player, $message);
 }
 
 =head2 on_message($player, $message)
@@ -60,8 +57,7 @@ Handle a player leaving.
 
 sub on_quit {
 	my ($self, $player) = @_;
-	delete $self->{players}{$player};
-	die GAME_OVER() if !$self->{players};
+	$self->{state}->on_quit($player);
 }
 
 =head2 on_destroy
@@ -74,10 +70,11 @@ sub on_destroy {
 }
 
 sub change_state {
-	my ($self, $state) = @_;
-	$self->{state}->on_leave($self) if exists $self->{state};
+	my ($self, $state_name) = @_;
+	my $state = $self->{state_table}{$state_name};
+	$self->{state}->on_leave_state($self);
 	$self->{state} = $state;
-	$state->on_enter($self);
+	$state->on_enter_state($self);
 }
 
 1;

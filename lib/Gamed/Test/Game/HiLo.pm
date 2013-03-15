@@ -1,12 +1,12 @@
 package Gamed::Test::Game::HiLo;
 
 use parent 'Gamed::Game';
+use Gamed::Const;
 
-sub on_create {
+sub build {
     my $self = shift;
     $self->{num}     = int( rand(101) );
     $self->{guesses} = 0;
-	$self->{'max-players'} = 1;
 }
 
 sub on_message {
@@ -16,12 +16,18 @@ sub on_message {
     my %resp = ( cmd => 'game', guesses => $self->{guesses} );
     if ( $guess == $self->{num} ) {
         $resp{answer} = 'Correct!';
-        $self->on_create;
+        $self->build;
     }
     else {
         $resp{answer} = $guess < $self->{num} ? 'Too low' : 'Too high';
     }
     $player->send( \%resp );
+}
+
+sub on_join {
+	my ($self, $player, $message) = @_;
+	die GAME_FULL() if exists $self->{joined};
+	$self->{joined} = ();
 }
 
 1;

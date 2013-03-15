@@ -1,12 +1,27 @@
-use Gamed qw/Gamed Test Game/;
+use Gamed 'Gamed::Test::Game';
+use strict;
+use warnings;
 
 package Gamed::Test;
 use Exporter 'import';
-our @EXPORT = qw/json text/;
+our @EXPORT = qw/json text client game/;
 
 my $j = JSON::Any->new;
 sub json ($) { $j->to_json( $_[0] ) }
 sub hash ($) { $j->from_json( $_[0] ) }
+sub client { Gamed::Test::Connection->new(shift) }
+sub game { 
+	my ($game, $name, @players) = @_;
+	my @connections;
+	my $created = 0;
+	for (@players) {
+		my $c = client($_);
+		$created ? $c->join($name) : $c->create($game, $name);
+		$created = 1;
+		push @connections, $c;
+	}
+	return @connections;
+}
 
 package SocketMock;
 
@@ -31,7 +46,7 @@ sub got_one {
     my $tb = Test::Builder->new;
 
     if ( @{ $self->{packets} } == 1 ) {
-        local $msg = shift @{ $self->{packets} };
+        my $msg = shift @{ $self->{packets} };
         my $pass = 1;
         while ( my ( $k, $v ) = each(%$hash) ) {
             if ( ref($v) eq 'CODE' ) {
@@ -52,6 +67,29 @@ sub got_one {
     else {
         $tb->is_eq( scalar @{ $self->{packets} }, 1, "Received one message" );
     }
+}
+
+package Gamed::Test::Connection;
+
+sub new {
+	my ($pkg, $name) = @_;
+	$name ||= 'test';
+	my $self = bless { sock => SocketMock->new }, shift;
+	$self->{id} = Gamed::on_connect( $name, $self->{sock} );
+	$self->{sock}->got_one({},"$name connected");
+	return $self;
+}
+
+sub create {
+	my ($self, $game, $name) = @_;
+	Gamed::on_message($self->{id}, $j->to_json({cmd=>'create', game=>$game, name=>$name}));
+	$self->{sock}->got_one({cmd=>'join',name=>$name},'create');
+}
+
+sub join {
+	my ($self, $name) = @_;
+	Gamed::on_message($self->{id}, $j->to_json({cmd=>'join', name=>$name}));
+	$self->{sock}->got_one({cmd=>'join',name=>$name},'join');
 }
 
 1;

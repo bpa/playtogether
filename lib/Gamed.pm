@@ -3,16 +3,14 @@ package Gamed;
 use strict;
 use warnings;
 
-use EV;
 use AnyEvent;
-use File::Basename 'dirname';
-use File::Spec::Functions 'catdir';
+use Data::UUID;
+use EV;
 use Gamed::Const;
 use Gamed::Game;
 use Gamed::Player;
-use File::Find;
-use Data::UUID;
 use JSON::Any;
+use Module::Pluggable::Object;
 
 my $uuid = Data::UUID->new;
 my $json = JSON::Any->new;
@@ -29,42 +27,38 @@ my %commands = (
 );
 
 sub import {
-    my ( $pgk, @path ) = @_;
-    @path = ( 'Gamed', 'Game' ) unless @path;
-    opendir DIR, catdir( dirname(__FILE__), @path );
-    for my $file ( readdir DIR ) {
-        my ($module) = $file =~ /(.*)\.pm$/;
-        next unless $module;
-        my $pkg = join( '::', @path, $module );
-        eval "CORE::require $pkg";
-        $games{$module} = $pkg;
-    }
-    closedir(DIR);
+    my ( $pgk, $path ) = ( @_, "Gamed::Game" );
+    my $finder = Module::Pluggable::Object->new( search_path => $path, require => 1, inner => 0 );
+	for my $game ($finder->plugins) {
+		if (my ($shortname) = $game =~ /::Game::([^:]+)$/) {
+			$games{$shortname} = $game;
+		}
+	}
 }
 
 sub err ($$) {
-	chomp($_[1]);
+    chomp( $_[1] );
     $_[0]->send( { cmd => "error", reason => $_[1] } );
 }
 
 sub on_connect {
     my ( $name, $sock ) = @_;
-	my $id = $uuid->create_b64;
-	my $player = Gamed::Player->new({ name=>$name, sock=>$sock, id=>$id});
+    my $id = $uuid->create_b64;
+    my $player = Gamed::Player->new( { name => $name, sock => $sock, id => $id } );
     $connection{$id} = $player;
     $player->send(
-      { cmd     => 'gamed',
-        version => $VERSION,
-        games   => [ keys(%games) ] });
-	return $id;
+        {   cmd     => 'gamed',
+            version => $VERSION,
+            games   => [ keys(%games) ] } );
+    return $id;
 }
 
 sub on_message {
     my ( $id, $msg_json ) = @_;
-    my $msg  = $json->from_json($msg_json);
+    my $msg    = $json->from_json($msg_json);
     my $player = $connection{$id};
-	return unless defined $player;
-    my $cmd  = $msg->{cmd};
+    return unless defined $player;
+    my $cmd = $msg->{cmd};
     if ( !defined($cmd) ) {
           err $player, "No cmd specified";
     }
@@ -78,7 +72,7 @@ sub on_message {
 
 sub on_chat {
     my ( $player, $msg ) = @_;
-    $player->send({ cmd => 'chat', text => $msg->{'text'}, user => $player->{name} });
+    $player->send( { cmd => 'chat', text => $msg->{'text'}, user => $player->{name} } );
 }
 
 sub on_create {
@@ -89,11 +83,11 @@ sub on_create {
     }
     if ( exists $games{ $msg->{game} } ) {
         eval {
-            my $game = Gamed::Game::create( $games{ $msg->{game} } );
+            my $game = Gamed::Game::new( $games{ $msg->{game} } );
             $game_instances{ $msg->{name} } = $game;
-            my $r = $game->on_join( $player );
-			$player->{game} = $game;
-            $msg->{cmd} = 'join';
+            my $r = $game->on_join($player);
+            $player->{game} = $game;
+            $msg->{cmd}     = 'join';
             $player->send($msg);
         };
         if ($@) {
@@ -103,9 +97,9 @@ sub on_create {
               err $player, $@;
         }
     }
-	else {
-		err $player, "No game type '".$msg->{game}."' exists";
-	}
+    else {
+          err $player, "No game type '" . $msg->{game} . "' exists";
+    }
 }
 
 sub on_join {
@@ -117,8 +111,8 @@ sub on_join {
     else {
         eval {
             my $instance = $game_instances{$name};
-            $instance->on_join( $player );
-			$player->{game} = $instance;
+            $instance->on_join($player);
+            $player->{game} = $instance;
             $player->send($msg);
         };
         if ($@) {
@@ -129,12 +123,17 @@ sub on_join {
 
 sub on_game {
     my ( $player, $msg ) = @_;
-	my $game = $player->{game};
-	$game->on_message($player, $msg);
+    eval {
+        my $game = $player->{game};
+        $game->on_message( $player, $msg );
+    };
+    if ($@) {
+          err $player, $@;
+    }
 }
 
 sub on_disconnect {
-	my $id = shift;
+    my $id = shift;
     delete $connection{$id};
 }
 

@@ -1,18 +1,25 @@
 package Gamed::State;
 
+use Gamed::Const;
+use Module::Pluggable::Object;
+
+sub import {
+    Module::Pluggable::Object->new( search_path => shift, require => 1, inner => 0 )->plugins;
+}
+
 sub new {
-	my ($pkg, $game) = @_;
+	my ($pkg, $game, @args) = @_;
 	my $self = bless {}, $pkg;
-	$self->on_enter($game);
+	$self->build($game, @args);
+	$self->on_enter_state($game);
+	return $self;
 }
 
-sub on_enter_state {
-}
-
-sub on_message {
-}
-
-sub on_leave_state {
-}
+sub build {}
+sub on_message {}
+sub on_enter_state {}
+sub on_leave_state {}
+sub on_join { die GAME_FULL() }
+sub on_quit { die GAME_OVER() }
 
 1;

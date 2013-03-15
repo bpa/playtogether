@@ -1,3 +1,6 @@
+use strict;
+use warnings;
+
 use Test::More;
 use Gamed::Test;
 use Data::Dumper;
@@ -11,7 +14,7 @@ is(scalar(keys %Gamed::connection), 2);
 $sock_one->got_one(
     {   cmd   => 'gamed',
         games => sub {
-            grep {/HiLo/} @$_[0];
+            grep {/HiLo/} @_;
           }
     } );
 $sock_two->got_one;
