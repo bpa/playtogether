@@ -2,6 +2,7 @@ package Gamed::Game;
 
 use Gamed::Const;
 use Gamed::State;
+use Gamed::Object;
 
 =head1 NAME
 
@@ -72,6 +73,7 @@ sub on_destroy {
 sub change_state {
 	my ($self, $state_name) = @_;
 	my $state = $self->{state_table}{$state_name};
+	die "No state '$state_name' found\n" unless defined $state;
 	$self->{state}->on_leave_state($self);
 	$self->{state} = $state;
 	$state->on_enter_state($self);

@@ -9,11 +9,11 @@ use EV;
 use Gamed::Const;
 use Gamed::Game;
 use Gamed::Player;
-use JSON::Any;
+use JSON;
 use Module::Pluggable::Object;
 
 my $uuid = Data::UUID->new;
-my $json = JSON::Any->new;
+my $json = JSON->new->convert_blessed;
 
 our %games;
 our %game_instances;
@@ -55,7 +55,7 @@ sub on_connect {
 
 sub on_message {
     my ( $id, $msg_json ) = @_;
-    my $msg    = $json->from_json($msg_json);
+    my $msg    = $json->decode($msg_json);
     my $player = $connection{$id};
     return unless defined $player;
     my $cmd = $msg->{cmd};

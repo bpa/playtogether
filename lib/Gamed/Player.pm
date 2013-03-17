@@ -1,8 +1,8 @@
 package Gamed::Player;
 
-use JSON::Any;
+use JSON;
 
-my $json = JSON::Any->new;
+my $json = JSON->new->convert_blessed;
 
 sub new {
 	my $pkg = shift;
@@ -10,7 +10,7 @@ sub new {
 }
 
 sub send {
-	shift->{sock}->send($json->to_json($_[0]));
+	shift->{sock}->send($json->encode($_[0]));
 }
 
 1;

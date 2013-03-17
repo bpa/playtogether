@@ -11,7 +11,6 @@ sub new {
 	my ($pkg, $game, @args) = @_;
 	my $self = bless {}, $pkg;
 	$self->build($game, @args);
-	$self->on_enter_state($game);
 	return $self;
 }
 
