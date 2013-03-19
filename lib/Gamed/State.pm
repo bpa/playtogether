@@ -2,6 +2,7 @@ package Gamed::State;
 
 use Gamed::Const;
 use Module::Pluggable::Object;
+require Exporter;
 
 sub import {
     Module::Pluggable::Object->new( search_path => shift, require => 1, inner => 0 )->plugins;

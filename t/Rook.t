@@ -30,7 +30,7 @@ like( ref( $rook->{state} ), qr/Bidding/, "Now bidding" );
 
 $e->game( { bid => 100 }, { reason => 'Not your turn' },         "Bid out of turn" );
 $n->game( { bid => 50 },  { reason => 'Bidding starts at 100' }, "Bid too low" );
-$n->game( { bid => 205 }, { reason => 'Bidding max is 200' },    "Bid too high" );
+$n->game( { bid => 205 }, { reason => 'Max bid is 200' },    "Bid too high" );
 
 $n->game( { bid => 100 } );
 broadcast_one( $rook, { bid => 100 }, 'bid was broadcast' );

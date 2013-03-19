@@ -37,8 +37,9 @@ sub import {
 }
 
 sub err ($$) {
-    chomp( $_[1] );
-    $_[0]->send( { cmd => "error", reason => $_[1] } );
+    my ($client, $reason) = @_;
+    chomp($reason);
+    $client->send( { cmd => "error", reason => $reason } );
 }
 
 sub on_connect {

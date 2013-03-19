@@ -46,8 +46,8 @@ Handle a message from a player.
 =cut
 
 sub on_message {
-	my ($self, $message) = @_;
-	$self->{state}->on_message($self, $message);
+	my ($self, $client, $message) = @_;
+	$self->{state}->on_message($self, $client, $message);
 }
 
 =head2 on_quit($player)
@@ -77,6 +77,14 @@ sub change_state {
 	$self->{state}->on_leave_state($self);
 	$self->{state} = $state;
 	$state->on_enter_state($self);
+}
+
+sub broadcast {
+    my ($self, $msg) = @_;
+    $msg->{cmd} = 'game';
+    for my $c (@{$self->{players}}) {
+        $c->send($msg);
+    }
 }
 
 1;

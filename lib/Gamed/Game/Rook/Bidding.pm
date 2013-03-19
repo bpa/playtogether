@@ -13,10 +13,21 @@ sub on_enter_state {
 
 sub on_message {
 	my ($self, $game, $client, $msg) = @_;
-	if ($client->{id} ne $game->{seats}[$self->{bidder}]{id}) {
-		$client->send({ cmd=>'err', reason=>'Not your turn'});
-		return;
+	if ($client->{id} ne $game->{players}[$self->{bidder}]{id}) {
+		$client->err('Not your turn');
 	}
+    elsif (!defined $msg->{bid}) {
+        $client->err('No bid given');
+    }
+    elsif ($msg->{bid} < 100) {
+        $client->err('Bidding starts at 100');
+    }
+    elsif ($msg->{bid} > 200) {
+        $client->err('Max bid is 200');
+    }
+    else {
+        $game->broadcast($msg);
+    }
 }
 
 1;
