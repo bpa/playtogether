@@ -6,16 +6,15 @@ use warnings;
 use parent 'Gamed::State';
 
 sub build {
-    my ( $self, $players, $next_state ) = @_;
-    $self->{max}        = $players;
-    $self->{next_state} = $next_state;
+    my ( $self, $next ) = @_;
+    $self->{next} = $next;
 }
 
 sub on_join {
     my ( $self, $game, $player, $message ) = @_;
     push @{ $game->{players} }, $player;
-    $game->change_state( $self->{next_state} )
-      if ( @{ $game->{players} } >= $self->{max} );
+    $game->change_state( $self->{next} )
+      if ( @{ $game->{players} } >= $game->{seats} );
 }
 
 1;

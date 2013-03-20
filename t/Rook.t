@@ -31,9 +31,27 @@ like( ref( $rook->{state} ), qr/Bidding/, "Now bidding" );
 $e->game( { bid => 100 }, { reason => 'Not your turn' },         "Bid out of turn" );
 $n->game( { bid => 50 },  { reason => 'Bidding starts at 100' }, "Bid too low" );
 $n->game( { bid => 205 }, { reason => 'Max bid is 200' },    "Bid too high" );
+$n->game( { bid => 103 }, { reason => 'Invalid bid' },    "Must bid in multiples of 5" );
 
 $n->game( { bid => 100 } );
-broadcast_one( $rook, { bid => 100 }, 'bid was broadcast' );
+broadcast_one( $rook, { bid => 100, player=>'n' }, 'bid was broadcast' );
+$e->game( { bid => 105 } );
+broadcast_one( $rook, { bid => 105, player=>'e' }, 'bid was broadcast' );
+$s->game( { bid => 105 }, { reason => 'You must bid up or pass' } );
+
+#$s->game( { bid => 0 } );
+#broadcast_one( $rook, { bid => 0, player=>'s' }, 'pass was broadcast' );
+#$w->game( { bid => 0 } );
+#broadcast_one( $rook, { bid => 0, player=>'w' }, 'pass was broadcast' );
+#$n->game( { bid => 120 } );
+#broadcast_one( $rook, { bid => 120, player=>'n' }, 'bid was broadcast' );
+#$e->game( { bid => 125 } );
+#broadcast_one( $rook, { bid => 125, player=>'e' }, 'bid was broadcast' );
+#$s->game( { bid => 130 } , { reason => 'Not your turn' }, "Can't bid after pass" );
+#$n->game( { bid => 0 } );
+#broadcast( $rook, { bid => 0, player=>'n' }, 'pass was broadcast' );
+#broadcast_one( $rook, { state=>'Picking trump', player=>'e' }, 'Changing state to picking' );
+#like( ref( $rook->{state} ), qr/Picking/, "Now picking trump" );
 
 done_testing;
 
