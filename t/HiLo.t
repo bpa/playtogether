@@ -26,8 +26,8 @@ Gamed::on_message( $two, json { cmd => "join", game => "HiLo", name => "test" } 
 $sock_two->got_one( { cmd => 'error', reason => "Game full" } );
 Gamed::on_message( $two, json { cmd => "join", name => "test2" } );
 $sock_two->got_one( { cmd => 'error', reason => "No game named 'test2' exists" } );
-Gamed::on_message( $two, json { cmd => "create", game => "Test", name => "test2" } );
-$sock_two->got_one( { cmd => 'error', reason => "No game type 'Test' exists" } );
+Gamed::on_message( $two, json { cmd => "create", game => "none", name => "test2" } );
+$sock_two->got_one( { cmd => 'error', reason => "No game type 'none' exists" } );
 Gamed::on_disconnect($two);
 is(scalar(keys %Gamed::connection), 1);
 $Gamed::game_instances{'test'}{num} = 175;

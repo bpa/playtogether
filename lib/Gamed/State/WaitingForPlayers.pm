@@ -1,4 +1,4 @@
-package Gamed::State::FillSeats;
+package Gamed::State::WaitingForPlayers;
 
 use strict;
 use warnings;
@@ -14,7 +14,7 @@ sub on_join {
     my ( $self, $game, $player, $message ) = @_;
     push @{ $game->{players} }, $player;
     $game->change_state( $self->{next} )
-      if ( @{ $game->{players} } >= $game->{seats} );
+      if @{ $game->{players} } >= @{$game->{seat}};
 }
 
 1;

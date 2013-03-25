@@ -84,7 +84,7 @@ sub on_create {
     }
     if ( exists $games{ $msg->{game} } ) {
         eval {
-            my $game = Gamed::Game::new( $games{ $msg->{game} } );
+            my $game = Gamed::Game::new( $games{ $msg->{game} }, $msg );
             $game_instances{ $msg->{name} } = $game;
             my $r = $game->on_join($player);
             $player->{game} = $game;

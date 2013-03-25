@@ -22,7 +22,7 @@ Initialize a game.  L<on_join> will be called immediately following return with 
 
 sub new {
 	my $self = bless { state => Gamed::State->new }, shift;
-	$self->build;
+	$self->build(@_);
 	return $self;
 }
 

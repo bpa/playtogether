@@ -4,11 +4,10 @@ use parent qw/Gamed::Game/;
 
 sub build {
     my $self = shift;
-    $self->{seats} = 4;
     $self->{seat} = [map { { name => $_ } } ( 'n', 'e', 's', 'w' )];
     $self->{state_table} = {
-        WAITING_FOR_PLAYERS => Gamed::State::FillSeats->new('DEALING'),
-        DEALING             => Gamed::Game::Rook::Dealing->new,
+        WAITING_FOR_PLAYERS => Gamed::State::WaitingForPlayers->new('DEALING'),
+        DEALING             => Gamed::Game::Rook::Dealing->new(Gamed::Object::Deck::Rook->new('partnership')),
         BIDDING             => Gamed::State::Bidding->new( {
               next  => 'PICKING_TRUMP',
               min   => 100,
