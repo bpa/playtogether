@@ -10,13 +10,25 @@ sub build {
     $self->{next} = $next;
 }
 
+sub on_enter_state {
+    my ( $self, $game ) = @_;
+    $game->{players}[$game->{bidder}]->send( { nest => $game->{nest} } );
+}
+
 sub on_message {
     my ( $self, $game, $client, $msg ) = @_;
     if ( $client->{id} eq $game->{players}[$game->{bidder}]{id} ) {
-        $game->change_state( $self->{next} );
+        if ($msg->{trump} !~ /^[RGBY]$/) {
+            $client->send( { cmd => 'error', reason => "'" . $msg->{trump} . "' is not a valid trump" } );
+        }
+        elsif (!defined $msg->{nest} || @{$msg->{nest}} != 5) {
+            $client->send( { cmd => 'error', reason => 'Invalid nest' } );
+        }
+        else {
+        }
     }
     else {
-        $client->send( { cmd => 'err', reason => 'Not your turn' } );
+        $client->send( { cmd => 'error', reason => 'Not your turn' } );
     }
 }
 

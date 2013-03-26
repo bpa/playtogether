@@ -9,13 +9,9 @@ sub build {
 	while (my ($k,$v) = each %$opts) {
 		$self->{$k} = $v;
 	}
+    $self->{state_table}{waiting} = Gamed::State::WaitingForPlayers->new('start');
     $self->{state_table}{end} = Gamed::State->new;
-    $self->change_state('start');
-}
-
-sub on_join {
-    my ( $self, $player, $message ) = @_;
-    push @{ $self->{players} }, $player;
+    $self->change_state('waiting');
 }
 
 1;

@@ -23,7 +23,7 @@ sub join {
     my ( $self, $name ) = @_;
     Gamed::on_join( $self, { cmd => 'join', name => $name } );
     local $Test::Builder::Level = $Test::Builder::Level + 1;
-    $self->{sock}->got_one( { cmd => 'join', name => $name }, 'join' );
+    $self->{sock}->got( { cmd => 'join', name => $name }, 'join' );
 }
 
 sub game {

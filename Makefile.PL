@@ -7,10 +7,11 @@ WriteMakefile(
     NAME         => 'Gamed',
     VERSION_FROM => 'lib/Gamed.pm',    # finds $VERSION
     PREREQ_PM    => {
-        AnyEvent     => (),
-        'Data::UUID' => (),
-        EV           => (),
-        JSON         => (),
+        AnyEvent      => (),
+        'Data::UUID'  => (),
+        EV            => (),
+        JSON          => (),
+        'Set::Object' => (),
     },                                 # e.g., Module::Name => 1.1
     (   $] >= 5.005
         ?                              ## Add these new keywords supported since 5.005

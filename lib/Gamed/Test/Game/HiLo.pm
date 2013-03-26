@@ -28,6 +28,7 @@ sub on_join {
 	my ($self, $player, $message) = @_;
 	die GAME_FULL() if exists $self->{joined};
 	$self->{joined} = ();
+    $player->send($message);
 }
 
 1;

@@ -86,10 +86,9 @@ sub on_create {
         eval {
             my $game = Gamed::Game::new( $games{ $msg->{game} }, $msg );
             $game_instances{ $msg->{name} } = $game;
-            my $r = $game->on_join($player);
-            $player->{game} = $game;
             $msg->{cmd}     = 'join';
-            $player->send($msg);
+            my $r = $game->on_join($player, $msg);
+            $player->{game} = $game;
         };
         if ($@) {
             $game_instances{ $msg->{name} }->on_destroy
@@ -112,9 +111,8 @@ sub on_join {
     else {
         eval {
             my $instance = $game_instances{$name};
-            $instance->on_join($player);
+            $instance->on_join($player, $msg);
             $player->{game} = $instance;
-            $player->send($msg);
         };
         if ($@) {
               err $player, $@;
