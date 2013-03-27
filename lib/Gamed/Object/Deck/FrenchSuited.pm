@@ -19,12 +19,11 @@ sub generate_cards {
     my @cards;
     for my $suit ( 'S', 'H', 'C', 'D' ) {
         for my $v ( @{ $TYPE{$self->{type}} } ) {
-            push @cards, Gamed::Object::Card->new( $v, $suit );
+            push @cards, "$v$suit";
         }
     }
     if ($self->{type} eq 'full') {
-        push @cards, Gamed::Object::Card->new(0, 'J');
-        push @cards, Gamed::Object::Card->new(0, 'J');
+        push @cards, '0_', '0_';
     }
     return \@cards;
 }

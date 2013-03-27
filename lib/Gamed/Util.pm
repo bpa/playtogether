@@ -6,7 +6,7 @@ use Gamed::Util::Bag;
 our @EXPORT = qw/bag/;
 
 sub bag {
-	return Gamed::Bag->new(@_);
+	return Gamed::Util::Bag->new(@_);
 }
 
 1;

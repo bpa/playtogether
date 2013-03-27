@@ -24,14 +24,14 @@ $e->game( { do => 'deal' }, { reason => 'Not your turn' }, 'Deal out of turn' );
 $n->game( { do => 'deal' } );
 my $rook = qr/(\d+[RGBY])|0/;
 check_deal($rook, 10);
-is( grep ( $_->isa('Gamed::Object::Card'), @{ $game->{nest} } ), 5, "5 cards in the nest" );
+is( scalar @{ $game->{nest} }, 5, "5 cards in the nest" );
 
 
 $game->change_state('start');
 broadcast_one( $game, { state => 'start' } );
 $e->game( { do => 'deal' } );
 check_deal($rook, 10);
-is( grep ( $_->isa('Gamed::Object::Card'), @{ $game->{nest} } ), 5, "5 cards in the nest" );
+is( scalar @{ $game->{nest} } , 5, "5 cards in the nest" );
 
 $game->{state_table}{start}->build( { next => 'end', deck => Gamed::Object::Deck::FrenchSuited->new('normal'), deal=>13 });
 $game->change_state('start');
@@ -47,7 +47,7 @@ $game->change_state('start');
 broadcast_one( $game, { state => 'start' } );
 $e->game( { do => 'deal' } );
 check_deal($french, 13);
-is( grep ( $_->isa('Gamed::Object::Card'), @{ $game->{dummy} } ), 13, "13 cards to dummy" );
+is( scalar @{ $game->{dummy} }, 13, "13 cards to dummy" );
 
 sub check_deal {
     local $Test::Builder::Level = $Test::Builder::Level + 1;
@@ -59,7 +59,7 @@ sub check_deal {
         'Hand Dealt'
     );
     for my $s ( @{$game->{seat}} ) {
-        is( grep ( $_->isa('Gamed::Object::Card'), @{$s->{cards}} ), $cards, "Game kept record of cards dealt to player" );
+        is( @{$s->{cards}}, $cards, "Game kept record of cards dealt to player" );
     }
     broadcast_one( $game, { state => 'end' } );
     is( ref( $game->{state} ), 'Gamed::State', "Finished dealing" );

@@ -13,12 +13,16 @@ sub build {
 
 sub on_enter_state {
     my ( $self, $game ) = @_;
-    $game->{players}[$game->{bidder}]->send( { nest => $game->{nest} } );
+    $game->{players}[ $game->{bidder} ]->send( { nest => $game->{nest} } );
+    push @{ $game->{seat}[ $game->{bidder} ]{cards} }, @{ $game->{nest} };
+    delete $game->{nest};
 }
 
 sub on_message {
     my ( $self, $game, $client, $msg ) = @_;
-    if ( $client->{id} ne $game->{players}[$game->{bidder}]{id} ) {
+    my $b    = $game->{bidder};
+    my $seat = $game->{seat}[$b];
+    if ( $client->{id} ne $game->{players}[$b]{id} ) {
         $client->send( { cmd => 'error', reason => 'Not your turn' } );
         return;
     }
@@ -26,10 +30,16 @@ sub on_message {
     if ( $msg->{trump} !~ /^[RGBY]$/ ) {
         $client->send( { cmd => 'error', reason => "'" . $msg->{trump} . "' is not a valid trump" } );
     }
-    elsif ( !defined $msg->{nest} || @{ $msg->{nest} } != 5 ) {
+    elsif (!defined $msg->{nest}
+        || @{ $msg->{nest} } != 5
+        || !bag( @{ $msg->{nest} } )->subset( bag( @{ $seat->{cards} } ) ) )
+    {
         $client->send( { cmd => 'error', reason => 'Invalid nest' } );
     }
     else {
+		$game->{trump} = $msg->{trump};
+		$game->broadcast( { trump => $game->{trump} } );
+		$game->change_state($self->{next});
     }
 }
 

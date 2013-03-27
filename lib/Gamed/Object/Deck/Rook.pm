@@ -19,10 +19,10 @@ sub generate_cards {
     for my $suit ( 'B', 'G', 'R', 'Y' ) {
         for my $v ( @{ $TYPE{$self->{type}} } ) {
 
-            push @cards, Gamed::Object::Card::Rook->new( $v, $suit );
+            push @cards, "$v$suit";
         }
     }
-    push @cards, Gamed::Object::Card::Rook->new(0);
+    push @cards, '0_';
     return \@cards;
 }
 
