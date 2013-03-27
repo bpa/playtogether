@@ -4,6 +4,7 @@ use strict;
 use warnings;
 
 use parent 'Gamed::State';
+use Gamed::Util;
 
 sub build {
     my ( $self, $next ) = @_;
@@ -17,18 +18,18 @@ sub on_enter_state {
 
 sub on_message {
     my ( $self, $game, $client, $msg ) = @_;
-    if ( $client->{id} eq $game->{players}[$game->{bidder}]{id} ) {
-        if ($msg->{trump} !~ /^[RGBY]$/) {
-            $client->send( { cmd => 'error', reason => "'" . $msg->{trump} . "' is not a valid trump" } );
-        }
-        elsif (!defined $msg->{nest} || @{$msg->{nest}} != 5) {
-            $client->send( { cmd => 'error', reason => 'Invalid nest' } );
-        }
-        else {
-        }
+    if ( $client->{id} ne $game->{players}[$game->{bidder}]{id} ) {
+        $client->send( { cmd => 'error', reason => 'Not your turn' } );
+        return;
+    }
+
+    if ( $msg->{trump} !~ /^[RGBY]$/ ) {
+        $client->send( { cmd => 'error', reason => "'" . $msg->{trump} . "' is not a valid trump" } );
+    }
+    elsif ( !defined $msg->{nest} || @{ $msg->{nest} } != 5 ) {
+        $client->send( { cmd => 'error', reason => 'Invalid nest' } );
     }
     else {
-        $client->send( { cmd => 'error', reason => 'Not your turn' } );
     }
 }
 
