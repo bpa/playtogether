@@ -17,4 +17,14 @@ is_deeply([sort @values], [qw/a b c c d e/], 'values');
 my $diff = $bag - bag(qw/a c e/);
 is_deeply([sort $diff->values], [qw/b c d/], 'subtract');
 
+my $b = bag(qw/a b/);
+$b += $b;
+is_deeply([sort $b->values], [qw/a a b b/], 'add');
+
+$b += (qw/c d/);
+is_deeply([sort $b->values], [qw/a a b b c d/], 'add literal');
+
+$b += [qw/e f/];
+is_deeply([sort $b->values], [qw/a a b b c d e f/], 'add arrayref');
+
 done_testing;

@@ -1,6 +1,6 @@
 package Gamed::Util::Bag;
 
-use overload '-' => \&difference;
+use overload '-' => \&difference, '+=' => \&add;
 
 sub new {
 	my $self = bless {}, shift;
@@ -8,8 +8,10 @@ sub new {
 	return $self;
 }
 
+use Data::Dumper;
 sub add {
 	my $self = shift;
+print Dumper \@_;
 	for (@_) {
 		$self->{$_}++;
 	}

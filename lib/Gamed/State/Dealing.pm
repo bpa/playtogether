@@ -3,6 +3,7 @@ package Gamed::State::Dealing;
 use strict;
 use warnings;
 use Scalar::Util 'looks_like_number';
+use Gamed::Util;
 
 use parent 'Gamed::State';
 
@@ -37,13 +38,13 @@ sub on_leave_state {
         if ($k eq 'seat') {
             my $seats = @{$game->{seat}} - 1;
             for my $s ( 0 .. $seats ) {
-                my $cards = [$self->{deck}->deal($num)];
+                my $cards = bag($self->{deck}->deal($num));
                 $game->{seat}[$s]{cards} = $cards;
-                $game->{players}[$s]->send( { cmd => 'game', action => 'deal', hand => $cards } );
+                $game->{players}[$s]->send( { cmd => 'game', action => 'deal', hand => [$cards->values] } );
             }
         }
         else {
-            $game->{$k} = [$self->{deck}->deal($num)];
+            $game->{$k} = bag($self->{deck}->deal($num));
         }
     }
     $self->{dealer}++;

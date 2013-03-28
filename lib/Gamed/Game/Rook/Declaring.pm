@@ -14,7 +14,7 @@ sub build {
 sub on_enter_state {
     my ( $self, $game ) = @_;
     $game->{players}[ $game->{bidder} ]->send( { nest => $game->{nest} } );
-    push @{ $game->{seat}[ $game->{bidder} ]{cards} }, @{ $game->{nest} };
+    $game->{seat}[ $game->{bidder} ]{cards} += $game->{nest};
     delete $game->{nest};
 }
 
