@@ -38,8 +38,8 @@ done_testing;
 
 sub hand_is {
     local $Test::Builder::Level = $Test::Builder::Level + 1;
-    my ($real, $exp, $name);
-    my $desired = [sort shift];
-    my $actual  = [sort shift];
+    my ($real, $exp, $name) = @_;
+    my $desired = [sort @$exp];
+    my $actual  = [sort @$real];
     is_deeply( $desired, $actual, $name);
 }

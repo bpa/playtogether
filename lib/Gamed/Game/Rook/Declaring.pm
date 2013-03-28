@@ -27,17 +27,22 @@ sub on_message {
         return;
     }
 
+    my $cards = bag(@{$seat->{cards}});
+    my $nest = bag(@{$msg->{nest}});
     if ( $msg->{trump} !~ /^[RGBY]$/ ) {
         $client->send( { cmd => 'error', reason => "'" . $msg->{trump} . "' is not a valid trump" } );
     }
     elsif (!defined $msg->{nest}
         || @{ $msg->{nest} } != 5
-        || !bag( @{ $msg->{nest} } )->subset( bag( @{ $seat->{cards} } ) ) )
+        || !$nest->subset( $cards ) )
     {
         $client->send( { cmd => 'error', reason => 'Invalid nest' } );
     }
     else {
 		$game->{trump} = $msg->{trump};
+        $game->{nest} = $msg->{nest};
+        my $hand = $cards - $nest;
+        $seat->{cards} = [$hand->values];
 		$game->broadcast( { trump => $game->{trump} } );
 		$game->change_state($self->{next});
     }
