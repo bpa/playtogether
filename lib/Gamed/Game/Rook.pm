@@ -23,7 +23,7 @@ sub build {
             }
         ),
         DECLARING => Gamed::Game::Rook::Declaring->new('PLAYING'),
-        #PLAYING => Gamed::State::PlayTricks->new('SCORING'),
+        PLAYING => Gamed::State::PlayTricks->new('SCORING', Gamed::Game::Rook::PlayLogic->new),
         #SCORING => Gamed::Game::Rook::Scoring->new,
         #FINISHED => Gamed::State::GameOver->new,
     };

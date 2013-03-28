@@ -67,6 +67,11 @@ sub subset {
     return 1;
 }
 
+sub contains {
+	my ($self, $e) = @_;
+	return exists $self->{$e};
+}
+
 sub values {
     my $self = shift;
     my @values;
