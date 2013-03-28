@@ -14,7 +14,7 @@ sub build {
 sub on_enter_state {
     my ( $self, $game ) = @_;
     $game->{players}[ $game->{bidder} ]->send( { nest => $game->{nest} } );
-    $game->{seat}[ $game->{bidder} ]{cards} += $game->{nest};
+    $game->{seat}[ $game->{bidder} ]{cards}->add($game->{nest});
     delete $game->{nest};
 }
 
@@ -27,8 +27,8 @@ sub on_message {
         return;
     }
 
-    my $cards = bag(@{$seat->{cards}});
-    my $nest = bag(@{$msg->{nest}});
+    my $cards = bag($seat->{cards});
+    my $nest = bag($msg->{nest});
     if ( $msg->{trump} !~ /^[RGBY]$/ ) {
         $client->send( { cmd => 'error', reason => "'" . $msg->{trump} . "' is not a valid trump" } );
     }
@@ -40,9 +40,9 @@ sub on_message {
     }
     else {
 		$game->{trump} = $msg->{trump};
-        $game->{nest} = $msg->{nest};
+        $game->{nest} = bag($msg->{nest});
         my $hand = $cards - $nest;
-        $seat->{cards} = [$hand->values];
+        $seat->{cards} = $hand;
 		$game->broadcast( { trump => $game->{trump} } );
 		$game->change_state($self->{next});
     }

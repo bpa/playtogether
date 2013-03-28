@@ -26,7 +26,6 @@ my $rook = qr/(\d+[RGBY])|0/;
 check_deal($rook, 10);
 is( scalar ($game->{nest}->values), 5, "5 cards in the nest" );
 
-
 $game->change_state('start');
 broadcast_one( $game, { state => 'start' } );
 $e->game( { do => 'deal' } );

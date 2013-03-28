@@ -21,7 +21,7 @@ my $b = bag(qw/a b/);
 $b += $b;
 is_deeply([sort $b->values], [qw/a a b b/], 'add');
 
-$b += (qw/c d/);
+$b->add(qw/c d/);
 is_deeply([sort $b->values], [qw/a a b b c d/], 'add literal');
 
 $b += [qw/e f/];
