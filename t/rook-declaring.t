@@ -4,7 +4,7 @@ use warnings;
 use Test::More;
 use Gamed;
 use Gamed::Test;
-use Gamed::Util;
+use Gamed::Object;
 use Data::Dumper;
 
 my ( $game, $n, $e ) = game(

@@ -1,4 +1,4 @@
-package Gamed::Util::Bag;
+package Gamed::Object::Bag;
 
 use overload '""' => \&to_string, '-' => \&difference, '+=' => \&plus_equals, eq => \&equal, ne => \&not_equal;
 
@@ -19,7 +19,7 @@ sub add {
         elsif ( $ref eq 'ARRAY' ) {
             $self->{$_}++ for @$v;
         }
-        elsif ( $ref eq 'Gamed::Util::Bag' ) {
+        elsif ( $ref eq 'Gamed::Object::Bag' ) {
             while ( my ( $k, $d ) = each %$v ) {
                 $self->{$k} += $d;
             }
@@ -27,9 +27,32 @@ sub add {
     }
 }
 
+sub remove {
+    my $self = shift;
+    for my $v (@_) {
+		next unless defined $v;
+        my $ref = ref $v;
+        if ( !$ref ) {
+            die "No element '$v' exists in bag\n" unless exists $self->{$v};
+            $self->{$v}--;
+            delete $self->{$v} unless $self->{$v};
+        }
+        elsif ( $ref eq 'ARRAY' ) {
+            $self->remove($_) for @$v;
+        }
+        elsif ( $ref eq 'Gamed::Object::Bag' ) {
+            while ( my ( $k, $d ) = each %$v ) {
+                $self->{$k} -= $d;
+                die "No element '$k' exists in bag\n" if $self->{$k} < 0;
+                delete $self->{$k} unless $self->{$k};
+            }
+        }
+    }
+}
+
 sub plus_equals {
     my ( $a, $b ) = @_;
-    my $c = Gamed::Util::Bag->new;
+    my $c = Gamed::Object::Bag->new;
     $c->add($a);
     $c->add($b);
     return $c;
@@ -51,7 +74,7 @@ sub not_equal {
 
 sub difference {
     my ( $self, $other ) = @_;
-    my $result = Gamed::Util::Bag->new;
+    my $result = Gamed::Object::Bag->new;
     while ( my ( $k, $v ) = each %$self ) {
         my $o_v = $other->{$k} || 0;
         $result->{$k} = $v - $o_v if $o_v < $v;

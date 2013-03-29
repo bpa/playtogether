@@ -3,7 +3,7 @@ package Gamed::State::Dealing;
 use strict;
 use warnings;
 use Scalar::Util 'looks_like_number';
-use Gamed::Util;
+use Gamed::Object;
 
 use parent 'Gamed::State';
 
@@ -26,7 +26,7 @@ sub on_message {
         $game->change_state( $self->{next} );
     }
     else {
-        $client->send( { cmd => 'err', reason => 'Not your turn' } );
+        $client->err( 'Not your turn' );
     }
 }
 

@@ -1,5 +1,5 @@
 use Test::More;
-use Gamed::Util;
+use Gamed::Object;
 use strict;
 use warnings;
 
@@ -26,5 +26,14 @@ is_deeply([sort $b->values], [qw/a a b b c d/], 'add literal');
 
 $b += [qw/e f/];
 is_deeply([sort $b->values], [qw/a a b b c d e f/], 'add arrayref');
+
+$b->remove('a');
+is_deeply([sort $b->values], [qw/a b b c d e f/], 'remove scalar');
+
+$b->remove([qw/d e f/]);
+is_deeply([sort $b->values], [qw/a b b c/], 'remove arrayref');
+
+$b->remove(bag(qw/a b/));
+is_deeply([sort $b->values], [qw/b c/], 'remove bag');
 
 done_testing;

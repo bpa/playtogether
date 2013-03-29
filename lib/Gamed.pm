@@ -36,12 +36,6 @@ sub import {
 	}
 }
 
-sub err ($$) {
-    my ($client, $reason) = @_;
-    chomp($reason);
-    $client->send( { cmd => "error", reason => $reason } );
-}
-
 sub on_connect {
     my ( $name, $sock ) = @_;
     my $id = $uuid->create_b64;
@@ -61,13 +55,13 @@ sub on_message {
     return unless defined $player;
     my $cmd = $msg->{cmd};
     if ( !defined($cmd) ) {
-          err $player, "No cmd specified";
+          $player->err("No cmd specified");
     }
     elsif ( exists $commands{$cmd} ) {
         $commands{$cmd}( $player, $msg );
     }
     else {
-          err $player, "Unknown cmd '$cmd'";
+          $player->("Unknown cmd '$cmd'");
     }
 }
 
@@ -79,7 +73,7 @@ sub on_chat {
 sub on_create {
     my ( $player, $msg ) = @_;
     if ( exists $game_instances{ $msg->{name} } ) {
-          err $player, "A game named '" . $msg->{name} . "' already exists";
+          $player->err( "A game named '" . $msg->{name} . "' already exists" );
         return;
     }
     if ( exists $games{ $msg->{game} } ) {
@@ -94,11 +88,11 @@ sub on_create {
             $game_instances{ $msg->{name} }->on_destroy
               if exists $game_instances{ $msg->{name} };
             delete $game_instances{ $msg->{name} };
-              err $player, $@;
+              $player->err($@);
         }
     }
     else {
-          err $player, "No game type '" . $msg->{game} . "' exists";
+          $player->err( "No game type '" . $msg->{game} . "' exists" );
     }
 }
 
@@ -106,7 +100,7 @@ sub on_join {
     my ( $player, $msg ) = @_;
     my $name = $msg->{'name'};
     if ( !defined( $game_instances{$name} ) ) {
-          err $player, "No game named '$name' exists";
+          $player->err( "No game named '$name' exists" );
     }
     else {
         eval {
@@ -115,7 +109,7 @@ sub on_join {
             $player->{game} = $instance;
         };
         if ($@) {
-              err $player, $@;
+              $player->err( $@ );
         }
     }
 }
@@ -127,7 +121,7 @@ sub on_game {
         $game->on_message( $player, $msg );
     };
     if ($@) {
-          err $player, $@;
+          $player->err( $@ );
     }
 }
 

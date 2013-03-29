@@ -4,7 +4,7 @@ use strict;
 use warnings;
 use Gamed 'Gamed::Test::Game';
 use Exporter 'import';
-our @EXPORT = qw/json text client game broadcast broadcast_one/;
+our @EXPORT = qw/json text client game broadcast broadcasted broadcast_one/;
 
 Module::Pluggable::Object->new( search_path => 'Gamed::Test', require => 1, inner => 0 )->plugins;
 {
@@ -34,6 +34,15 @@ sub game {
 	my $instance = $Gamed::game_instances{$name};
     broadcast( $instance, {}, 'Broacast of test start' );
     return $instance, @connections;
+}
+
+sub broadcasted {
+    local $Test::Builder::Level = $Test::Builder::Level + 1;
+    my ($game, $client, $msg, @exp) = @_;
+    $client->game( $msg );
+    for my $p ( @{ $game->{players} } ) {
+        $p->{sock}->got_one(@exp);
+    }
 }
 
 sub broadcast_one {
