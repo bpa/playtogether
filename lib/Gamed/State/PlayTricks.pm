@@ -6,6 +6,7 @@ sub build {
     my ( $self, $next, $logic ) = @_;
     $self->{next}   = $next;
     $self->{logic}  = $logic;
+	$self->{trick}  = [];
 }
 
 sub on_enter_state {
@@ -24,7 +25,9 @@ sub on_message {
     if ($self->{logic}->is_valid_play($msg->{play}, $self->{trick}, $seat->{cards}, $game)) {
         push @{$self->{trick}}, $msg->{play};
         $seat->{cards}->remove($msg->{play});
-        $game->broadcast( { player => $seat->{name}, play => $msg->{play} } );
+        $game->broadcast( { player => $self->{active_player}, play => $msg->{play} } );
+		$self->{active_player}++;
+		$self->{active_player} = 0 if $self->{active_player} >= @{$game->{seat}};
     }
     else {
         $client->err('Invalid card');

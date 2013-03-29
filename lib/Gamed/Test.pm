@@ -8,8 +8,15 @@ our @EXPORT = qw/json text client game broadcast broadcasted broadcast_one/;
 
 Module::Pluggable::Object->new( search_path => 'Gamed::Test', require => 1, inner => 0 )->plugins;
 {
-	no warnings 'redefine';
-	*Gamed::Player::send = sub { $_[0]->{sock}->send($_[1]) }; #Don't json encode
+
+    #Don't json encode for testing
+    no warnings 'redefine';
+    *Gamed::Player::send = sub { $_[0]->{sock}->send( $_[1] ) };
+    *Gamed::Player::err = sub {
+        my ( $self, $reason ) = @_;
+        chomp($reason);
+        $self->{sock}->send( { cmd => 'error', reason => $reason } );
+    };
 }
 
 use Test::Builder;
@@ -22,7 +29,7 @@ sub client   { Gamed::Test::Connection->new(shift) }
 
 sub game {
     local $Test::Builder::Level = $Test::Builder::Level + 1;
-    my ( $game, $name, $players, $opts) = @_;
+    my ( $game, $name, $players, $opts ) = @_;
     my @connections;
     my $created = 0;
     for (@$players) {
@@ -31,17 +38,17 @@ sub game {
         $created = 1;
         push @connections, $c;
     }
-	my $instance = $Gamed::game_instances{$name};
+    my $instance = $Gamed::game_instances{$name};
     broadcast( $instance, {}, 'Broacast of test start' );
     return $instance, @connections;
 }
 
 sub broadcasted {
     local $Test::Builder::Level = $Test::Builder::Level + 1;
-    my ($game, $client, $msg, @exp) = @_;
-    $client->game( $msg );
+    my ( $game, $client, $msg, @exp ) = @_;
+    $client->game($msg);
     for my $p ( @{ $game->{players} } ) {
-        $p->{sock}->got_one(@exp);
+        $p->{sock}->got(@exp);
     }
 }
 

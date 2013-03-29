@@ -25,20 +25,20 @@ $n->game( { bid => 205 }, { reason => 'Max bid is 200' },        "Bid too high" 
 $n->game( { bid => 103 }, { reason => 'Invalid bid' },           "Must bid in multiples of 5" );
 
 $n->game( { bid => 100 } );
-broadcast_one( $game, { bid => 100, player => 'n' }, 'bid was broadcast' );
+broadcast_one( $game, { bid => 100, player => 0 }, 'bid was broadcast' );
 $e->game( { bid => 105 } );
-broadcast_one( $game, { bid => 105, player => 'e' }, 'bid was broadcast' );
+broadcast_one( $game, { bid => 105, player => 1 }, 'bid was broadcast' );
 $s->game( { bid => 105 }, { reason => 'You must bid up or pass' } );
 
 $s->game( { bid => 'pass' } );
-broadcast_one( $game, { bid => 'pass', player=>'s' }, 'pass was broadcast' );
+broadcast_one( $game, { bid => 'pass', player=> 2 }, 'pass was broadcast' );
 $n->game( { bid => 120 } );
-broadcast_one( $game, { bid => 120, player=>'n' }, 'bid was broadcast' );
+broadcast_one( $game, { bid => 120, player=> 0 }, 'bid was broadcast' );
 $e->game( { bid => 125 } );
-broadcast_one( $game, { bid => 125, player=>'e' }, 'bid was broadcast' );
+broadcast_one( $game, { bid => 125, player=>1 }, 'bid was broadcast' );
 $s->game( { bid => 130 } , { reason => 'Not your turn' }, "Can't bid after pass" );
 $n->game( { bid => 'pass' } );
-broadcast( $game, { bid => 'pass', player=>'n' }, 'pass was broadcast' );
+broadcast( $game, { bid => 'pass', player=>0 }, 'pass was broadcast' );
 broadcast( $game, { bidder=>'e', bid => 125 }, 'Bid winner declared' );
 broadcast_one( $game, { state => 'end' }, 'Changing state to picking' );
 is( $game->{bid}, 125, "Game's bid got set");
@@ -69,6 +69,6 @@ $game->change_state('start');
 broadcast( $game );
 $n->game( { bid => 35 }, { reason => 'Not your turn' }, 'Bidding switches to next player on return');
 $s->game( { bid => 25 } );
-broadcast_one( $game, { bid => 25, player => 's' }, 'Old state info is cleared' );
+broadcast_one( $game, { bid => 25, player => 1 }, 'Old state info is cleared' );
 
 done_testing;

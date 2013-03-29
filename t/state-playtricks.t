@@ -7,32 +7,32 @@ use Gamed::Test;
 use Gamed::Object;
 use Data::Dumper;
 
-my ( $game, $n, $e, $s, $w ) = game(
+my ( $game, $n, $e, $s ) = game(
     'Test', 'test',
-    [qw/n e s w/],
+    [qw/n e s/],
     {
         bidder => 2,
-        bid => 135,
-        trump => 'R',
-        seats       => [qw/n e s w/],
-        nest => bag(qw/5G 6G 7G 8G 9G/),
-        seat => [
-            { cards => bag(qw/10G 12R 11R 14Y 9Y 8Y 1B 11B 9B 7B/) },
-            { cards => bag(qw/11G 14R 8R 6R 13Y 7Y 6Y 14B 12B 5B/) },
-            { cards => bag(qw/12G 1G 1R 13R 9R 7R 5R 1Y 10Y 13B/) },
-            { cards => bag(qw/13G 14G 10R 12Y 11Y 5Y 13B 10B 8B 6B/) },
-        ],
-        state_table => {
-            start => Gamed::State::PlayTricks->new('end', Gamed::Game::Rook::PlayLogic->new),
-        } } );
+        bid    => 135,
+        trump  => 'R',
+        seats  => [qw/n e s/],
+        seat   => [ { cards => bag(qw/1 3 5 6/) }, { cards => bag(qw/2 7 10 11/) }, { cards => bag(qw/4 8 9 12/) }, ],
+        state_table => { start => Gamed::State::PlayTricks->new( 'end', Gamed::Test::PlayLogic->new ), } } );
 
 my $play = $game->{state};
-like(ref($play), qr/PlayTricks/);
-$n->game( { play => '10G' }, { reason => 'Not your turn' } );
-$s->game( { play => '1B' }, { reason => 'Invalid card' } );
+like( ref($play), qr/PlayTricks/ );
+$n->game( { play => 1 }, { reason => 'Not your turn' } );
+$s->game( { play => 8 }, { reason => 'Invalid card' } );
 
-broadcasted( $game, $s, { play => '1Y' }, { player => 's', play => '1Y' } );
-is_deeply( $play->{trick}, ['1Y'], 'Card added to trick' );
-ok( !$game->{seat}[2]{cards}->contains('1Y'), 'Card removed from hand' );
+$s->game( { play => 4 } );
+broadcast_one( $game, { player => 2, play => 4 }, 'Card played was sent to everyone' );
+is_deeply( $play->{trick}, [4], 'Card added to trick' );
+ok( !$game->{seat}[2]{cards}->contains(4), 'Card removed from hand' );
+
+broadcasted( $game, $n, { play => 1 }, { player => 0, play => 1 }, 'N plays a 1' );
+is_deeply( $play->{trick}, [ 4, 1 ], 'Card added to trick' );
+broadcasted( $game, $e, { play => 2 }, { player => 1, play => 2 } );
+broadcast_one( $game, { trick => [ 4, 1, 2 ], winner => 1 }, 'Trick winner declared' );
+
+is_deeply( $play->{trick}, [], 'Trick reset after all play' );
 
 done_testing;

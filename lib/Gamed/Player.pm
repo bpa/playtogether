@@ -15,13 +15,8 @@ sub send {
 
 sub err {
     my ( $self, $reason ) = @_;
+	chomp $reason;
     $self->{sock}->send( $json->encode({ cmd => 'error', reason => $reason }));
-}
-
-sub game {
-    my ( $self, $msg ) = @_;
-    $msg->{cmd} = 'game';
-    $self->{sock}->send( $json->encode($msg));
 }
 
 1;
