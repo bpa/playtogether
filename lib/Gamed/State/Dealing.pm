@@ -49,6 +49,7 @@ sub on_leave_state {
     }
     $self->{dealer}++;
     $self->{dealer} = 0 if $self->{dealer} >= @{$game->{seat}};
+    $game->{leader} = $self->{dealer};
 }
 
 1;

@@ -57,6 +57,7 @@ sub check_deal {
     for my $s ( @{$game->{seat}} ) {
         is( scalar ($s->{cards}->values), $cards, "Game kept record of cards dealt to player" );
     }
+    is ( $game->{leader}, $game->{state_table}{start}{dealer}, 'leader set' );
     is( ref( $game->{state} ), 'Gamed::State', "Finished dealing" );
 }
 

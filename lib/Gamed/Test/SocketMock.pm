@@ -40,7 +40,7 @@ sub got {
                 last;
             }
         }
-        if ( ref($v) eq 'ARRAY' ) {
+        elsif ( ref($v) eq 'ARRAY' ) {
             if ( Dumper($v) ne Dumper($msg->{$k}) ) {
                 $pass = 0;
                 last;

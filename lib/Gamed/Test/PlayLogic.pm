@@ -1,5 +1,8 @@
 package Gamed::Test::PlayLogic;
 
+use strict;
+use warnings; 
+
 sub new { return bless {}, shift }
 
 sub is_valid_play {
@@ -17,9 +20,9 @@ sub trick_winner {
     my $winning_seat = 0;
     my $winning_value = 0;
     for my $p (0 .. $#$trick) {
-        if ($value > $winning_value) {
+        if ($trick->[$p] > $winning_value) {
             $winning_seat = $p;
-            $winning_value = $value;
+            $winning_value = $trick->[$p];
         }
     }
     return $winning_seat;
