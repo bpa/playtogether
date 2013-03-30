@@ -39,7 +39,6 @@ sub game {
         push @connections, $c;
     }
     my $instance = $Gamed::game_instances{$name};
-    broadcast( $instance, {}, 'Broacast of test start' );
     return $instance, @connections;
 }
 

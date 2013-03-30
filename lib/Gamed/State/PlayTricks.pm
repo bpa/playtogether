@@ -28,6 +28,12 @@ sub on_message {
         $game->broadcast( { player => $self->{active_player}, play => $msg->{play} } );
 		$self->{active_player}++;
 		$self->{active_player} = 0 if $self->{active_player} >= @{$game->{seat}};
+        if (@{$self->{trick}} == @{$game->{seat}}) {
+            my $winner = $self->{logic}->trick_winner($self->{trick}, $game) + $self->{active_player};
+            $winner -= @{$game->{seat}} if $winner >= @{$game->{seat}};
+            $game->broadcast( { trick => $self->{trick}, winner => $winner } );
+            $self->{trick} = [];
+        }
     }
     else {
         $client->err('Invalid card');

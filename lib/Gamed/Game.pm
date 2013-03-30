@@ -75,7 +75,6 @@ sub change_state {
 	my $state = $self->{state_table}{$state_name};
 	die "No state '$state_name' found\n" unless defined $state;
 	$self->{state}->on_leave_state($self);
-    $self->broadcast({state=>$state_name});
 	$self->{state} = $state;
 	$state->on_enter_state($self);
 }

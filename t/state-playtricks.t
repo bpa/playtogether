@@ -31,7 +31,7 @@ ok( !$game->{seat}[2]{cards}->contains(4), 'Card removed from hand' );
 broadcasted( $game, $n, { play => 1 }, { player => 0, play => 1 }, 'N plays a 1' );
 is_deeply( $play->{trick}, [ 4, 1 ], 'Card added to trick' );
 broadcasted( $game, $e, { play => 2 }, { player => 1, play => 2 } );
-broadcast_one( $game, { trick => [ 4, 1, 2 ], winner => 1 }, 'Trick winner declared' );
+broadcast_one( $game, { trick => [ 4, 1, 2 ], winner => 2 }, 'Trick winner declared' );
 
 is_deeply( $play->{trick}, [], 'Trick reset after all play' );
 

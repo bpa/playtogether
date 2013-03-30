@@ -40,6 +40,12 @@ sub got {
                 last;
             }
         }
+        if ( ref($v) eq 'ARRAY' ) {
+            if ( Dumper($v) ne Dumper($msg->{$k}) ) {
+                $pass = 0;
+                last;
+            }
+        }
         else {
             if ( !exists($msg->{$k}) || $msg->{$k} ne $v ) {
                 $pass = 0;

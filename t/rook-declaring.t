@@ -29,8 +29,7 @@ $e->game( { trump => 'R', nest => [qw/5G 6G 7G 8G 9G 4G/] }, { reason => "Invali
 $e->game( { trump => 'R', nest => [qw/5G 6G 7G 9G 9G/] },    { reason => "Invalid nest" }, 'Duplicate card specified' );
 $e->game( { trump => 'R', nest => [qw/5G 6G 7G 8G 9Y/] },    { reason => "Invalid nest" }, 'Card not held specified' );
 $e->game( { trump => 'R', nest => [qw/5G 6G 7G 8G 9G/] } );
-broadcast( $game, { trump => 'R' }, 'Chosen trump broadcast' );
-broadcast_one( $game, { state => 'end' }, 'Game state changed' );
+broadcast_one( $game, { trump => 'R' }, 'Chosen trump broadcast' );
 is( $game->{trump}, 'R', 'Trump is set in game' );
 is( $game->{nest}, bag(qw/5G 6G 7G 8G 9G/), 'Nest saved in game' );
 is( $game->{seat}[1]{cards}, bag(qw/5R 6R 7R 8R 9R 11R 12R 13R 14R 1R/), 'Player hand set in game' );
