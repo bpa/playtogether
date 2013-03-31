@@ -3,15 +3,14 @@ package Gamed::State::PlayTricks;
 use parent 'Gamed::State';
 
 sub build {
-    my ( $self, $next, $logic ) = @_;
-    $self->{next}   = $next;
+    my ( $self, $logic ) = @_;
     $self->{logic}  = $logic;
-	$self->{trick}  = [];
 }
 
 sub on_enter_state {
     my ($self, $game) = @_;
     $self->{active_player} = $game->{leader};
+	$self->{trick}  = [];
 }
 
 sub on_message {
@@ -32,6 +31,7 @@ sub on_message {
             $self->{active_player} = $self->{logic}->trick_winner($self->{trick}, $game) + $self->{active_player};
             $self->{active_player} -= @{$game->{seat}} if $self->{active_player} >= @{$game->{seat}};
             $game->broadcast( { trick => $self->{trick}, winner => $self->{active_player} } );
+            push @{$game->{seat}[$self->{active_player}]{taken}}, @{$self->{trick}};
             $self->{trick} = [];
             if (grep ( scalar($_->{cards}->values), @{$game->{seat}}) == 0) {
                 $game->change_state($self->{next});

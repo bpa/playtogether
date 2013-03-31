@@ -17,9 +17,9 @@ my ( $game, $n, $e, $s ) = game(
         trump  => 'R',
         seats  => [qw/n e s/],
         seat   => [
-            { cards => bag(qw/1 5 13/) },
-            { cards => bag(qw/2 9 11/) },
-            { cards => bag(qw/4 8 12/) },
+            { cards => bag(qw/1 5 13 14/) },
+            { cards => bag(qw/2 9 11 15/) },
+            { cards => bag(qw/4 8 12 16/) },
         ],
         state_table =>
           { start => Gamed::State::PlayTricks->new( 'end', Gamed::Test::PlayLogic->new ), }
@@ -42,16 +42,25 @@ broadcasted( $game, $e, { play => 2 }, { player => 1, play => 2 } );
 broadcast_one( $game, { trick => [ 4, 1, 2 ], winner => 2 }, 'Trick winner declared' );
 
 is_deeply( $play->{trick}, [], 'Trick reset after all play' );
+is_deeply( $game->{seat}[2]{taken}, [ 4, 1, 2 ], "Captured trick given to player" );
 
 broadcasted( $game, $s, { play => 8 }, { player => 2, play => 8 }, 'Round 2' );
 broadcasted( $game, $n, { play => 5 }, { player => 0, play => 5 }, 'Round 2' );
 broadcasted( $game, $e, { play => 9 }, { player => 1, play => 9 }, 'Round 2' );
 broadcast_one( $game, { trick => [ 8, 5, 9 ], winner => 1 }, 'Trick winner declared' );
+is_deeply( $game->{seat}[1]{taken}, [ 8, 5, 9 ], "Captured trick given to player" );
 
 broadcasted( $game, $e, { play => 11 }, { player => 1, play => 11 }, 'Round 3' );
 broadcasted( $game, $s, { play => 12 }, { player => 2, play => 12 }, 'Round 3' );
 broadcasted( $game, $n, { play => 13 }, { player => 0, play => 13 }, 'Round 3' );
 broadcast( $game, { trick => [ 11, 12, 13 ], winner => 0 }, 'Trick winner declared' );
+is_deeply( $game->{seat}[0]{taken}, [ 11, 12, 13 ], "Captured trick given to player" );
+
+broadcasted( $game, $n, { play => 14 }, { player => 0, play => 14 }, 'Round 3' );
+broadcasted( $game, $e, { play => 15 }, { player => 1, play => 15 }, 'Round 3' );
+broadcasted( $game, $s, { play => 16 }, { player => 2, play => 16 }, 'Round 3' );
+broadcast( $game, { trick => [ 14, 15, 16 ], winner => 2 }, 'Trick winner declared' );
+is_deeply( $game->{seat}[2]{taken}, [ 4, 1, 2, 14, 15, 16 ], "Captured trick doesn't overwrite other captured tricks" );
 
 is( ref($game->{state}), 'Gamed::State', 'Changed state' );
 

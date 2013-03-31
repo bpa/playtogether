@@ -23,8 +23,7 @@ sub build {
             }
         ),
         DECLARING => Gamed::Game::Rook::Declaring->new('PLAYING'),
-        PLAYING => Gamed::State::PlayTricks->new('SCORING', Gamed::Game::Rook::PlayLogic->new),
-        #SCORING => Gamed::Game::Rook::Scoring->new,
+        PLAYING => Gamed::State::PlayTricks->new(Gamed::Game::Rook::PlayLogic->new),
         FINISHED => Gamed::State->new,
     };
     $self->change_state('WAITING_FOR_PLAYERS');
