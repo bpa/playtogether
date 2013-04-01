@@ -24,7 +24,7 @@ sub build {
         ),
         DECLARING => Gamed::Game::Rook::Declaring->new('PLAYING'),
         PLAYING => Gamed::State::PlayTricks->new(Gamed::Game::Rook::PlayLogic->new),
-        FINISHED => Gamed::State->new,
+        GAME_OVER => Gamed::State->new,
     };
     $self->change_state('WAITING_FOR_PLAYERS');
 }

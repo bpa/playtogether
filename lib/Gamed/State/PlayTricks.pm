@@ -34,7 +34,7 @@ sub on_message {
             push @{$game->{seat}[$self->{active_player}]{taken}}, @{$self->{trick}};
             $self->{trick} = [];
             if (grep ( scalar($_->{cards}->values), @{$game->{seat}}) == 0) {
-                $game->change_state($self->{next});
+                $self->{logic}->on_round_end($game);
             }
         }
     }

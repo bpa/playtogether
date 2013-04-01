@@ -22,7 +22,7 @@ my ( $game, $n, $e, $s ) = game(
             { cards => bag(qw/4 8 12 16/) },
         ],
         state_table =>
-          { start => Gamed::State::PlayTricks->new( 'end', Gamed::Test::PlayLogic->new ), }
+          { start => Gamed::State::PlayTricks->new( Gamed::Test::PlayLogic->new ), }
     }
 );
 

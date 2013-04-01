@@ -31,6 +31,10 @@ get '/' => sub {
     );
 };
 
+get qr!/game/:game! => sub {
+	
+};
+
 post '/login' => sub {
     my $self = shift;
     my $user = $self->param('username');
