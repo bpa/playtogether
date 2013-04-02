@@ -7,6 +7,6 @@ use FindBin;
 use lib "$FindBin::Bin/../lib";
 
 if ($ARGV[0] eq '-test') {
-	use Gamed qw/Gamed Test Game/;
+	use Gamed 'Gamed::Test::Game';
 }
 use Gamed::Mojo;

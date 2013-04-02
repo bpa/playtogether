@@ -1,15 +1,8 @@
-<!DOCTYPE html>
-<html>
-  <head>
-    <title>Lobby</title>
-  </head>
-  <body>
+% layout 'default', title => 'Lobby';
     Welcome<br>
-  Available games:
-  <ul>
-  % for my $g (@$games) {
-    <li><a href="/<%= $g %>.html"><%= $g %></a></li>
-  % }
-  </ul>
-  </body>
-</html>
+Available games:
+<ul>
+% for my $g (@$games) {
+<li><a href="/game/<%= $g %>"><%= $g %></a></li>
+% }
+</ul>
