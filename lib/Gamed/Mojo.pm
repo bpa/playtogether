@@ -45,7 +45,7 @@ post '/' => sub {
     }
 };
 
-get '/game/:game/create' => sub {
+get '/create/:game' => sub {
     my $self = shift;
     my $game = $self->param('game');
     if ( $Gamed::games{$game} ) {
@@ -57,18 +57,20 @@ get '/game/:game/create' => sub {
     }
 };
 
-post '/game/:game/create' => sub {
+post '/create/:game' => sub {
 	my $self = shift;
 	my $game = $self->param('game');
 	eval {
-		Gamed::on_create($self->params->to_hash);
+		my $opts = $self->req->params->to_hash;
+		$opts->{game} = $game;
+		Gamed::on_create($opts);
 	};
 	if ($@) {
 		$self->stash(error => $@);
 		$self->render("create-$game", game => $game);
 	}
 	else {
-		$self->redirect_to("/game/$game");
+		$self->redirect_to("/game/".$self->param('name'));
 	}
 };
 
@@ -77,7 +79,7 @@ get '/game/:name' => sub {
 	my $name = $self->param('name');
 	if (exists $Gamed::game_instances{$name}) {
 		my $game = (split(/::/,ref($Gamed::game_instances{$name})))[-1];
-    	$self->render( $Gamed::game_instances{$name} );
+    	$self->render($game, game => $game, name => $name, user => $self->session('user'));
 	}
 	else {
 		$self->stash(error => "No game named '$name' exists");
@@ -97,14 +99,10 @@ websocket '/game/:name/websocket' => sub {
         $self->finish;
     }
     else {
-        $self->app->log->debug($self);
-
         $self->on(
             message => sub {
                 my ( $self, $msg ) = @_;
-                $self->app->log->debug($msg);
                 Gamed::on_message( $player, $msg );
-                $self->app->log->debug($self);
             } );
 
         $self->on(

@@ -3,6 +3,6 @@
 Available games:
 <ul>
 % for my $g (@$games) {
-<li><a href="/game/<%= $g %>/create"><%= $g %></a></li>
+<li><a href="/create/<%= $g %>"><%= $g %></a></li>
 % }
 </ul>
