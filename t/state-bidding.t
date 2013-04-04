@@ -6,10 +6,9 @@ use Gamed::Test;
 use Data::Dumper;
 
 my ( $game, $n, $e, $s ) = game(
-    'Test', 'test',
     [qw/n e s/],
     {
-        seats       => [qw/n e s/],
+        seat        => [ {}, {}, {} ],
         state_table => {
             start => Gamed::State::Bidding->new(
                 {
@@ -31,40 +30,41 @@ broadcast_one( $game, { bid => 105, player => 1 }, 'bid was broadcast' );
 $s->game( { bid => 105 }, { reason => 'You must bid up or pass' } );
 
 $s->game( { bid => 'pass' } );
-broadcast_one( $game, { bid => 'pass', player=> 2 }, 'pass was broadcast' );
+broadcast_one( $game, { bid => 'pass', player => 2 }, 'pass was broadcast' );
 $n->game( { bid => 120 } );
-broadcast_one( $game, { bid => 120, player=> 0 }, 'bid was broadcast' );
+broadcast_one( $game, { bid => 120, player => 0 }, 'bid was broadcast' );
 $e->game( { bid => 125 } );
-broadcast_one( $game, { bid => 125, player=>1 }, 'bid was broadcast' );
-$s->game( { bid => 130 } , { reason => 'Not your turn' }, "Can't bid after pass" );
+broadcast_one( $game, { bid => 125, player => 1 }, 'bid was broadcast' );
+$s->game( { bid => 130 }, { reason => 'Not your turn' }, "Can't bid after pass" );
 $n->game( { bid => 'pass' } );
-broadcast( $game, { bid => 'pass', player=>0 }, 'pass was broadcast' );
-broadcast_one( $game, { bidder=>'e', bid => 125 }, 'Bid winner declared' );
-is( $game->{bid}, 125, "Game's bid got set");
-is( $game->{bidder}, 1, "Game's bidder got set");
+broadcast( $game, { bid => 'pass', player => 0 }, 'pass was broadcast' );
+broadcast_one( $game, { bidder => 1, bid => 125 }, 'Bid winner declared' );
+is( $game->{bid},          125,            "Game's bid got set" );
+is( $game->{bidder},       1,              "Game's bidder got set" );
 is( ref( $game->{state} ), 'Gamed::State', "State changed" );
 
 ( $game, $n, $s ) = game(
-    'Test', 'test2',
     [qw/n s/],
     {
-        seats       => [qw/n s/],
+        name        => 'test2',
+        seat        => [ {}, {} ],
         state_table => {
             start => Gamed::State::Bidding->new(
                 {
-                    next  => 'end',
-                    min   => 25,
+                    next => 'end',
+                    min  => 25,
                 } ) } } );
 
 like( ref( $game->{state} ), qr/Bidding/, "initial state" );
 $n->game( { bid => 30 } );
-broadcast_one( $game );
+broadcast_one($game);
 $s->game( { bid => 'pass' } );
-broadcast( $game );
-broadcast_one( $game );
+broadcast($game);
+broadcast_one($game);
 is( ref( $game->{state} ), 'Gamed::State', "State changed" );
 $game->change_state('start');
-$n->game( { bid => 35 }, { reason => 'Not your turn' }, 'Bidding switches to next player on return');
+$game->_change_state;
+$n->game( { bid => 35 }, { reason => 'Not your turn' }, 'Bidding switches to next player on return' );
 $s->game( { bid => 25 } );
 broadcast_one( $game, { bid => 25, player => 1 }, 'Old state info is cleared' );
 

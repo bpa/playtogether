@@ -7,38 +7,28 @@ use Exporter 'import';
 our @EXPORT = qw/json text client game broadcast broadcasted broadcast_one/;
 
 Module::Pluggable::Object->new( search_path => 'Gamed::Test', require => 1, inner => 0 )->plugins;
-{
-
-    #Don't json encode for testing
-    no warnings 'redefine';
-    *Gamed::Player::send = sub { $_[0]->{sock}->send( $_[1] ) };
-    *Gamed::Player::err = sub {
-        my ( $self, $reason ) = @_;
-        chomp($reason);
-        $self->{sock}->send( { cmd => 'error', reason => $reason } );
-    };
-}
-
 use Test::Builder;
 my $tb = Test::Builder->new;
 
 my $j = JSON->new->convert_blessed;
 sub json ($) { $j->encode( $_[0] ) }
 sub hash ($) { $j->decode( $_[0] ) }
-sub client   { Gamed::Test::Connection->new(shift) }
+sub client   { Gamed::Test::Player->new(shift) }
 
 sub game {
     local $Test::Builder::Level = $Test::Builder::Level + 1;
-    my ( $game, $name, $players, $opts ) = @_;
+    my ( $players, $opts ) = @_;
+	$opts->{game} ||= 'Test';
+	$opts->{name} ||= 'test';
     my @connections;
-    my $created = 0;
+    Gamed::on_create($opts);
     for (@$players) {
         my $c = client($_);
-        $created ? $c->join($name) : $c->create( $game, $name, $opts );
-        $created = 1;
+        $c->join($opts->{name});
+		$_->got_one({ cmd => 'join' }) for @connections;
         push @connections, $c;
     }
-    my $instance = $Gamed::game_instances{$name};
+    my $instance = $Gamed::game_instances{$opts->{name}};
     return $instance, @connections;
 }
 

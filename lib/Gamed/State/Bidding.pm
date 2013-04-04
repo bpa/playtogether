@@ -69,7 +69,7 @@ sub on_leave_state {
     }
     $game->{bidder} = delete $self->{bidder};
     $game->{bid}    = delete $self->{bid};
-	$game->broadcast( { bid => $game->{bid}, bidder => $game->{seat}[$game->{bidder}]{name} } );
+	$game->broadcast( { bid => $game->{bid}, bidder => $game->{bidder} } );
 }
 
 sub next_bidder {

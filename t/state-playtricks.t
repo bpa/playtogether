@@ -8,23 +8,16 @@ use Gamed::Object;
 use Data::Dumper;
 
 my ( $game, $n, $e, $s ) = game(
-    'Test', 'test',
     [qw/n e s/],
     {
         leader => 2,
         bidder => 2,
         bid    => 135,
         trump  => 'R',
-        seats  => [qw/n e s/],
-        seat   => [
-            { cards => bag(qw/1 5 13 14/) },
-            { cards => bag(qw/2 9 11 15/) },
-            { cards => bag(qw/4 8 12 16/) },
-        ],
-        state_table =>
-          { start => Gamed::State::PlayTricks->new( Gamed::Test::PlayLogic->new ), }
-    }
-);
+        seat   => [ { cards => bag(qw/1 5 13 14/) }, 
+					{ cards => bag(qw/2 9 11 15/) },
+					{ cards => bag(qw/4 8 12 16/) }, ],
+        state_table => { start => Gamed::State::PlayTricks->new( Gamed::Test::PlayLogic->new ), } } );
 
 my $play = $game->{state};
 like( ref($play), qr/PlayTricks/ );
@@ -62,6 +55,6 @@ broadcasted( $game, $s, { play => 16 }, { player => 2, play => 16 }, 'Round 3' )
 broadcast( $game, { trick => [ 14, 15, 16 ], winner => 2 }, 'Trick winner declared' );
 is_deeply( $game->{seat}[2]{taken}, [ 4, 1, 2, 14, 15, 16 ], "Captured trick doesn't overwrite other captured tricks" );
 
-is( ref($game->{state}), 'Gamed::State', 'Changed state' );
+is( ref( $game->{state} ), 'Gamed::State', 'Changed state' );
 
 done_testing;

@@ -25,10 +25,11 @@ sub on_message {
 }
 
 sub on_join {
-	my ($self, $player, $message) = @_;
+	my ($self, $player) = @_;
 	die GAME_FULL() if exists $self->{joined};
+	push @{$self->{players}}, $player;
 	$self->{joined} = ();
-    $player->send($message);
+	$self->broadcast( { cmd => 'join', players => [map { $_->{name} } @{$self->{players}}]});
 }
 
 1;

@@ -1,5 +1,8 @@
 package Gamed::Game::Rook::PlayLogic;
 
+use strict;
+use warnings;
+
 sub new { return bless {}, shift }
 
 sub is_valid_play {
@@ -49,8 +52,8 @@ my %point_value = (
 
 sub on_round_end {
     my ( $self, $game ) = @_;
-    my @points;
-    my @cards_taken;
+    my @points = (0,0);
+    my @cards_taken = (0,0);
     my $team = $game->{bidder} % 2;
     for my $s ( 0 .. 3 ) {
         my $t = $s % 2;
@@ -67,7 +70,7 @@ sub on_round_end {
     }
     $game->{points}[0] += $points[0];
     $game->{points}[1] += $points[1];
-    if ( $game->{points}[0] != $game->{points}[1] && ( $game->{points}[0] >= 500 || $game->{ $points[1] } >= 500 ) ) {
+    if ( $game->{points}[0] != $game->{points}[1] && ( $game->{points}[0] >= 500 || $game->{points}[1] >= 500 ) ) {
         $game->change_state('GAME_OVER');
     }
     else {

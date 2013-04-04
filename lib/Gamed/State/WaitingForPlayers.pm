@@ -11,9 +11,8 @@ sub build {
 }
 
 sub on_join {
-    my ( $self, $game, $player, $message ) = @_;
+    my ( $self, $game, $player ) = @_;
     push @{ $game->{players} }, $player;
-    $player->send( $message );
     $game->change_state( $self->{next} )
       if @{ $game->{players} } >= @{$game->{seat}};
 }

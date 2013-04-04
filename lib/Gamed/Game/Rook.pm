@@ -4,6 +4,7 @@ use parent qw/Gamed::Game/;
 
 sub build {
     my $self = shift;
+    $self->{points} = [ 0, 0 ];
     $self->{seat} = [ map { { name => $_ } } ( 'n', 'e', 's', 'w' ) ];
     $self->{state_table} = {
         WAITING_FOR_PLAYERS => Gamed::State::WaitingForPlayers->new('DEALING'),
@@ -23,7 +24,7 @@ sub build {
             }
         ),
         DECLARING => Gamed::Game::Rook::Declaring->new('PLAYING'),
-        PLAYING => Gamed::State::PlayTricks->new(Gamed::Game::Rook::PlayLogic->new),
+        PLAYING   => Gamed::State::PlayTricks->new( Gamed::Game::Rook::PlayLogic->new ),
         GAME_OVER => Gamed::State->new,
     };
     $self->change_state('WAITING_FOR_PLAYERS');
