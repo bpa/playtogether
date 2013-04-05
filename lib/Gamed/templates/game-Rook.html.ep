@@ -1,0 +1,2 @@
+% layout 'game';
+%= include 'cards-4-player';

@@ -84,4 +84,12 @@ sub on_game {
     }
 }
 
+sub on_quit {
+    my $player = shift;
+    eval {
+        my $game = $player->{game};
+        $game->on_quit($player);
+    };
+}
+
 1;

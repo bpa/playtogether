@@ -13,6 +13,8 @@ sub build {
 sub on_join {
     my ( $self, $game, $player ) = @_;
     push @{ $game->{players} }, $player;
+    $player->{seat} = $#{$game->{players}};
+    $game->{seat}[$player->{seat}]{id} = $player->{id};
     $game->change_state( $self->{next} )
       if @{ $game->{players} } >= @{$game->{seat}};
 }

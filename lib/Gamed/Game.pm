@@ -37,8 +37,15 @@ Handle a player joining.  If the game is full, or there is any issue joining, th
 
 sub on_join {
     my ( $self, $player ) = @_;
-    $self->{state}->on_join( $self, $player );
-	$self->broadcast( { cmd => 'join', players => [map { $_->{name} } @{$self->{players}}]});
+    my $reconnected = 0;
+    for my $i (0 .. $#{$self->{seat}}) {
+        if (exists $self->{seat}[$i]{id} && $self->{seat}[$i]{id} eq $player->{id}) {
+            $self->{players}[$i] = $player;
+            $reconnected = 1;
+        }
+    }
+    $self->{state}->on_join( $self, $player ) unless $reconnected;
+	$self->broadcast( { cmd => 'join', players => [map { defined $_ ? $_->{name} : $_ } @{$self->{players}}]});
 	$self->_change_state if exists $self->{_change_state};
 }
 
@@ -62,6 +69,7 @@ Handle a player leaving.
 
 sub on_quit {
     my ( $self, $player ) = @_;
+    $self->{players}[$player->{seat}] = undef;
     $self->{state}->on_quit($player);
 }
 
@@ -92,7 +100,7 @@ sub _change_state {
 sub broadcast {
     my ( $self, $msg ) = @_;
     for my $c ( @{ $self->{players} } ) {
-        $c->send($msg);
+        $c->send($msg) if defined $c;
     }
 }
 

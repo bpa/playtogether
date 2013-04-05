@@ -22,7 +22,7 @@
         % if (defined $self->stash('error')) {
         <div class="error"><%= $self->stash('error') =%></div>
         % }
-        <td id="content"><%= content %></td>
+        <td id="content"><%== content %></td>
       </tr>
     </table>
   </body>
