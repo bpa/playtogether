@@ -4,3 +4,8 @@ html, body { height: 100%; width: 100%; margin: 0; overflow: hidden; }
 #hud { width: 100%; height: 20%; }
 #chat { width: 100%; }
 #chat_input { width: 100%; }
+
+.avatar {
+  height: 100px;
+  width: 100px;
+}

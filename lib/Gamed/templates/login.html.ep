@@ -2,14 +2,58 @@
 <html>
   <head>
     <title>Login to Gamed</title>
+    %= stylesheet '/css/gamed.css'
+    %= javascript 'http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js'
+    %= javascript "http://jzaefferer.github.com/jquery-validation/jquery.validate.js"
+    %= javascript "/js/login.js"
+    <style type="text/css">
+      label { width: 10em; float: left; }
+      label.error { float: none; color: red; padding-left: .5em; vertical-align: top; }
+    </style>
   </head>
   <body>
-    <form method="post" action="/">
-      <div style="margin-left: auto; margin-right: auto">
-        <label for="user">Username</label>
-        <input name="username">
-        <input type="submit" value="Login">
-      </div>
+    <form id="login" method="post" action="/">
+    <fieldset>
+      <legend>Login</legend>
+      <table>
+        <tr>
+          <td align="right"><label for="user">Username:</label></td>
+          <td><input name="username" class="required"></td>
+        </tr>
+        <tr>
+          <td align="right"><label for="user">Passphrase:</label></td>
+          <td><input name="passphrase" class="required"></td>
+        </tr>
+        <tr>
+          <td colspan="2" align="center"><input type="submit" value="Login"></td>
+        </tr>
+      </table>
+    </fieldset>
     </form>
+  <form id="newaccount" method="POST" action="/newaccount">
+  <fieldset>
+  <legend>Create an account</legend>
+  <table>
+    <tr>
+      <td align="right">Username (or email):</td><td><input name="username" class="required" minlength="2"></td>
+    </tr>
+    <tr>
+      <td align="right">Password:</td><td><input id="passphrase" type="password" name="passphrase" class="required" minlength="6"></td>
+    </tr>
+    <tr>
+      <td align="right">Password(again):</td><td><input type="password" name="passphrase2" equalTo="#passphrase"></td>
+    </tr>
+    <tr>
+      <td align="right">Your name:</td><td><input name="name" class="required" minlength="2"></td>
+    </tr>
+    <tr>
+      <td align="right">Avatar url:</td><td><input name="avatar" class="url"></td>
+    </tr>
+    <tr>
+      <td colspan="2" align="center"><input type="submit" value="Create Account"></td>
+    </tr>
+  </table>
+  </fieldset>
+  </form>
   </body>
 </html>

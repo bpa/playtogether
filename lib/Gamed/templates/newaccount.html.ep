@@ -1,0 +1,20 @@
+% layout 'default';
+<form method="POST">
+<table>
+  <tr>
+	<td align="right">Username (or email):</td><td><input name="username"></td>
+  </tr>
+  <tr>
+	<td align="right">Password:</td><td><input type="password" name="username"></td>
+  </tr>
+  <tr>
+	<td align="right">Again:</td><td><input type="password" name="username2"></td>
+  </tr>
+  <tr>
+	<td align="right">Avatar url:</td><td><input name="avatar"></td>
+  </tr>
+  <tr>
+	<td><div id="avatar"></div></td><td><input type="submit" value="Create Account"></td>
+  </tr>
+</table>
+</form>

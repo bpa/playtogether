@@ -1,2 +1,7 @@
 % layout 'game';
 %= include 'cards-4-player';
+<div id="bid-dialog"><!-- style="display: none"> -->
+  <label size="5" for="bid-spinner">Bid:</label>
+  <input id="bid-spinner" value="100">
+  <button id="make-bid">Bid</button>
+</div>

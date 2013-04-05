@@ -9,16 +9,8 @@
   %= stylesheet '/css/gamed.css'
   </head>
   <body>
-    % if (defined $self->stash('error')) {
-    <div class="error"><%= $self->stash('error') =%></div>
-    % }
-    <table height="100%" width="100%" cellspacing="0" cellpadding="0">
-      <tr height="24">
-        <td id="header"><%= $user %></td>
-      </tr>
-      <tr width="100%">
-        <td id="content"><%= content %></td>
-      </tr>
+	%= include 'header';
+    <div id="content"><%= content %></div>
     </table>
   </body>
 </html>

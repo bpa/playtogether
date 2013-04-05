@@ -7,19 +7,20 @@ WriteMakefile(
     NAME         => 'Gamed',
     VERSION_FROM => 'lib/Gamed.pm',    # finds $VERSION
     PREREQ_PM    => {
-        AnyEvent            => (),
-        'Data::UUID'        => (),
-        EV                  => (),
-        JSON                => (),
-        'Module::Refresh'   => (),
-        'Mojolicious::Lite' => (),
+        AnyEvent             => (),
+        'Authen::Passphrase' => (),
+        'Data::UUID'         => (),
+        EV                   => (),
+        JSON                 => (),
+        'Module::Refresh'    => (),
+        'Mojolicious::Lite'  => (),
     },                                 # e.g., Module::Name => 1.1
     (
         $] >= 5.005
-        ?    ## Add these new keywords supported since 5.005
+        ?                              ## Add these new keywords supported since 5.005
           (
             ABSTRACT => 'Modular HTML5 game server',
-            AUTHOR => 'Bruce Armstrong <bruce@fortressofgeekdom.org>'
+            AUTHOR   => 'Bruce Armstrong <bruce@fortressofgeekdom.org>'
           )
         : ()
     ),

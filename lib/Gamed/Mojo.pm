@@ -4,8 +4,6 @@ use 5.010;
 use strict;
 use warnings;
 
-use Data::UUID;
-use Gamed;
 use Mojolicious::Lite;
 use Mojolicious::Sessions;
 use Mojo::Server::Daemon;
@@ -16,25 +14,47 @@ use File::Basename 'dirname';
 use File::Spec::Functions 'catdir';
 use File::Find;
 use Module::Refresh;
+use Gamed;
+use Gamed::DB;
 
-my $uuid     = Data::UUID->new;
 my $sessions = Mojolicious::Sessions->new;
 $sessions->cookie_name('gamed');
 $sessions->default_expiration(86400);
 
 post '/' => sub {
     my $self = shift;
-    my $user = $self->param('username');
-    $self->session( 'user', $user );
-    $self->session( 'id',   $uuid->create_b64 );
-    return $self->redirect_to('/');
+	my $user = $self->login;
+	if (defined $user) {
+    	$self->session( 'username', $user->{username} );
+    	$self->session( 'name', $user->{name} );
+    	$self->session( 'avatar', $user->{avatar} );
+    	$self->redirect_to('/');
+	}
+	else {
+		$self->stash(error => 'Incorrect username or passphrase');
+		$self->render('login');
+	}
+};
+
+post '/newaccount' => sub {
+	my $self = shift;
+	my $user = $self->create_user;
+	if (defined $user) {
+    	$self->session( 'username', $user->{username} );
+    	$self->session( 'name', $user->{name} );
+    	$self->session( 'avatar', $user->{avatar} );
+    	$self->redirect_to('/');
+	}
+	else {
+		$self->render('login');
+	}
 };
 
 group {
     under sub {
         my $self = shift;
-        my $user = $self->session('user');
-        if ( !defined $user ) {
+        my $username = $self->session('username');
+        if ( !defined $username ) {
             $self->render('login');
             return;
         }
@@ -43,13 +63,10 @@ group {
 
     get '/' => sub {
         my $self = shift;
-        my $user = $self->session('user');
         $self->render(
             'lobby',
-            user  => $user,
             game  => 'Lobby',
-            games => [ sort keys(%Gamed::games) ]
-        );
+            games => [ sort keys(%Gamed::games) ] );
     };
 
     get '/create/:game' => sub {
@@ -85,29 +102,24 @@ group {
         my $self = shift;
         my $name = $self->param('name');
         if ( exists $Gamed::game_instances{$name} ) {
-            my $game =
-              ( split( /::/, ref( $Gamed::game_instances{$name} ) ) )[-1];
+            my $game = ( split( /::/, ref( $Gamed::game_instances{$name} ) ) )[-1];
             $self->render(
                 "game-$game",
                 game => $game,
                 name => $name,
-                user => $self->session('user')
-            );
+			 );
         }
         else {
             $self->stash( error => "No game named '$name' exists" );
             $self->redirect_to('/');
         }
     };
-};
 
     websocket '/game/:name/websocket' => sub {
         my $self = shift;
         $self->app->log->debug('WebSocket connected.');
         Mojo::IOLoop->stream( $self->tx->connection )->timeout(3600);
-        my $user   = $self->session('user');
-        my $player = Gamed::Player->new(
-            { name => $user, sock => $self, id => $self->session('id') } );
+        my $player = Gamed::Player->new( { name => $self->session('name'), sock => $self, id => $self->session('username') } );
         eval { Gamed::on_join( $player, $self->param('name') ); };
         if ($@) {
             $self->send("{'error':'$@'}");
@@ -118,18 +130,17 @@ group {
                 message => sub {
                     my ( $self, $msg ) = @_;
                     Gamed::on_message( $player, $msg );
-                }
-            );
+                } );
 
             $self->on(
                 finish => sub {
                     my $self = shift;
-                    Gamed::on_quit( $player );
+                    Gamed::on_quit($player);
                     $self->app->log->debug('WebSocket disconnected.');
-                }
-            );
+                } );
         }
     };
+};
 
 get '/refresh/*module' => sub {
     my $self = shift;
@@ -143,10 +154,8 @@ get '/flushcache' => sub {
     $self->render( text => "OK" );
 };
 
-my $daemon =
-  Mojo::Server::Daemon->new( app => app, listen => ['http://*:8080'] );
-$daemon->app->home->parse( catdir( dirname(__FILE__), '..', 'Gamed' ),
-    'Gamed' );
+my $daemon = Mojo::Server::Daemon->new( app => app, listen => ['http://*:8080'] );
+$daemon->app->home->parse( catdir( dirname(__FILE__), '..', 'Gamed' ), 'Gamed' );
 $daemon->app->static->paths->[0]   = $daemon->app->home->rel_dir('public');
 $daemon->app->renderer->paths->[0] = $daemon->app->home->rel_dir('templates');
 $daemon->start;
