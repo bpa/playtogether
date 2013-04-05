@@ -15,6 +15,7 @@ use Mojo::IOLoop;
 use File::Basename 'dirname';
 use File::Spec::Functions 'catdir';
 use File::Find;
+use Module::Refresh;
 
 my $uuid     = Data::UUID->new;
 my $sessions = Mojolicious::Sessions->new;
@@ -111,6 +112,18 @@ websocket '/game/:name/websocket' => sub {
                 $self->app->log->debug('WebSocket disconnected.');
             } );
     }
+};
+
+get '/refresh/*module' => sub {
+    my $self = shift;
+    Module::Refresh->refresh($self->param('module'));
+    $self->render(text => 'OK');
+};
+
+get '/flushcache' => sub {
+    my $self = shift;
+    $self->app->renderer->cache(Mojo::Cache->new);
+    $self->render(text => "OK");
 };
 
 my $daemon = Mojo::Server::Daemon->new( app => app, listen => ['http://*:8080'] );
