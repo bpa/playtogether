@@ -10,6 +10,8 @@ WriteMakefile(
         AnyEvent             => (),
         'Authen::Passphrase' => (),
         'Data::UUID'         => (),
+        DBI                  => (),
+        'DBD::SQLite'        => (),
         EV                   => (),
         JSON                 => (),
         'Module::Refresh'    => (),

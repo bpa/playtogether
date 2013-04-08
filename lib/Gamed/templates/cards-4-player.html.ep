@@ -1,23 +1,34 @@
-<table width="100%" border="1">
+% extends 'game';
+%= content main => begin
+<table width="100%">
   <tr>
     <td colspan="3">
-      <div id="partner" class="horizontal">
-        <span>
+      <div id="partner" class="player">
           <div class="avatar"></div>
           <div class="player-name"></div>
-        </span>
-        <span>
-          
-        </span>
       </div>
     </td>
   </tr>
   <tr>
-    <td width="100"></td>
-    <td></td>
-    <td width="100"></td>
+    <td width="100">
+      <div id="left" class="player">
+        <div class="avatar"></div>
+        <div class="player-name"></div>
+      </div>
+    </td>
+    <td align="center">
+      %= content game => begin
+      % end
+    </td>
+    <td width="100">
+      <div id="right" class="player">
+        <div class="avatar"></div>
+        <div class="player-name"></div>
+      </div>
+    </td>
   </tr>
   <tr>
     <td colspan="3"></td>
   </tr>
 </table>
+% end

@@ -22,7 +22,7 @@
         </tr>
         <tr>
           <td align="right"><label for="user">Passphrase:</label></td>
-          <td><input name="passphrase" class="required"></td>
+          <td><input name="passphrase" type="password" class="required"></td>
         </tr>
         <tr>
           <td colspan="2" align="center"><input type="submit" value="Login"></td>

@@ -1,0 +1,22 @@
+#declaring-tab {
+  display:none;
+}
+#bid-tab {
+  display:none;
+}
+#table {
+  display:none;
+}
+
+label[for=suit-red] {
+  color: red;
+}
+label[for=suit-green] {
+  color: green;
+}
+label[for=suit-yellow] {
+  color: yellow;
+}
+label[for=suit-blue] {
+  color: blue;
+}

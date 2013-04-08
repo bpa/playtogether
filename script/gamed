@@ -6,7 +6,10 @@ use warnings;
 use FindBin;
 use lib "$FindBin::Bin/../lib";
 
-if ($ARGV[0] eq '-test') {
-	use Gamed 'Gamed::Test::Game';
+BEGIN {
+    if (@ARGV > 0 && $ARGV[0] eq '-test') {
+        require Gamed;
+        Gamed->import('Gamed::Test::Game');
+    }
 }
 use Gamed::Mojo;

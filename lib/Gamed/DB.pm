@@ -19,8 +19,6 @@ helper login => sub {
 
 helper create_user => sub {
     my $self = shift;
-    use Data::Dumper;
-    print Dumper $self->req->params->to_hash;
     my $ppr = Authen::Passphrase::SaltedDigest->new(
         algorithm   => 'SHA-1',
         salt_random => 20,

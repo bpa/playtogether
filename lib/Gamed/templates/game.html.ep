@@ -7,14 +7,18 @@
   %= javascript 'http://ajax.googleapis.com/ajax/libs/jqueryui/1.10.1/jquery-ui.min.js'
   %= stylesheet 'http://code.jquery.com/ui/1.10.1/themes/le-frog/jquery-ui.css'
   %= stylesheet '/css/gamed.css'
+  %= stylesheet "/css/$game.css"
   %= javascript begin 
     var ws = new WebSocket('<%= url_for("game/$name/websocket")->to_abs->scheme('ws') %>');
   %= end
   %= javascript '/js/client.js'
-  <%= javascript "/js/$game.js" %>
+  %= javascript "/js/$game.js"
   </head>
   <body>
       %= include 'header';
-      <div id="content"><%== content %></div>
+      <div id="content">
+      %= content main => begin
+      % end
+      </div>
   </body>
 </html>
