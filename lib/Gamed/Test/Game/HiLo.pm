@@ -29,7 +29,7 @@ sub on_join {
 	die GAME_FULL() if exists $self->{joined};
 	push @{$self->{players}}, $player;
 	$self->{joined} = ();
-	$self->broadcast( { cmd => 'join', players => [map { $_->{name} } @{$self->{players}}]});
+	$self->broadcast( { cmd => 'join', players => [map { $_->{name} } @{$self->{players}}], player => 0});
 }
 
 1;
