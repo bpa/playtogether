@@ -10,6 +10,8 @@ html, body {
   height: 100px;
   width: 100px;
   background-color: LightBlue;
+  background-size: 100px;
+  background-repeat: no-repeat;
 }
 
 .player {

@@ -45,7 +45,7 @@ sub on_join {
         }
     }
     $self->{state}->on_join( $self, $player ) unless $reconnected;
-	my %msg = ( cmd => 'join', players => [map { defined $_ ? $_->{name} : $_ } @{$self->{players}}]);
+	my %msg = ( cmd => 'join', players => [map { defined $_ ? { name => $_->{name}, avatar => $_->{avatar} } : $_ } @{$self->{players}}]);
     for my $i ( 0 .. $#{$self->{players}} ) {
 		$msg{player} = $i;
 		my $p = $self->{players}[$i];

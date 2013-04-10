@@ -10,11 +10,12 @@ unless ( $dbh->selectrow_arrayref("SELECT 1 FROM sqlite_master WHERE type='table
 }
 
 helper login => sub {
-    my ( $self, $username, $passphrase ) = @_;
-    my $user = $dbh->selectall_arrayref( "select * from user where username=?", { Slice => {} }, $username, );
+    my $self = shift;
+    my $user = $dbh->selectall_arrayref( "select * from user where username=?", { Slice => {} }, $self->param('username'), );
     return unless @$user > 0;
+    $user = $user->[0];
     my $ppr = Authen::Passphrase::SaltedDigest->from_rfc2307( delete $user->{passphrase} );
-    return $ppr->match($passphrase) ? $user : ();
+    return $ppr->match($self->param('passphrase')) ? $user : ();
 };
 
 helper create_user => sub {

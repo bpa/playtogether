@@ -3,7 +3,7 @@
 <table width="100%">
   <tr>
     <td colspan="3">
-      <div id="partner" class="player">
+      <div id="player2" class="player">
           <div class="avatar"></div>
           <div class="player-name"></div>
       </div>
@@ -11,7 +11,7 @@
   </tr>
   <tr>
     <td width="100">
-      <div id="left" class="player">
+      <div id="player1" class="player">
         <div class="avatar"></div>
         <div class="player-name"></div>
       </div>
@@ -21,7 +21,7 @@
       % end
     </td>
     <td width="100">
-      <div id="right" class="player">
+      <div id="player3" class="player">
         <div class="avatar"></div>
         <div class="player-name"></div>
       </div>

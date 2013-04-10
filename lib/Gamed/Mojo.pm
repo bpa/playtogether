@@ -119,7 +119,7 @@ group {
         my $self = shift;
         $self->app->log->debug('WebSocket connected.');
         Mojo::IOLoop->stream( $self->tx->connection )->timeout(3600);
-        my $player = Gamed::Player->new( { name => $self->session('name'), sock => $self, id => $self->session('username') } );
+        my $player = Gamed::Player->new( { name => $self->session('name'), sock => $self, id => $self->session('username'), avatar => $self->session('avatar') } );
         eval { Gamed::on_join( $player, $self->param('name') ); };
         if ($@) {
             $self->send("{'error':'$@'}");
