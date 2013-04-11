@@ -2,7 +2,14 @@
     Welcome<br>
 Available games:
 <ul>
-% for my $g (@$games) {
+% for my $g (sort keys %Gamed::games) {
 <li><a href="/create/<%= $g %>"><%= $g %></a></li>
+% }
+</ul>
+
+Join existing game:
+<ul>
+% while (my ($name, $game) = each(%Gamed::game_instances)) {
+<li><a href="/game/<%= $name %>"><%= $name %> (<%= pop [split(/::/,ref($game))] %>)</a></li>
 % }
 </ul>

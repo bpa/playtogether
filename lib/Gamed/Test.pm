@@ -25,7 +25,7 @@ sub game {
     for (@$players) {
         my $c = client($_);
         $c->join($opts->{name});
-		$_->got_one({ cmd => 'join' }) for @connections;
+		$_->got({ cmd => 'join' }) for @connections;
         push @connections, $c;
     }
     my $instance = $Gamed::game_instances{$opts->{name}};

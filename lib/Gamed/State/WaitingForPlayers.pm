@@ -19,4 +19,11 @@ sub on_join {
       if @{ $game->{players} } >= @{$game->{seat}};
 }
 
+sub on_message {
+    my ($self, $game, $player, $message) = @_;
+    if ($message->{start} eq 'now') {
+        $game->change_state( $self->{next} );
+    }
+}
+
 1;

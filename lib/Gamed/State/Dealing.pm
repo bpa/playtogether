@@ -20,6 +20,11 @@ sub build {
     $self->{dealer} = 0;
 }
 
+sub on_enter_state {
+    my ($self, $game) = @_;
+    $game->broadcast( { dealing => $self->{dealer} } );
+}
+
 sub on_message {
     my ( $self, $game, $client, $msg ) = @_;
     if ( $client->{id} eq $game->{players}[$self->{dealer}]{id} ) {

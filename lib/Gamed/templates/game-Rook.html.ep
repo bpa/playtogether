@@ -1,7 +1,8 @@
 %= extends 'cards-4-player';
 %= content game => begin
 <div id="waiting-tab">
-Waiting for players to join...
+Waiting for players to join...<br>
+<button id="start">Start with current players</button>
 </div>
 <div id="bid-tab">
   <label size="5" for="bid-spinner">Bid:</label>

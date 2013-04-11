@@ -19,6 +19,7 @@ my ( $game, $n, $e, $s, $w ) = game(
                     deal => { seat => 10, nest => 5 },
                 } ) } } );
 
+broadcast_one( $game, { dealing => 0 } );
 $e->game( { do => 'deal' }, { reason => 'Not your turn' }, 'Deal out of turn' );
 $n->game( { do => 'deal' } );
 my $rook = qr/(\d+[RGBY])|0/;
@@ -65,6 +66,7 @@ sub change_state {
 	my ($game, $state) = @_;
 	$game->change_state($state);
 	$game->_change_state;
+    broadcast_one($game);
 }
 
 done_testing;
