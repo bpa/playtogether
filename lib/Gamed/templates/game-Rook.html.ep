@@ -4,7 +4,7 @@
 Waiting for players to join...<br>
 <button id="start">Start with current players</button>
 </div>
-<div id="bid-tab">
+<div id="bidding-tab">
   <label size="5" for="bid-spinner">Bid:</label>
   <input id="bid-spinner" value="100">
   <button id="make-bid">Bid</button>

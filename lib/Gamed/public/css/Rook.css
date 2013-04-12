@@ -1,7 +1,10 @@
 #declaring-tab {
   display:none;
 }
-#bid-tab {
+#declaring-tab {
+  display:none;
+}
+#bidding-tab {
   display:none;
 }
 #table {
