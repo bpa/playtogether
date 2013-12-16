@@ -7,15 +7,15 @@ WriteMakefile(
     NAME         => 'Gamed',
     VERSION_FROM => 'lib/Gamed.pm',    # finds $VERSION
     PREREQ_PM    => {
-        AnyEvent             => (),
-        'Authen::Passphrase' => (),
-        'Data::UUID'         => (),
-        DBI                  => (),
-        'DBD::SQLite'        => (),
-        EV                   => (),
-        JSON                 => (),
-        'Module::Refresh'    => (),
-        'Mojolicious::Lite'  => (),
+        AnyEvent             => 0,
+        'Authen::Passphrase' => 0,
+        'Data::UUID'         => 0,
+        DBI                  => 0,
+        'DBD::SQLite'        => 0,
+        EV                   => 0,
+        JSON                 => 0,
+        'Module::Refresh'    => 0,
+        'Mojolicious::Lite'  => 0,
     },                                 # e.g., Module::Name => 1.1
     (
         $] >= 5.005
