@@ -4,10 +4,11 @@ use parent qw/Gamed::Game/;
 
 sub build {
     my $self = shift;
-	$self->{seat} = [ {}, {} ];
+	$self->{seat} = [ {}, {}, {} ];
     $self->{state_table} = {
         WAITING_FOR_PLAYERS => Gamed::State::WaitingForPlayers->new('PLACING'),
-        #        PLACING             => Gamed::Game::SpeedRisk::Placing->new(),
+        PLACING             => Gamed::State->new,
+		#PLACING             => Gamed::Game::SpeedRisk::Placing->new(),
         #        PLAYING             => Gamed::Game::SpeedRisk::Playing->new(),
         #        RUNNING             => Gamed::Game::SpeedRisk::Running->new(),
         GAME_OVER => Gamed::State->new,
