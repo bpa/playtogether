@@ -4,9 +4,14 @@ use strict;
 use warnings;
 use Gamed 'Gamed::Test::Game';
 use Exporter 'import';
-our @EXPORT = qw/json text client game broadcast broadcasted broadcast_one/;
+our @EXPORT = qw/json text client game broadcast broadcasted broadcast_one error/;
 
-Module::Pluggable::Object->new( search_path => 'Gamed::Test', require => 1, inner => 0 )->plugins;
+Module::Pluggable::Object->new(
+    search_path => 'Gamed::Test',
+    require     => 1,
+    inner       => 0
+)->plugins;
+
 use Test::Builder;
 my $tb = Test::Builder->new;
 
@@ -18,17 +23,23 @@ sub client   { Gamed::Test::Player->new(shift) }
 sub game {
     local $Test::Builder::Level = $Test::Builder::Level + 1;
     my ( $players, $opts ) = @_;
-	$opts->{game} ||= 'Test';
-	$opts->{name} ||= 'test';
-    my @connections;
+    $opts->{game} ||= 'Test';
+    $opts->{name} ||= 'test';
+    $opts->{max_players} ||= ~~ @$players;
     Gamed::on_create($opts);
-    for (@$players) {
-        my $c = client($_);
-        $c->join($opts->{name});
-		$_->got({ cmd => 'join' }) for @connections;
+    my @connections;
+    my $instance = $Gamed::game_instances{ $opts->{name} };
+    for my $i ( 0 .. $#{$players} ) {
+        my $player = $players->[$i];
+        my $c      = client($player);
+        if ( defined $instance->{players}{$i} ) {
+            $instance->{next_player_id}++;
+            $instance->{ids}{ $c->{id} } = $i;
+        }
+        Gamed::on_join( $c, $opts->{name} );
         push @connections, $c;
+        $_->got( { cmd => 'join' } ) for @connections;
     }
-    my $instance = $Gamed::game_instances{$opts->{name}};
     return $instance, @connections;
 }
 
@@ -55,6 +66,10 @@ sub broadcast {
     for my $p ( @{ $game->{players} } ) {
         $p->{sock}->got(@_);
     }
+}
+
+sub error ($) {
+    return { cmd => 'error', reason => shift };
 }
 
 1;

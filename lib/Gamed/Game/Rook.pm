@@ -5,7 +5,8 @@ use parent qw/Gamed::Game/;
 sub build {
     my $self = shift;
     $self->{points} = [ 0, 0 ];
-    $self->{seat} = [ {}, {}, {}, {} ];
+    $self->{min_players} = 1;
+    $self->{max_players} = 4;
     $self->{state_table} = {
         WAITING_FOR_PLAYERS => Gamed::State::WaitingForPlayers->new('DEALING'),
         DEALING             => Gamed::State::Dealing->new(

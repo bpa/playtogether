@@ -21,7 +21,7 @@ Initialize a game.  L<on_join> will be called immediately following return with 
 =cut
 
 sub new {
-    my $self = bless { state => Gamed::State->new }, shift;
+    my $self = bless { state => Gamed::State->new, next_player_id => 0 }, shift;
     $self->build(@_);
 	$self->_change_state if exists $self->{_change_state};
     return $self;
@@ -36,22 +36,41 @@ Handle a player joining.  If the game is full, or there is any issue joining, th
 =cut
 
 sub on_join {
-    my ( $self, $player ) = @_;
-    my $reconnected = 0;
-    for my $i (0 .. $#{$self->{seat}}) {
-        if (exists $self->{seat}[$i]{id} && $self->{seat}[$i]{id} eq $player->{id}) {
-            $self->{players}[$i] = $player;
-            $reconnected = 1;
-        }
+    my ( $self, $client ) = @_;
+    my $player_id = $self->{ids}{ $client->{id} };
+    my $player;
+
+    if ( defined $player_id ) {
+        $player = $self->{players}{$player_id};
     }
-    $self->{state}->on_join( $self, $player ) unless $reconnected;
-	my %msg = ( cmd => 'join', players => [map { defined $_ ? { name => $_->{name}, avatar => $_->{avatar} } : $_ } @{$self->{players}}]);
-    for my $i ( 0 .. $#{$self->{players}} ) {
-		$msg{player} = $i;
-		my $p = $self->{players}[$i];
-        $p->send(\%msg) if defined $p;
+    else {
+        $player_id                    = $self->{next_player_id}++;
+        $player                       = { in_game_id => $player_id };
+        $self->{players}{$player_id}  = $player;
+        $self->{ids}{ $client->{id} } = $player_id;
     }
-	$self->_change_state if exists $self->{_change_state};
+
+    $player->{client}     = $client;
+    $client->{in_game_id} = $player_id;
+
+    my %players;
+    $self->{state}->on_join( $self, $client );
+
+    for my $p ( values %{ $self->{players} } ) {
+        $players{ $p->{in_game_id} } = {
+            name   => $p->{name},
+            avatar => $p->{avatar},
+            data   => $p->{game_data} };
+    }
+
+    my %msg
+      = ( cmd => 'join', players => \%players, player => $client->{in_game_id} );
+    for my $p ( values %{ $self->{players} } ) {
+        $msg{player} = $i;
+        $p->{client}->send( \%msg ) if defined $p->{client};
+    }
+
+    $self->_change_state if exists $self->{_change_state};
 }
 
 =head2 on_message($player, $message)

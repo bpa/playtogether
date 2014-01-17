@@ -1,5 +1,6 @@
 package Gamed::State::WaitingForPlayers;
 
+use v5.14;
 use strict;
 use warnings;
 
@@ -11,18 +12,21 @@ sub build {
 }
 
 sub on_join {
-    my ( $self, $game, $player ) = @_;
-    push @{ $game->{players} }, $player;
-    $player->{seat} = $#{$game->{players}};
-    $game->{seat}[$player->{seat}]{id} = $player->{id};
+    my ( $self, $game, $client ) = @_;
+	my $players = grep { defined $_->{client} } values %{ $game->{players} };
     $game->change_state( $self->{next} )
-      if @{ $game->{players} } >= @{$game->{seat}};
+      if $players >= $game->{max_players};
 }
 
 sub on_message {
-    my ($self, $game, $player, $message) = @_;
-    if ($message->{start} eq 'now') {
-        $game->change_state( $self->{next} );
+    my ( $self, $game, $client, $message ) = @_;
+    for ( $message->{cmd} ) {
+        when ('ready') {
+            $game->change_state( $self->{next} )
+              unless @{ $game->{players} } < $game->{min_players}
+              || grep { !$_->{ready} } @{ $game->{players} };
+        }
+        when ('not ready') { $game->{players}{ $client->{id} }{ready} = 0; }
     }
 }
 

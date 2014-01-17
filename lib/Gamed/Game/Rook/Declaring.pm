@@ -13,16 +13,15 @@ sub build {
 
 sub on_enter_state {
     my ( $self, $game ) = @_;
-    $game->{players}[ $game->{bidder} ]->send( { nest => $game->{nest} } );
-    $game->{seat}[ $game->{bidder} ]{cards}->add($game->{nest});
+    $game->{players}{ $game->{bidder} }{client}->send( { nest => $game->{nest} } );
+    $game->{players}{ $game->{bidder} }{cards}->add($game->{nest});
     delete $game->{nest};
 }
 
 sub on_message {
     my ( $self, $game, $client, $msg ) = @_;
-    my $b    = $game->{bidder};
-    my $seat = $game->{seat}[$b];
-    if ( $client->{id} ne $game->{players}[$b]{id} ) {
+    my $seat = $game->{players}{$game->{bidder}};
+    if ( $client->{id} ne $game->{bidder} ) {
         $client->err( 'Not your turn' );
         return;
     }

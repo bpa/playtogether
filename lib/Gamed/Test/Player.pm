@@ -11,11 +11,32 @@ sub new {
     bless { sock => SocketMock->new, id => $uuid->create_b64, name => $name }, shift;
 }
 
-sub join {
-    my ( $self, $name ) = @_;
-    Gamed::on_join( $self, $name );
+sub create {
     local $Test::Builder::Level = $Test::Builder::Level + 1;
-    $self->{sock}->got( { cmd => 'join'}, 'join' );
+    my ( $self, $game, $name, $opts ) = @_;
+    $opts ||= {};
+    $opts->{game} = $game;
+    $opts->{name} = $name;
+    Gamed::on_create($opts);
+    return $self->join($name);
+}
+
+sub join {
+    local $Test::Builder::Level = $Test::Builder::Level + 1;
+    my ( $self, $name ) = @_;
+    $self->{_game} = $Gamed::game_instances{$name};
+    Gamed::on_join( $self, $name );
+    my @players;
+    for my $p ( @{ $self->{_game}{players} } ) {
+        push @players, { name => $p->{name}, avatar => $p->{avatar} };
+    }
+    Gamed::Test::broadcast_one(
+        $self->{_game},
+        {   cmd     => 'join',
+            players => \@players,
+            player  => $self->{seat},
+        } );
+    return $self->{_game};
 }
 
 sub game {
@@ -25,6 +46,13 @@ sub game {
         local $Test::Builder::Level = $Test::Builder::Level + 1;
         $self->{sock}->got_one( $test, $desc );
     }
+}
+
+sub broadcast {
+    my ( $self, $msg, $test, $desc ) = @_;
+    Gamed::on_game( $self, $msg );
+    local $Test::Builder::Level = $Test::Builder::Level + 1;
+    Gamed::Test::broadcast_one( $self->{_game}, $test );
 }
 
 sub got {
@@ -46,7 +74,7 @@ sub send {
 
 sub err {
     my ( $self, $reason ) = @_;
-	chomp($reason);
+    chomp($reason);
     $self->{sock}->send( { cmd => 'error', reason => $reason } );
 }
 
