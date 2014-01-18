@@ -47,24 +47,24 @@ sub broadcasted {
     local $Test::Builder::Level = $Test::Builder::Level + 1;
     my ( $game, $client, $msg, @exp ) = @_;
     $client->game($msg);
-    for my $p ( @{ $game->{players} } ) {
-        $p->{sock}->got(@exp);
+    for my $p ( values %{ $game->{players} } ) {
+        $p->{client}{sock}->got(@exp);
     }
 }
 
 sub broadcast_one {
     local $Test::Builder::Level = $Test::Builder::Level + 1;
     my $game = shift;
-    for my $p ( @{ $game->{players} } ) {
-        $p->{sock}->got_one(@_);
+    for my $p ( values %{ $game->{players} } ) {
+        $p->{client}{sock}->got_one(@_);
     }
 }
 
 sub broadcast {
     local $Test::Builder::Level = $Test::Builder::Level + 1;
     my $game = shift;
-    for my $p ( @{ $game->{players} } ) {
-        $p->{sock}->got(@_);
+    for my $p ( values %{ $game->{players} } ) {
+        $p->{client}{sock}->got(@_);
     }
 }
 

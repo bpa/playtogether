@@ -17,7 +17,7 @@ my ( $game, $n, $e ) = game(
 like( ref( $game->{state} ), qr/Declaring/, 'Ready to start test' );
 
 $e->got_one( { nest => bag(qw/1R 14R 13R 12R 11R/) }, 'Nest sent to bid winner' );
-is( $game->{players}{e}{cards},
+is( $game->{players}{1}{cards},
     bag(qw/1R 14R 13R 12R 11R 5G 6G 7G 8G 9G 5R 6R 7R 8R 9R/),
     'Nest added to player hand'
 );
@@ -56,7 +56,7 @@ $e->game( { trump => 'R', nest => [qw/5G 6G 7G 8G 9G/] } );
 broadcast_one( $game, { trump => 'R' }, 'Chosen trump broadcast' );
 is( $game->{trump}, 'R', 'Trump is set in game' );
 is( $game->{nest}, bag(qw/5G 6G 7G 8G 9G/), 'Nest saved in game' );
-is( $game->{players}{e}{cards},
+is( $game->{players}{1}{cards},
     bag(qw/5R 6R 7R 8R 9R 11R 12R 13R 14R 1R/),
     'Player hand set in game'
 );

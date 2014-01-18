@@ -12,7 +12,7 @@ Gamed::on_create( { game => "HiLo", name => "test" } );
 eval { Gamed::on_create( { game => "HiLo", name => "test" } ); };
 is( $@, "A game named 'test' already exists.\n" );
 Gamed::on_join( $one, 'test' );
-$one->got_one( { cmd => 'join', players => ['test'], player => 0 } );
+$one->got_one( { cmd => 'join', player => 0 } );
 Gamed::on_join( $two, 'test' );
 $two->got_one( { cmd => 'error', reason => "Game full" } );
 Gamed::on_join( $two, 'test2' );

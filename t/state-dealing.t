@@ -10,7 +10,6 @@ my $tb = Test::Builder->new;
 my ( $game, $n, $e, $s, $w ) = game(
     [qw/n e s w/],
     {
-        seat        => [ {}, {}, {}, {} ],
         state_table => {
             start => Gamed::State::Dealing->new(
                 {
@@ -19,29 +18,29 @@ my ( $game, $n, $e, $s, $w ) = game(
                     deal => { seat => 10, nest => 5 },
                 } ) } } );
 
-broadcast_one( $game, { dealing => 0 } );
-$e->game( { do => 'deal' }, { reason => 'Not your turn' }, 'Deal out of turn' );
-$n->game( { do => 'deal' } );
+broadcast_one( $game, { dealing => 0 }, 'Dealer announced' );
+$e->game( { cmd => 'deal' }, { reason => 'Not your turn' }, 'Deal out of turn' );
+$n->game( { cmd => 'deal' } );
 my $rook = qr/(\d+[RGBY])|0/;
 check_deal( $rook, 10 );
 is( scalar( $game->{nest}->values ), 5, "5 cards in the nest" );
 
 change_state($game, 'start');
-$e->game( { do => 'deal' } );
+$e->game( { cmd => 'deal' } );
 check_deal( $rook, 10 );
 is( scalar( $game->{nest}->values ), 5, "5 cards in the nest" );
 
 $game->{state_table}{start}->build( { next => 'end', deck => Gamed::Object::Deck::FrenchSuited->new('normal'), deal => 13 } );
 change_state($game, 'start');
 my $french = qr/([\dJQKA]+[SHCD])/;
-$n->game( { do => 'deal' } );
+$n->game( { cmd => 'deal' } );
 check_deal( $french, 13 );
 
 $game->{state_table}{start}{deal} = { seat => 13, dummy => 13 };
 pop @{ $game->{seat} };
-pop @{ $game->{players} };
+delete $game->{players}{3};
 change_state($game, 'start');
-$e->game( { do => 'deal' } );
+$e->game( { cmd => 'deal' } );
 check_deal( $french, 13 );
 is( scalar( $game->{dummy}->values ), 13, "13 cards to dummy" );
 

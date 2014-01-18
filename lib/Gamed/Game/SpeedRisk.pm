@@ -2,13 +2,16 @@ package Gamed::Game::SpeedRisk;
 
 use parent qw/Gamed::Game/;
 
+use Data::Dumper;
 sub build {
-    my ($self, %args) = @_;
-	my $board_module = "Gamed::Game::SpeedRisk::" . $args{board};
+    my ($self, $args) = @_;
+	my $board_module = "Gamed::Game::SpeedRisk::" . $args->{board};
 	eval {
-		require "$board_module.pm";
+		my $module = $board_module;
+		$module =~ s/::/\//g;
+		require "$module.pm";
 		$self->{board} = $board_module->new();
-	} or die "Unknown Risk board '" . $args{board} . "' specified";
+	} or die "Unknown Risk board '" . $args->{board} . "' specified";
 	$self->{min_players} = 2;
 	$self->{max_players} = $self->{board}{max_players};
     $self->{state_table} = {

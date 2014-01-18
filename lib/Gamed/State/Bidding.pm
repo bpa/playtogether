@@ -26,7 +26,7 @@ sub on_enter_state {
 
 sub on_message {
     my ( $self, $game, $client, $msg ) = @_;
-    if ( $client->{id} ne $game->{players}[ $self->{bidder} ]{id} ) {
+    if ( $client->{in_game_id} ne $self->{bidder} ) {
         $client->err('Not your turn');
         return;
     }
@@ -76,7 +76,7 @@ sub next_bidder {
     my ( $self, $game ) = @_;
     do {
         $self->{bidder}++;
-        $self->{bidder} = 0 if $self->{bidder} == @{$game->{seat}};
+        $self->{bidder} = 0 if $self->{bidder} == keys %{$game->{players}};
     } while defined $self->{seat}[ $self->{bidder} ]{pass};
 
     if ( grep(!exists $_->{pass}, @{$self->{seat}}) == 1) {

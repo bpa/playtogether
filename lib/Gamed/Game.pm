@@ -123,8 +123,8 @@ sub _change_state {
 
 sub broadcast {
     my ( $self, $msg ) = @_;
-    for my $c ( @{ $self->{players} } ) {
-        $c->send($msg) if defined $c;
+    for my $c ( values %{ $self->{players} } ) {
+        $c->{client}->send($msg) if defined $c;
     }
 }
 

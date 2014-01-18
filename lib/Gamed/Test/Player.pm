@@ -27,7 +27,7 @@ sub join {
     $self->{_game} = $Gamed::game_instances{$name};
     Gamed::on_join( $self, $name );
     my @players;
-    for my $p ( @{ $self->{_game}{players} } ) {
+    for my $p ( values %{ $self->{_game}{players} } ) {
         push @players, { name => $p->{name}, avatar => $p->{avatar} };
     }
     Gamed::Test::broadcast_one(

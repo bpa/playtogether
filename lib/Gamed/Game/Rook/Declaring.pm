@@ -21,7 +21,7 @@ sub on_enter_state {
 sub on_message {
     my ( $self, $game, $client, $msg ) = @_;
     my $seat = $game->{players}{$game->{bidder}};
-    if ( $client->{id} ne $game->{bidder} ) {
+    if ( $client->{in_game_id} ne $game->{bidder} ) {
         $client->err( 'Not your turn' );
         return;
     }
