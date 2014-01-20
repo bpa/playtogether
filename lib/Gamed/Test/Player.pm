@@ -26,14 +26,15 @@ sub join {
     my ( $self, $name ) = @_;
     $self->{_game} = $Gamed::game_instances{$name};
     Gamed::on_join( $self, $name );
-    my @players;
+    my %players;
     for my $p ( values %{ $self->{_game}{players} } ) {
-        push @players, { name => $p->{name}, avatar => $p->{avatar} };
+        $players{ $p->{in_game_id} }
+          = { name => $p->{name}, avatar => $p->{avatar}, data => undef };
     }
     Gamed::Test::broadcast_one(
         $self->{_game},
         {   cmd     => 'join',
-            players => \@players,
+            players => \%players,
             player  => $self->{seat},
         } );
     return $self->{_game};
