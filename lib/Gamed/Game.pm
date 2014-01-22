@@ -66,7 +66,6 @@ sub on_join {
     my %msg
       = ( cmd => 'join', players => \%players, player => $client->{in_game_id} );
     for my $p ( values %{ $self->{players} } ) {
-        $msg{player} = $i;
         $p->{client}->send( \%msg ) if defined $p->{client};
     }
 
@@ -93,8 +92,8 @@ Handle a player leaving.
 
 sub on_quit {
     my ( $self, $player ) = @_;
-    $self->{players}[$player->{seat}] = undef;
-    $self->{state}->on_quit($player);
+    $self->{state}->on_quit( $self, $player );
+    $self->broadcast( { cmd => 'quit', player => $player->{in_game_id} } );
 }
 
 =head2 on_destroy

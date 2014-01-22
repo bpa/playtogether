@@ -44,4 +44,19 @@ sub on_message {
     }
 }
 
+sub on_quit {
+    my ( $self, $game, $client ) = @_;
+    delete $game->{players}{ $client->{in_game_id} };
+    delete $game->{ids}{ $client->{id} };
+
+    my $ready = 1;
+    for my $p ( values %{ $game->{players} } ) {
+        $ready = 0 unless $p->{ready};
+    }
+    if ($ready) {
+        $game->broadcast( { cmd => 'ready', player => $client->{in_game_id} } );
+        $game->change_state( $self->{next} );
+    }
+}
+
 1;

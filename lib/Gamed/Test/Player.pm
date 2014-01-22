@@ -35,9 +35,17 @@ sub join {
         $self->{_game},
         {   cmd     => 'join',
             players => \%players,
-            player  => $self->{seat},
-        } );
+            player  => $self->{in_game_id},
+        }, "Got join" );
     return $self->{_game};
+}
+
+sub quit {
+    local $Test::Builder::Level = $Test::Builder::Level + 1;
+    my $self = shift;
+    Gamed::on_quit($self);
+    Gamed::Test::broadcast_one( $self->{_game},
+        { cmd => 'quit', player => $self->{in_game_id} }, 'Quit broadcast' );
 }
 
 sub game {
@@ -53,7 +61,7 @@ sub broadcast {
     my ( $self, $msg, $test, $desc ) = @_;
     Gamed::on_game( $self, $msg );
     local $Test::Builder::Level = $Test::Builder::Level + 1;
-    Gamed::Test::broadcast_one( $self->{_game}, $test );
+    Gamed::Test::broadcast_one( $self->{_game}, $test, $desc );
 }
 
 sub got {
