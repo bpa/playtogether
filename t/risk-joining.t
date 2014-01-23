@@ -61,13 +61,13 @@ subtest 'drop/rejoin and start game' => sub {
 subtest 'dropping unready player can start game' => sub {
     my $risk = $p1->create( 'SpeedRisk', 'test', { board => 'Classic' } );
     $p2->join('test');
-    $p2->broadcast( { cmd => 'ready' }, 'P2 is ready' );
+    $p2->broadcast( { cmd => 'ready' }, { cmd=>'ready', player=>1 }, 'P2 is ready' );
     $p1->quit;
     like( ref( $risk->{state} ), qr/WaitingForPlayers/, 'Need enough players' );
 
     $p1->join('test');
     $p3->join('test');
-    $p3->broadcast( { cmd => 'ready' } );
+    $p3->broadcast( { cmd => 'ready' }, { cmd=>'ready', player=>3 } );
     $p1->quit;
 
     $risk->broadcast( { state => 'Placing' } );
@@ -126,6 +126,7 @@ subtest 'set theme' => sub {
 sub done {
     for my $p ( $p1, $p2, $p3, $p4 ) {
         $p->{sock}{packets} = ();
+		delete $p->{game};
     }
     delete $Gamed::game_instances{test};
     done_testing();

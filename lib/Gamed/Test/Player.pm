@@ -24,27 +24,25 @@ sub create {
 sub join {
     local $Test::Builder::Level = $Test::Builder::Level + 1;
     my ( $self, $name ) = @_;
-    $self->{_game} = $Gamed::game_instances{$name};
     Gamed::on_join( $self, $name );
     my %players;
-    for my $p ( values %{ $self->{_game}{players} } ) {
-        $players{ $p->{in_game_id} }
-          = { name => $p->{name}, avatar => $p->{avatar}, data => undef };
+    for my $p ( values %{ $self->{game}{players} } ) {
+        $players{ $p->{in_game_id} } = $p->{public};
     }
     Gamed::Test::broadcast_one(
-        $self->{_game},
+        $self->{game},
         {   cmd     => 'join',
             players => \%players,
             player  => $self->{in_game_id},
         }, "Got join" );
-    return $self->{_game};
+    return $self->{game};
 }
 
 sub quit {
     local $Test::Builder::Level = $Test::Builder::Level + 1;
     my $self = shift;
     Gamed::on_quit($self);
-    Gamed::Test::broadcast_one( $self->{_game},
+    Gamed::Test::broadcast_one( $self->{game},
         { cmd => 'quit', player => $self->{in_game_id} }, 'Quit broadcast' );
 }
 
@@ -59,9 +57,10 @@ sub game {
 
 sub broadcast {
     my ( $self, $msg, $test, $desc ) = @_;
+	$test ||= $msg;
     Gamed::on_game( $self, $msg );
     local $Test::Builder::Level = $Test::Builder::Level + 1;
-    Gamed::Test::broadcast_one( $self->{_game}, $test, $desc );
+    Gamed::Test::broadcast_one( $self->{game}, $test, $desc );
 }
 
 sub got {

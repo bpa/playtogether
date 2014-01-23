@@ -2,7 +2,6 @@ package Gamed::Game::SpeedRisk;
 
 use parent qw/Gamed::Game/;
 
-use Data::Dumper;
 sub build {
     my ($self, $args) = @_;
 	my $board_module = "Gamed::Game::SpeedRisk::" . $args->{board};
@@ -23,5 +22,7 @@ sub build {
     };
     $self->change_state('WAITING_FOR_PLAYERS');
 }
+
+use Gamed::Themes;
 
 1;

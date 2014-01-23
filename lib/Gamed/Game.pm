@@ -23,7 +23,7 @@ Initialize a game.  L<on_join> will be called immediately following return with 
 sub new {
     my $self = bless { state => Gamed::State->new, next_player_id => 0 }, shift;
     $self->build(@_);
-	$self->_change_state if exists $self->{_change_state};
+    $self->_change_state if exists $self->{_change_state};
     return $self;
 }
 
@@ -44,9 +44,14 @@ sub on_join {
         $player = $self->{players}{$player_id};
     }
     else {
-        $player_id                    = $self->{next_player_id}++;
-        $player                       = { in_game_id => $player_id };
-        $self->{players}{$player_id}  = $player;
+        $player_id = $self->{next_player_id}++;
+        $player    = {
+            in_game_id => $player_id,
+            public     => {
+                id     => $player_id,
+                name   => $client->{name},
+                avatar => $client->{avatar} } };
+        $self->{players}{$player_id} = $player;
         $self->{ids}{ $client->{id} } = $player_id;
     }
 
@@ -57,10 +62,7 @@ sub on_join {
     $self->{state}->on_join( $self, $client );
 
     for my $p ( values %{ $self->{players} } ) {
-        $players{ $p->{in_game_id} } = {
-            name   => $p->{name},
-            avatar => $p->{avatar},
-            data   => $p->{game_data} };
+        $players{ $p->{in_game_id} } = $p->{public};
     }
 
     my %msg
@@ -81,7 +83,7 @@ Handle a message from a player.
 sub on_message {
     my ( $self, $client, $message ) = @_;
     $self->{state}->on_message( $self, $client, $message );
-	$self->_change_state if exists $self->{_change_state};
+    $self->_change_state if exists $self->{_change_state};
 }
 
 =head2 on_quit($player)
@@ -94,6 +96,7 @@ sub on_quit {
     my ( $self, $player ) = @_;
     $self->{state}->on_quit( $self, $player );
     $self->broadcast( { cmd => 'quit', player => $player->{in_game_id} } );
+    $self->_change_state if exists $self->{_change_state};
 }
 
 =head2 on_destroy
@@ -106,14 +109,14 @@ sub on_destroy {
 }
 
 sub change_state {
-	my ($self, $state_name) = @_;
-	$self->{_change_state} = $state_name;
+    my ( $self, $state_name ) = @_;
+    $self->{_change_state} = $state_name;
 }
 
 sub _change_state {
-	my $self = shift;
-	my $state_name = delete $self->{_change_state};
-    my $state = $self->{state_table}{$state_name};
+    my $self       = shift;
+    my $state_name = delete $self->{_change_state};
+    my $state      = $self->{state_table}{$state_name};
     die "No state '$state_name' found\n" unless defined $state;
     $self->{state}->on_leave_state($self);
     $self->{state} = $state;

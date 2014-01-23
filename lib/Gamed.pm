@@ -42,6 +42,7 @@ sub on_create {
     if ( exists $games{ $msg->{game} } ) {
         eval {
             my $game = Gamed::Game::new( $games{ $msg->{game} }, $msg );
+			$game->{name} = $msg->{name};
             $game_instances{ $msg->{name} } = $game;
         };
         if ($@) {
@@ -86,10 +87,16 @@ sub on_game {
 
 sub on_quit {
     my $player = shift;
+    my $game = $player->{game};
     eval {
-        my $game = $player->{game};
         $game->on_quit($player);
     };
+	eval {
+		if (!keys %{ $game->{players} }) {
+			delete $game_instances{$game->{name}};
+			$game->on_destroy();
+		}
+	};
 }
 
 1;

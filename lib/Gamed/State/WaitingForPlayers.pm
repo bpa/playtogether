@@ -41,6 +41,11 @@ sub on_message {
             $game->broadcast(
                 { cmd => 'not ready', player => $client->{in_game_id} } );
         }
+		when ('theme') {
+		}
+		default {
+			$client->err("Invalid command");
+		}
     }
 }
 
@@ -49,13 +54,16 @@ sub on_quit {
     delete $game->{players}{ $client->{in_game_id} };
     delete $game->{ids}{ $client->{id} };
 
-    my $ready = 1;
-    for my $p ( values %{ $game->{players} } ) {
-        $ready = 0 unless $p->{ready};
-    }
-    if ($ready) {
-        $game->broadcast( { cmd => 'ready', player => $client->{in_game_id} } );
-        $game->change_state( $self->{next} );
+    if (  !defined( $game->{min_players} )
+        || keys %{ $game->{players} } >= $game->{min_players} )
+    {
+        my $ready = 1;
+        for my $p ( values %{ $game->{players} } ) {
+            $ready = 0 unless $p->{ready};
+        }
+        if ($ready) {
+            $game->change_state( $self->{next} );
+        }
     }
 }
 
