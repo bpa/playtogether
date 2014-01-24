@@ -35,7 +35,7 @@ subtest 'start 2 player game' => sub {
     $risk->broadcast( { state => 'Placing' } );
     like( ref( $risk->{state} ), qr/Placing/ );
 
-	done();
+    done();
 };
 
 subtest 'drop/rejoin and start game' => sub {
@@ -45,7 +45,7 @@ subtest 'drop/rejoin and start game' => sub {
     $p1->quit;
     $p1->join('test');
     is( $p1->{in_game_id}, 3, "Re-joining players get a new id" );
-	$p4->join('test');
+    $p4->join('test');
     is( $p4->{in_game_id}, 4 );
 
     $p1->quit;
@@ -55,25 +55,29 @@ subtest 'drop/rejoin and start game' => sub {
     $risk->broadcast( { state => 'Placing' } );
     like( ref( $risk->{state} ), qr/Placing/ );
 
-	done();
+    done();
 };
 
 subtest 'dropping unready player can start game' => sub {
     my $risk = $p1->create( 'SpeedRisk', 'test', { board => 'Classic' } );
     $p2->join('test');
-    $p2->broadcast( { cmd => 'ready' }, { cmd=>'ready', player=>1 }, 'P2 is ready' );
+    $p2->broadcast(
+        { cmd => 'ready' },
+        { cmd => 'ready', player => 1 },
+        'P2 is ready'
+    );
     $p1->quit;
     like( ref( $risk->{state} ), qr/WaitingForPlayers/, 'Need enough players' );
 
     $p1->join('test');
     $p3->join('test');
-    $p3->broadcast( { cmd => 'ready' }, { cmd=>'ready', player=>3 } );
+    $p3->broadcast( { cmd => 'ready' }, { cmd => 'ready', player => 3 } );
     $p1->quit;
 
     $risk->broadcast( { state => 'Placing' } );
     like( ref( $risk->{state} ), qr/Placing/ );
 
-	done();
+    done();
 };
 
 subtest 'game starts automatically with enough players' => sub {
@@ -85,7 +89,7 @@ subtest 'game starts automatically with enough players' => sub {
     $risk->broadcast( { state => 'Placing' } );
     like( ref( $risk->{state} ), qr/Placing/ );
 
-	done();
+    done();
 };
 
 subtest 'game destroyed when all players leave' => sub {
@@ -95,7 +99,7 @@ subtest 'game destroyed when all players leave' => sub {
     is( ~~ @{ $p1->{sock}{packets} }, 0, "No one to talk to" );
     ok( !defined $Gamed::game_instances{test}, "Game was deleted" );
 
-	done();
+    done();
 };
 
 subtest 'get random theme on join' => sub {
@@ -104,29 +108,30 @@ subtest 'get random theme on join' => sub {
     $p3->join('test');
     $p4->join('test');
     my %theme;
-    map { $theme{ $_->{theme} } = () } values %{ $risk->{players} };
+    map { $theme{ $_->{public}{theme} } = () } values %{ $risk->{players} };
     is( ~~ keys %theme, 4, "Got 4 different themes" );
 
-	done();
+    done();
 };
 
 subtest 'set theme' => sub {
     my $risk = $p1->create( 'SpeedRisk', 'test', { board => 'Classic' } );
     $p2->join('test');
 
+    $risk->{_themes}{test} = ();
     $p1->game( { cmd => 'theme', theme => undef },  error => 'Invalid theme' );
     $p1->game( { cmd => 'theme', theme => "none" }, error => 'Invalid theme' );
     $p1->broadcast( { cmd => 'theme', theme => "test" },
         { cmd => 'theme', theme => 'test', player => 0 } );
     $p2->game( { cmd => 'theme', theme => "test" }, error => 'Invalid theme' );
 
-	done();
+    done();
 };
 
 sub done {
     for my $p ( $p1, $p2, $p3, $p4 ) {
         $p->{sock}{packets} = ();
-		delete $p->{game};
+        delete $p->{game};
     }
     delete $Gamed::game_instances{test};
     done_testing();

@@ -10,6 +10,9 @@ use Gamed::Game;
 use Gamed::Player;
 use JSON;
 use Module::Pluggable::Object;
+use FindBin;
+
+our $resources = "$FindBin::Bin/../resources";
 
 my $json = JSON->new->convert_blessed;
 
