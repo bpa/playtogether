@@ -13,12 +13,12 @@ subtest 'two players' => sub {
     my $risk = $p1->create( 'SpeedRisk', 'test', { board => 'Classic' } );
     $p2->join('test');
     $p1->broadcast( { cmd => 'ready' } );
-    $p2->broadcast( { cmd => 'ready' } );
-    $risk->broadcast( { state => 'Placing' } );
+    $p2->game( { cmd => 'ready' } );
+    broadcast( $risk, { cmd => 'ready', player => 1 }, "Got ready" );
     like( ref( $risk->{state} ), qr/Placing/ );
 
     my %player_armies;
-    $p1->got_one( { cmd => 'status' } );
+    $p1->got_one( { cmd => 'state' } );
     my $msg = pop @{ $p2->{sock}{packets} };
     is( ~~ @{ $msg->{countries} }, 42 );
     for my $c ( 0 .. 42 ) {

@@ -31,8 +31,9 @@ subtest 'start 2 player game' => sub {
     ok( $risk->{players}{0}{ready}, "N is ready" );
 
     #Everyone is finally ready
-    $p2->broadcast( { cmd => 'ready' }, { cmd => 'ready', player => 1 } );
-    $risk->broadcast( { state => 'Placing' } );
+    $p2->game( { cmd => 'ready' } );
+	broadcast( $risk, { cmd => 'ready', player => 1 } );
+    broadcast( $risk, { state => 'Placing' } );
     like( ref( $risk->{state} ), qr/Placing/ );
 
     done();
@@ -51,8 +52,9 @@ subtest 'drop/rejoin and start game' => sub {
     $p1->quit;
     $p4->quit;
     $p2->broadcast( { cmd => 'ready' } );
-    $p3->broadcast( { cmd => 'ready' } );
-    $risk->broadcast( { state => 'Placing' } );
+    $p3->game( { cmd => 'ready' } );
+	broadcast( $risk, { cmd => 'ready' } );
+    broadcast( $risk, { state => 'Placing' } );
     like( ref( $risk->{state} ), qr/Placing/ );
 
     done();
@@ -74,7 +76,7 @@ subtest 'dropping unready player can start game' => sub {
     $p3->broadcast( { cmd => 'ready' }, { cmd => 'ready', player => 3 } );
     $p1->quit;
 
-    $risk->broadcast( { state => 'Placing' } );
+    broadcast( $risk, { state => 'Placing' } );
     like( ref( $risk->{state} ), qr/Placing/ );
 
     done();
@@ -86,7 +88,7 @@ subtest 'game starts automatically with enough players' => sub {
         my $player = Gamed::Test::Player->new($p);
         $player->join('test');
     }
-    $risk->broadcast( { state => 'Placing' } );
+    broadcast( $risk, { state => 'Placing' } );
     like( ref( $risk->{state} ), qr/Placing/ );
 
     done();

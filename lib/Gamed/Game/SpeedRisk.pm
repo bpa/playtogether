@@ -12,7 +12,7 @@ sub build {
 		$self->{board} = $board_module->new();
 	} or die "Unknown Risk board '" . $args->{board} . "' specified";
 	$self->{min_players} = 2;
-	$self->{max_players} = $self->{board}{max_players};
+	$self->{max_players} = $self->{board}{players};
     $self->{state_table} = {
         WAITING_FOR_PLAYERS => Gamed::State::WaitingForPlayers->new('PLACING'),
 		PLACING             => Gamed::Game::SpeedRisk::Placing->new(),

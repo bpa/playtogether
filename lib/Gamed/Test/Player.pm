@@ -29,7 +29,7 @@ sub join {
     for my $p ( values %{ $self->{game}{players} } ) {
         $players{ $p->{in_game_id} } = $p->{public};
     }
-    Gamed::Test::broadcast_one(
+    Gamed::Test::broadcast(
         $self->{game},
         {   cmd     => 'join',
             players => \%players,
@@ -42,7 +42,7 @@ sub quit {
     local $Test::Builder::Level = $Test::Builder::Level + 1;
     my $self = shift;
     Gamed::on_quit($self);
-    Gamed::Test::broadcast_one( $self->{game},
+    Gamed::Test::broadcast( $self->{game},
         { cmd => 'quit', player => $self->{in_game_id} }, 'Quit broadcast' );
 }
 

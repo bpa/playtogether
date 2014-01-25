@@ -12,20 +12,21 @@ sub import {
           = defined &{"$pkg\::$method"}
           ? \&{"$pkg\::$method"}
           : \&{"Gamed::Game::$method"};
-        *{"$pkg\::$method"}         = \&{"Gamed::Themes::$method"};
-        *{"$pkg\::_themes_$method"} = $real;
+        *{"$pkg\::$method"} = sub {
+            &{"Gamed::Themes::$method"}( $real, @_ );
+          }
     }
 }
 
 sub build {
-    my ( $self, $args ) = @_;
+    my ( $f, $self, $args ) = @_;
     $self->{_themes} = load();
-    $self->_themes_build($args);
+    $f->( $self, $args );
 }
 
 sub on_join {
-    my ( $self, $client ) = @_;
-    $self->_themes_on_join($client);
+    my ( $f, $self, $client ) = @_;
+    $f->( $self, $client );
 
     my $unused = $self->{_themes};
     my $theme  = ( keys %$unused )[ rand keys %$unused ];
@@ -34,7 +35,7 @@ sub on_join {
 }
 
 sub on_message {
-    my ( $self, $client, $message ) = @_;
+    my ( $f, $self, $client, $message ) = @_;
     if ( $message->{cmd} eq 'theme' ) {
         if ( exists $self->{_themes}{ $message->{theme} } ) {
             $self->{_themes}{ $client->{public}{theme} } = ();
@@ -50,14 +51,14 @@ sub on_message {
         }
     }
     else {
-        $self->_themes_on_message( $client, $message );
+        $f->( $self, $client, $message );
     }
 }
 
 sub on_quit {
-    my ( $self, $player ) = @_;
+    my ( $f, $self, $player ) = @_;
     $self->{_themes}{ $player->{public}{theme} } = ();
-    $self->_themes_on_quit($player);
+    $f->( $self, $player );
 }
 
 sub load {

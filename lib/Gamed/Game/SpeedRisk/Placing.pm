@@ -6,6 +6,9 @@ sub build {
 }
 
 sub on_enter_state {
+	my ($self, $game) = @_;
+	my @countries;
+	$game->broadcast({ cmd=>'state', state=>'Placing', countries=>\@countries });
 }
 
 sub on_message {
