@@ -18,12 +18,15 @@ my ( $game, $n, $e, $s ) = game(
             1 => { cards => bag(qw/2 9 11 15/) },
             2 => { cards => bag(qw/4 8 12 16/) },
         },
-        state_table =>
-          { start => Gamed::State::PlayTricks->new( Gamed::Test::PlayLogic->new ), }
-    } );
+        state_table => {
+            start =>
+              Gamed::State::PlayTricks->new( logic => Gamed::Test::PlayLogic->new ),
+            end => Gamed::State->new( name => 'end' ) }
+    },
+    'start'
+);
 
-my $play = $game->{state};
-like( ref($play), qr/PlayTricks/ );
+is( $game->{state}->name, 'PlayTricks' );
 $n->game( { play => 1 }, { reason => 'Not your turn' } );
 $s->game( { play => 8 }, { reason => 'Invalid card' } );
 
@@ -33,11 +36,11 @@ broadcast_one(
     { player => 2, play => 4 },
     'Card played was sent to everyone'
 );
-is_deeply( $play->{trick}, [4], 'Card added to trick' );
+is_deeply( $game->state->{trick}, [4], 'Card added to trick' );
 ok( !$game->{players}{2}{cards}->contains(4), 'Card removed from hand' );
 
 broadcasted( $game, $n, { play => 1 }, { player => 0, play => 1 }, 'N plays a 1' );
-is_deeply( $play->{trick}, [ 4, 1 ], 'Card added to trick' );
+is_deeply( $game->state->{trick}, [ 4, 1 ], 'Card added to trick' );
 broadcasted( $game, $e, { play => 2 }, { player => 1, play => 2 } );
 broadcast_one(
     $game,
@@ -45,8 +48,12 @@ broadcast_one(
     'Trick winner declared'
 );
 
-is_deeply( $play->{trick}, [], 'Trick reset after all play' );
-is_deeply( $game->{players}{2}{taken}, [ 4, 1, 2 ], "Captured trick given to player" );
+is_deeply( $game->state->{trick}, [], 'Trick reset after all play' );
+is_deeply(
+    $game->{players}{2}{taken},
+    [ 4, 1, 2 ],
+    "Captured trick given to player"
+);
 
 broadcasted( $game, $s, { play => 8 }, { player => 2, play => 8 }, 'Round 2' );
 broadcasted( $game, $n, { play => 5 }, { player => 0, play => 5 }, 'Round 2' );
@@ -56,7 +63,11 @@ broadcast_one(
     { trick => [ 8, 5, 9 ], winner => 1 },
     'Trick winner declared'
 );
-is_deeply( $game->{players}{1}{taken}, [ 8, 5, 9 ], "Captured trick given to player" );
+is_deeply(
+    $game->{players}{1}{taken},
+    [ 8, 5, 9 ],
+    "Captured trick given to player"
+);
 
 broadcasted( $game, $e, { play => 11 }, { player => 1, play => 11 }, 'Round 3' );
 broadcasted( $game, $s, { play => 12 }, { player => 2, play => 12 }, 'Round 3' );

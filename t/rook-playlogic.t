@@ -90,7 +90,7 @@ sub round_end {
       'Gamed::Game';
 	
     $logic->on_round_end($rook);
-	$rook->_change_state if exists $rook->{_change_state};
+	$rook->change_state_if_requested;
 	my $name = $opts{name};
 	is_deeply($rook->{points}, $opts{end_points}, "$name - end points");
     is($rook->{state}{name}, $opts{state}, "$name - state");

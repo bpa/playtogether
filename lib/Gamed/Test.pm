@@ -22,13 +22,16 @@ sub client   { Gamed::Test::Player->new(shift) }
 
 sub game {
     local $Test::Builder::Level = $Test::Builder::Level + 1;
-    my ( $players, $opts ) = @_;
+    my ( $players, $opts, $start_state ) = @_;
     $opts->{game} ||= 'Test';
     $opts->{name} ||= 'test';
-    $opts->{max_players} ||= ~~ @$players;
     Gamed::on_create($opts);
     my @connections;
     my $instance = $Gamed::game_instances{ $opts->{name} };
+	my $player_data = delete $opts->{players};
+	while (my ($k, $v) = each %$opts) {
+		$instance->{$k} = $v;
+	}
     for my $i ( 0 .. $#{$players} ) {
         my $player = $players->[$i];
         my $c      = client($player);
@@ -40,6 +43,15 @@ sub game {
         push @connections, $c;
         $_->got( { cmd => 'join' } ) for @connections;
     }
+	while (my ($p, $data) = each %$player_data) {
+		while (my ($k, $v) = each %$data) {
+			$instance->{players}{$p}{$k} = $v;
+		}
+	}
+	if ($start_state) {
+		$instance->change_state('start');
+	}
+	$instance->change_state_if_requested;
     return $instance, @connections;
 }
 

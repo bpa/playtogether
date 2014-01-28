@@ -15,7 +15,7 @@ subtest 'two players' => sub {
     $p1->broadcast( { cmd => 'ready' } );
     $p2->game( { cmd => 'ready' } );
     broadcast( $risk, { cmd => 'ready', player => 1 }, "Got ready" );
-    like( ref( $risk->{state} ), qr/Placing/ );
+    is( $risk->{state}->name, qr/Placing/ );
 
     my %player_armies;
     $p1->got_one( { cmd => 'state' } );

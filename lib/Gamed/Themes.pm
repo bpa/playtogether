@@ -1,67 +1,55 @@
 package Gamed::Themes;
 
+use Moose::Role;
 use File::Find;
 use File::Basename;
+use namespace::autoclean;
 
-sub import {
-    no strict 'refs';
-    no warnings 'redefine';
-    my $pkg = caller;
-    for my $method (qw/build on_join on_message on_quit/) {
-        my $real
-          = defined &{"$pkg\::$method"}
-          ? \&{"$pkg\::$method"}
-          : \&{"Gamed::Game::$method"};
-        *{"$pkg\::$method"} = sub {
-            &{"Gamed::Themes::$method"}( $real, @_ );
-          }
-    }
-}
+has 'themes' => (
+    is      => 'ro',
+    isa     => 'HashRef',
+    lazy    => 1,
+    builder => 'load_themes',
+);
 
-sub build {
-    my ( $f, $self, $args ) = @_;
-    $self->{_themes} = load();
-    $f->( $self, $args );
-}
+after 'on_join' => sub {
+    my ( $self, $game, $player ) = @_;
 
-sub on_join {
-    my ( $f, $self, $client ) = @_;
-    $f->( $self, $client );
-
-    my $unused = $self->{_themes};
+    my $unused = $self->themes;
     my $theme  = ( keys %$unused )[ rand keys %$unused ];
     delete $unused->{$theme};
-    $self->{players}{ $client->{in_game_id} }{public}{theme} = $theme;
-}
+    $player->{public}{theme} = $theme;
+};
 
-sub on_message {
-    my ( $f, $self, $client, $message ) = @_;
+around 'on_message' => sub {
+    my ( $orig, $self, $game, $player, $message ) = @_;
     if ( $message->{cmd} eq 'theme' ) {
-        if ( exists $self->{_themes}{ $message->{theme} } ) {
-            $self->{_themes}{ $client->{public}{theme} } = ();
-            $client->{public}{theme} = $message->{theme};
-            delete $self->{_themes}{ $message->{theme} };
-            $self->broadcast(
+        if (   defined $message->{theme}
+            && exists $self->{themes}{ $message->{theme} } )
+        {
+            $self->{themes}{ $player->{public}{theme} } = ();
+            $player->{public}{theme} = $message->{theme};
+            delete $self->{themes}{ $message->{theme} };
+            $game->broadcast(
                 {   cmd    => 'theme',
                     theme  => $message->{theme},
-                    player => $client->{in_game_id} } );
+                    player => $player->{in_game_id} } );
         }
         else {
-            $client->err("Invalid theme");
+            $player->{client}->err("Invalid theme");
         }
     }
     else {
-        $f->( $self, $client, $message );
+        $self->$orig( $game, $player, $message );
     }
-}
+};
 
-sub on_quit {
-    my ( $f, $self, $player ) = @_;
-    $self->{_themes}{ $player->{public}{theme} } = ();
-    $f->( $self, $player );
-}
+before 'on_quit' => sub {
+    my ( $self, $game, $player ) = @_;
+    $self->{themes}{ delete $player->{public}{theme} } = ();
+};
 
-sub load {
+sub load_themes {
     my %themes;
     find sub {
         if ( $_ eq 'theme.properties' ) {

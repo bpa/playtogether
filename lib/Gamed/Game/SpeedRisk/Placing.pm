@@ -1,14 +1,19 @@
 package Gamed::Game::SpeedRisk::Placing;
 
-use parent 'Gamed::State';
+use Moose;
+use namespace::autoclean;
 
-sub build {
-}
+extends 'Gamed::State';
+
+has '+name' => ( default => 'Placing' );
 
 sub on_enter_state {
-	my ($self, $game) = @_;
-	my @countries;
-	$game->broadcast({ cmd=>'state', state=>'Placing', countries=>\@countries });
+    my ( $self, $game ) = @_;
+    my @countries;
+
+    #if (keys %{$self->{players}})
+    $game->broadcast(
+        { cmd => 'state', state => 'Placing', countries => \@countries } );
 }
 
 sub on_message {
@@ -17,4 +22,4 @@ sub on_message {
 sub on_leave_state {
 }
 
-1;
+__PACKAGE__->meta->make_immutable;

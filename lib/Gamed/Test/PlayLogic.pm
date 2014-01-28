@@ -1,9 +1,7 @@
 package Gamed::Test::PlayLogic;
 
-use strict;
-use warnings; 
-
-sub new { return bless {}, shift }
+use Moose;
+use namespace::autoclean;
 
 sub is_valid_play {
     my ( $self, $card, $trick, $hand ) = @_;
@@ -29,8 +27,8 @@ sub trick_winner {
 }
 
 sub on_round_end {
-	my ($self, $game) = @_;
+    my ( $self, $game ) = @_;
 	$game->change_state('end');
 }
 
-1;
+__PACKAGE__->meta->make_immutable;

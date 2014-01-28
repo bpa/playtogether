@@ -3,6 +3,8 @@ package Gamed::Game;
 use Gamed::Const;
 use Gamed::State;
 use Gamed::Object;
+use Moose;
+use namespace::autoclean;
 
 =head1 NAME
 
@@ -20,14 +22,36 @@ Initialize a game.  L<on_join> will be called immediately following return with 
 
 =cut
 
-sub new {
-    my $self = bless { state => Gamed::State->new, next_player_id => 0 }, shift;
-    $self->build(@_);
-    $self->_change_state if exists $self->{_change_state};
-    return $self;
-}
+has 'state' => (
+    is      => 'ro',
+    isa     => 'Gamed::State',
+    default => sub { Gamed::State->new( { name => 'Start' } ) },
+);
 
-sub build { }
+has 'next_player_id' => (
+    is  => 'bare',
+    isa => 'Int',
+);
+
+after 'on_join', 'on_message', 'on_quit' => \&change_state_if_requested;
+
+sub change_state_if_requested {
+    my $self = shift;
+    if ( exists $self->{_change_state} ) {
+        my $state_name = delete $self->{_change_state};
+        my $state      = $self->{state_table}{$state_name};
+        die "No state '$state_name' found\n" unless defined $state;
+        $self->{state}->on_leave_state($self);
+        $self->{state} = $state;
+        $state->on_enter_state($self);
+    }
+};
+
+sub create {
+	my $instance = shift->new(@_);
+	$instance->change_state_if_requested;
+	return $instance;
+}
 
 =head2 on_join($player) => Game::Const
 
@@ -59,7 +83,7 @@ sub on_join {
     $client->{in_game_id} = $player_id;
 
     my %players;
-    $self->{state}->on_join( $self, $client );
+    $self->state->on_join( $self, $player );
 
     for my $p ( values %{ $self->{players} } ) {
         $players{ $p->{in_game_id} } = $p->{public};
@@ -70,8 +94,6 @@ sub on_join {
     for my $p ( values %{ $self->{players} } ) {
         $p->{client}->send( \%msg ) if defined $p->{client};
     }
-
-    $self->_change_state if exists $self->{_change_state};
 }
 
 =head2 on_message($player, $message)
@@ -82,8 +104,8 @@ Handle a message from a player.
 
 sub on_message {
     my ( $self, $client, $message ) = @_;
-    $self->{state}->on_message( $self, $client, $message );
-    $self->_change_state if exists $self->{_change_state};
+    $self->state->on_message( $self, $self->{players}{ $client->{in_game_id} },
+        $message );
 }
 
 =head2 on_quit($player)
@@ -93,34 +115,14 @@ Handle a player leaving.
 =cut
 
 sub on_quit {
-    my ( $self, $player ) = @_;
-    $self->{state}->on_quit( $self, $player );
-    $self->broadcast( { cmd => 'quit', player => $player->{in_game_id} } );
-    $self->_change_state if exists $self->{_change_state};
-}
-
-=head2 on_destroy
-
-Do any cleanup needed before the game is deleted
-
-=cut
-
-sub on_destroy {
+    my ( $self, $client ) = @_;
+    $self->state->on_quit( $self, $self->{players}{ $client->{in_game_id} } );
+    $self->broadcast( { cmd => 'quit', player => $client->{in_game_id} } );
 }
 
 sub change_state {
     my ( $self, $state_name ) = @_;
     $self->{_change_state} = $state_name;
-}
-
-sub _change_state {
-    my $self       = shift;
-    my $state_name = delete $self->{_change_state};
-    my $state      = $self->{state_table}{$state_name};
-    die "No state '$state_name' found\n" unless defined $state;
-    $self->{state}->on_leave_state($self);
-    $self->{state} = $state;
-    $state->on_enter_state($self);
 }
 
 sub broadcast {
@@ -130,4 +132,4 @@ sub broadcast {
     }
 }
 
-1;
+__PACKAGE__->meta->make_immutable;

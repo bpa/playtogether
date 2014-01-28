@@ -1,11 +1,12 @@
 package Gamed::State::PlayTricks;
 
-use parent 'Gamed::State';
+use Moose;
+use namespace::autoclean;
 
-sub build {
-    my ( $self, $logic ) = @_;
-    $self->{logic} = $logic;
-}
+extends 'Gamed::State';
+
+has '+name' => ( default => 'PlayTricks' );
+has 'logic' => ( is => 'ro', required => 1 );
 
 sub on_enter_state {
     my ( $self, $game ) = @_;
@@ -14,18 +15,17 @@ sub on_enter_state {
 }
 
 sub on_message {
-    my ( $self, $game, $client, $msg ) = @_;
-    if ( $client->{in_game_id} != $self->{active_player} ) {
-        $client->err('Not your turn');
+    my ( $self, $game, $player, $msg ) = @_;
+    if ( $player->{in_game_id} != $self->{active_player} ) {
+        $player->{client}->err('Not your turn');
         return;
     }
 
-    my $seat = $game->{players}{ $self->{active_player} };
     if ( $self->{logic}
-        ->is_valid_play( $msg->{play}, $self->{trick}, $seat->{cards}, $game ) )
+        ->is_valid_play( $msg->{play}, $self->{trick}, $player->{cards}, $game ) )
     {
         push @{ $self->{trick} }, $msg->{play};
-        $seat->{cards}->remove( $msg->{play} );
+        $player->{cards}->remove( $msg->{play} );
         $game->broadcast(
             { player => $self->{active_player}, play => $msg->{play} } );
         $self->{active_player}++;
@@ -50,8 +50,8 @@ sub on_message {
         }
     }
     else {
-        $client->err('Invalid card');
+        $player->{client}->err('Invalid card');
     }
 }
 
-1;
+__PACKAGE__->meta->make_immutable;

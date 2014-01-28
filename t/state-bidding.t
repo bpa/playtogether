@@ -8,20 +8,23 @@ use Data::Dumper;
 my ( $game, $n, $e, $s ) = game(
     [qw/n e s/],
     {
-        seat        => [ {}, {}, {} ],
         state_table => {
             start => Gamed::State::Bidding->new(
-                {
-                    next  => 'end',
-                    min   => 100,
-                    max   => 200,
-                    valid => sub { $_[0] % 5 == 0 },
-                } ) } } );
+                next  => 'end',
+                min   => 100,
+                max   => 200,
+                valid => sub { $_[0] % 5 == 0 },
+            ),
+            end => Gamed::State->new( name => 'end' ) }
+    },
+    'start'
+);
 
 $e->game( { bid => 100 }, { reason => 'Not your turn' },         "Bid out of turn" );
 $n->game( { bid => 50 },  { reason => 'Bidding starts at 100' }, "Bid too low" );
 $n->game( { bid => 205 }, { reason => 'Max bid is 200' },        "Bid too high" );
-$n->game( { bid => 103 }, { reason => 'Invalid bid' },           "Must bid in multiples of 5" );
+$n->game( { bid => 103 }, { reason => 'Invalid bid' },
+    "Must bid in multiples of 5" );
 
 $n->game( { bid => 100 } );
 broadcast_one( $game, { bid => 100, player => 0 }, 'bid was broadcast' );
@@ -45,17 +48,22 @@ is( ref( $game->{state} ), 'Gamed::State', "State changed" );
 
 ( $game, $n, $s ) = game(
     [qw/n s/],
-    {
-        name        => 'test2',
+    {   name        => 'test2',
         seat        => [ {}, {} ],
         state_table => {
             start => Gamed::State::Bidding->new(
-                {
-                    next => 'end',
-                    min  => 25,
-                } ) } } );
+                {   next  => 'end',
+                    min   => 25,
+                    max   => 50,
+                    valid => sub {1},
+                }
+            ),
+            end => Gamed::State->new( name => 'end' ) }
+    },
+    'start'
+);
 
-like( ref( $game->{state} ), qr/Bidding/, "initial state" );
+is( $game->{state}->name, 'Bidding', "initial state" );
 $n->game( { bid => 30 } );
 broadcast_one($game);
 $s->game( { bid => 'pass' } );
@@ -63,8 +71,12 @@ broadcast($game);
 broadcast_one($game);
 is( ref( $game->{state} ), 'Gamed::State', "State changed" );
 $game->change_state('start');
-$game->_change_state;
-$n->game( { bid => 35 }, { reason => 'Not your turn' }, 'Bidding switches to next player on return' );
+$game->change_state_if_requested;
+$n->game(
+    { bid    => 35 },
+    { reason => 'Not your turn' },
+    'Bidding switches to next player on return'
+);
 $s->game( { bid => 25 } );
 broadcast_one( $game, { bid => 25, player => 1 }, 'Old state info is cleared' );
 

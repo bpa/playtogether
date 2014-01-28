@@ -2,11 +2,23 @@ package Gamed::Test::Game::HiLo;
 
 use parent 'Gamed::Game';
 use Gamed::Const;
+use Moose;
+use namespace::autoclean;
 
-sub build {
+has 'num' => (
+	is => 'rw',
+	isa => 'Int',
+);
+
+has 'guesses' => (
+	is => 'rw',
+	isa => 'Int',
+	default => 0,
+);
+
+sub BUILD {
     my $self = shift;
-    $self->{num}     = int( rand(101) );
-    $self->{guesses} = 0;
+    $self->{num} = int( rand(101) );
 }
 
 sub on_message {
@@ -16,7 +28,7 @@ sub on_message {
     my %resp = ( cmd => 'game', guesses => $self->{guesses} );
     if ( $guess == $self->{num} ) {
         $resp{answer} = 'Correct!';
-        $self->build;
+        $self->{num} = int( rand(101) );
     }
     else {
         $resp{answer} = $guess < $self->{num} ? 'Too low' : 'Too high';
@@ -24,11 +36,9 @@ sub on_message {
     $player->send( \%resp );
 }
 
-sub on_join {
-    my ( $self, $player ) = @_;
+before 'on_join' => sub {
+    my ($self, $player) = @_;
     die GAME_FULL() if keys %{ $self->{players} };
-	$self->{players}{0} = { in_game_id => $player_id, client => $player };
-	$self->broadcast( { cmd => 'join', player => 0 } );
-}
+};
 
-1;
+__PACKAGE__->meta->make_immutable;

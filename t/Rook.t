@@ -4,11 +4,10 @@ use warnings;
 use Test::More;
 use Gamed;
 use Gamed::Test;
-use Data::Dumper;
 
 my ( $rook, $n, $e, $s, $w ) = game( [qw/n e s w/], { game => 'Rook' } );
 ok( defined $rook, "Game created" );
-like( ref( $rook->{state} ), qr/Dealing/ );
+is( $rook->{state}->name, 'Dealing' );
 
 done_testing;
 

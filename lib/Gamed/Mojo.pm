@@ -13,7 +13,6 @@ use Mojo::IOLoop;
 use File::Basename 'dirname';
 use File::Spec::Functions 'catdir';
 use File::Find;
-use Module::Refresh;
 use Gamed;
 use Gamed::DB;
 
@@ -140,12 +139,6 @@ group {
                 } );
         }
     };
-};
-
-get '/refresh/*module' => sub {
-    my $self = shift;
-    Module::Refresh->refresh_module( $self->param('module') );
-    $self->render( text => "OK" );
 };
 
 get '/flushcache' => sub {

@@ -9,12 +9,21 @@ use Data::Dumper;
 
 my ( $game, $n, $e ) = game(
     [qw/n e/],
-    {   bidder => 1,
-        bid    => 135,
-        nest   => bag(qw/1R 14R 13R 12R 11R/),
-        players => { 1 => { cards => bag(qw/5G 6G 7G 8G 9G 5R 6R 7R 8R 9R/) } },
-        state_table => { start => Gamed::Game::Rook::Declaring->new('end'), } } );
-like( ref( $game->{state} ), qr/Declaring/, 'Ready to start test' );
+    {   bidder      => 1,
+        bid         => 135,
+        nest        => bag(qw/1R 14R 13R 12R 11R/),
+        players     => { 1 => { cards => bag(qw/5G 6G 7G 8G 9G 5R 6R 7R 8R 9R/) } },
+        state_table => {
+            start => Gamed::Game::Rook::Declaring->new(
+                name => 'Declaring',
+                next => 'end'
+            ),
+            end => Gamed::State->new( name => 'end' ),
+        }
+    },
+    'start'
+);
+is( $game->{state}->name, 'Declaring', 'Ready to start test' );
 
 $e->got_one( { nest => bag(qw/1R 14R 13R 12R 11R/) }, 'Nest sent to bid winner' );
 is( $game->{players}{1}{cards},

@@ -1,16 +1,17 @@
 package Gamed::State::Dealing;
 
-use strict;
-use warnings;
+use Moose;
 use Scalar::Util 'looks_like_number';
 use Gamed::Object;
 
-use parent 'Gamed::State';
+extends 'Gamed::State';
 
-sub build {
+has '+name' => ( default => 'Dealing' );
+has 'next' => ( is => 'ro', required => 1 );
+has 'deck' => ( is => 'ro', required => 1 );
+
+sub BUILD {
     my ( $self, $opts ) = @_;
-    $self->{next} = $opts->{next};
-    $self->{deck} = $opts->{deck};
     if ( looks_like_number( $opts->{deal} ) ) {
         $self->{deal} = { seat => $opts->{deal} };
     }
@@ -26,12 +27,12 @@ sub on_enter_state {
 }
 
 sub on_message {
-    my ( $self, $game, $client, $msg ) = @_;
-    if ( $client->{in_game_id} eq $self->{dealer} ) {
+    my ( $self, $game, $player, $msg ) = @_;
+    if ( $player->{in_game_id} eq $self->{dealer} ) {
         $game->change_state( $self->{next} );
     }
     else {
-        $client->err('Not your turn');
+        $player->{client}->err('Not your turn');
     }
 }
 
@@ -59,4 +60,4 @@ sub on_leave_state {
     $game->{leader} = $self->{dealer};
 }
 
-1;
+__PACKAGE__->meta->make_immutable;

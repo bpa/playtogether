@@ -25,7 +25,7 @@ sub got_one {
     }
     else {
         $tb->is_eq( scalar @{ $self->{packets} }, 1, "$desc Received response" );
-        print STDERR Dumper $self->{packets} if scalar( @{ $self->{packets} } );
+        print STDERR Dumper $self->{packets} if @{ $self->{packets} };
     }
 }
 
