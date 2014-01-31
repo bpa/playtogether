@@ -10,7 +10,7 @@ my $p3 = Gamed::Test::Player->new('3');
 my $p4 = Gamed::Test::Player->new('4');
 
 subtest 'start 2 player game' => sub {
-    my $risk = $p1->create( 'SpeedRisk', 'test', { board => 'Classic' } );
+    my $risk = $p1->create( 'SpeedRisk', 'test', { board => 'ClassicRisk' } );
     is( $p1->{in_game_id}, 0 );
     is( ~~ keys %{ $risk->{players} }, 1 );
 
@@ -40,7 +40,7 @@ subtest 'start 2 player game' => sub {
 };
 
 subtest 'drop/rejoin and start game' => sub {
-    my $risk = $p1->create( 'SpeedRisk', 'test', { board => 'Classic' } );
+    my $risk = $p1->create( 'SpeedRisk', 'test', { board => 'ClassicRisk' } );
     $p2->join('test');
     $p3->join('test');
     $p1->quit;
@@ -61,7 +61,7 @@ subtest 'drop/rejoin and start game' => sub {
 };
 
 subtest 'dropping unready player can start game' => sub {
-    my $risk = $p1->create( 'SpeedRisk', 'test', { board => 'Classic' } );
+    my $risk = $p1->create( 'SpeedRisk', 'test', { board => 'ClassicRisk' } );
     $p2->join('test');
     $p2->broadcast(
         { cmd => 'ready' },
@@ -83,7 +83,7 @@ subtest 'dropping unready player can start game' => sub {
 };
 
 subtest 'game starts automatically with enough players' => sub {
-    my $risk = $p1->create( 'SpeedRisk', 'test', { board => 'Classic' } );
+    my $risk = $p1->create( 'SpeedRisk', 'test', { board => 'ClassicRisk' } );
     for my $p ( 2 .. 6 ) {
         my $player = Gamed::Test::Player->new($p);
         $player->join('test');
@@ -95,7 +95,7 @@ subtest 'game starts automatically with enough players' => sub {
 };
 
 subtest 'game destroyed when all players leave' => sub {
-    my $risk = $p1->create( 'SpeedRisk', 'test', { board => 'Classic' } );
+    my $risk = $p1->create( 'SpeedRisk', 'test', { board => 'ClassicRisk' } );
     is( ~~ keys %{ $risk->{players} }, 1 );
     $p1->quit;
     is( ~~ @{ $p1->{sock}{packets} }, 0, "No one to talk to" );
@@ -105,7 +105,7 @@ subtest 'game destroyed when all players leave' => sub {
 };
 
 subtest 'get random theme on join' => sub {
-    my $risk = $p1->create( 'SpeedRisk', 'test', { board => 'Classic' } );
+    my $risk = $p1->create( 'SpeedRisk', 'test', { board => 'ClassicRisk' } );
     $p2->join('test');
     $p3->join('test');
     $p4->join('test');
@@ -117,7 +117,7 @@ subtest 'get random theme on join' => sub {
 };
 
 subtest 'set theme' => sub {
-    my $risk = $p1->create( 'SpeedRisk', 'test', { board => 'Classic' } );
+    my $risk = $p1->create( 'SpeedRisk', 'test', { board => 'ClassicRisk' } );
     $p2->join('test');
 
     $risk->state->{themes}{test} = ();

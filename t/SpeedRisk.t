@@ -7,7 +7,7 @@ use Gamed::Test;
 use Data::Dumper;
 
 my ( $risk, $a, $b )
-  = game( [ 'a', 'b' ], { game => 'SpeedRisk', board => 'Classic' } );
+  = game( [ 'a', 'b' ], { game => 'SpeedRisk', board => 'ClassicRisk' } );
 ok( defined $risk, "Game created" );
 is( $risk->{state}->name, 'WaitingForPlayers' );
 

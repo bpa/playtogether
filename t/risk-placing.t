@@ -3,6 +3,7 @@ use warnings;
 use Test::More;
 use Gamed;
 use Gamed::Test;
+use Data::Dumper;
 
 my $p1 = Gamed::Test::Player->new('1');
 my $p2 = Gamed::Test::Player->new('2');
@@ -15,28 +16,34 @@ subtest 'two players' => sub {
     $p1->broadcast( { cmd => 'ready' } );
     $p2->game( { cmd => 'ready' } );
     broadcast( $risk, { cmd => 'ready', player => 1 }, "Got ready" );
-    is( $risk->{state}->name, qr/Placing/ );
+    is( $risk->{state}->name, 'Placing' );
 
-    my %player_armies;
+    my %player_countries;
+    $p1->got( { cmd => 'armies' } );
     $p1->got_one( { cmd => 'state' } );
     my $msg = pop @{ $p2->{sock}{packets} };
     is( ~~ @{ $msg->{countries} }, 42 );
-    for my $c ( 0 .. 42 ) {
-        ok( $msg->{countries}[$c]{owner} < 3, "Owned by player" );
-        is( $msg->{countries}[$c]{armies}, 1, "Country starts with one army" );
-        $player_armies{ $msg->{countries}[$c]{owner} }++;
+    for my $c ( 0 .. 41 ) {
+		#Skip the dummy player, it will have an id of 'd' and more than one army
+        if ( $msg->{countries}[$c]{owner} ne 'd' ) {
+            ok( $msg->{countries}[$c]{owner} < 3, "Owned by player" );
+            is( $msg->{countries}[$c]{armies}, 1, "Country starts with one army" );
+        }
+        $player_countries{ $msg->{countries}[$c]{owner} }++;
     }
-    for my $p ( 0 .. 2 ) {
-        is( $player_armies{$p}, 14, "Each player has 14 armies" );
+    for my $p ( 0, 1, 'd' ) {
+        is( $player_countries{$p}, 14, "Each player has 14 countries" );
         is( $risk->{players}{$p}{countries},
-            14, "Game says each player has 14 armies" );
+            14, "Game says each player has 14 countries" );
     }
     is( $risk->{players}{0}{armies}, 26, "Player 1 has 26 armies to place" );
     is( $risk->{players}{1}{armies}, 26, "Player 2 has 26 armies to place" );
-    is( $risk->{players}{2}{armies}, 26, "Player 3 has 26 armies to place" );
+    is( $risk->{players}{d}{armies}, 0, "Dummy player placed all armies" );
 
     done();
 };
+
+done_testing();
 
 sub done {
     for my $p ( $p1, $p2, $p3, $p4 ) {

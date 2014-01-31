@@ -9,13 +9,7 @@ extends qw/Gamed::Game/;
 
 sub BUILD {
     my ( $self, $args ) = @_;
-    my $board_module = "Gamed::Game::SpeedRisk::" . $args->{board};
-    eval {
-        my $module = $board_module;
-        $module =~ s/::/\//g;
-        require "$module.pm";
-        $self->{board} = $board_module->new();
-    } or die "Unknown Risk board '" . $args->{board} . "' specified";
+	$self->{board} = Gamed::Game::SpeedRisk::Board->new( variant => 'ClassicRisk' );
     $self->{min_players} = 2;
     $self->{max_players} = $self->{board}{players};
     $self->{state_table} = {
