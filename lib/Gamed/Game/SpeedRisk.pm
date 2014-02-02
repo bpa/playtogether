@@ -15,10 +15,8 @@ sub BUILD {
     $self->{state_table} = {
         WAITING_FOR_PLAYERS => Gamed::State::WaitingForPlayers->new('PLACING'),
         PLACING             => Gamed::Game::SpeedRisk::Placing->new(),
-
-        #        PLAYING             => Gamed::Game::SpeedRisk::Playing->new(),
-        #        RUNNING             => Gamed::Game::SpeedRisk::Running->new(),
-        GAME_OVER => Gamed::State->new({ name => 'Game Over' }),
+        PLAYING             => Gamed::Game::SpeedRisk::Playing->new(),
+        GAME_OVER => Gamed::State::GameOver->new(),
     };
     apply_all_roles( $self->{state_table}{WAITING_FOR_PLAYERS}, 'Gamed::Themes' );
     apply_all_roles( $self->{state_table}{PLACING},             'Gamed::Themes' );

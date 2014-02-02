@@ -24,7 +24,8 @@ subtest 'two players' => sub {
     my $msg = pop @{ $p2->{sock}{packets} };
     is( ~~ @{ $msg->{countries} }, 42 );
     for my $c ( 0 .. 41 ) {
-		#Skip the dummy player, it will have an id of 'd' and more than one army
+
+        #Skip the dummy player, it will have an id of 'd' and more than one army
         if ( $msg->{countries}[$c]{owner} ne 'd' ) {
             ok( $msg->{countries}[$c]{owner} < 3, "Owned by player" );
             is( $msg->{countries}[$c]{armies}, 1, "Country starts with one army" );
@@ -38,9 +39,26 @@ subtest 'two players' => sub {
     }
     is( $risk->{players}{0}{armies}, 26, "Player 1 has 26 armies to place" );
     is( $risk->{players}{1}{armies}, 26, "Player 2 has 26 armies to place" );
-    is( $risk->{players}{d}{armies}, 0, "Dummy player placed all armies" );
+    is( $risk->{players}{d}{armies}, 0,  "Dummy player placed all armies" );
 
     done();
+};
+
+subtest 'all ready starts game' => sub {
+    my $risk = $p1->create( 'SpeedRisk', 'test', { board => 'Classic' } );
+    $p2->join('test');
+    $p1->broadcast( { cmd => 'ready' } );
+    $p2->game( { cmd => 'ready' } );
+	broadcast( $risk, { cmd   => 'ready' } );
+    broadcast( $risk, { cmd   => 'armies' } );
+    broadcast( $risk, { state => 'Placing' } );
+    $p1->broadcast( { cmd => 'ready' } );
+    $p2->game( { cmd => 'ready' } );
+	broadcast( $risk, { cmd   => 'ready' } );
+    broadcast( $risk, { state => 'Playing' } );
+    is( $risk->{state}->name, 'Playing' );
+
+	done();
 };
 
 done_testing();

@@ -1,5 +1,6 @@
 package Gamed::Game::SpeedRisk::Placing;
 
+use v5.14;
 use Moose;
 use Gamed::NullPlayer;
 use List::Util qw/shuffle/;
@@ -8,6 +9,7 @@ use namespace::autoclean;
 extends 'Gamed::State';
 
 has '+name' => ( default => 'Placing' );
+has 'next' => ( default => 'PLAYING', is => 'bare' );
 
 use Data::Dumper;
 
@@ -53,6 +55,7 @@ sub on_enter_state {
 
     #Spread out the dummy player's armies so the countries aren't effectively free
     if ( defined $dummy ) {
+		$dummy->{ready} = 1;
         while ( $dummy->{armies} ) {
             for my $c ( @{ $game->{countries} } ) {
                 if ( $c->{owner} eq 'd' ) {
@@ -70,6 +73,15 @@ sub on_enter_state {
 }
 
 sub on_message {
+    my ( $self, $game, $player, $message ) = @_;
+    for ( $message->{cmd} ) {
+        when ('ready') {
+            $player->{ready} = 1;
+            $game->broadcast( { cmd => 'ready', player => $player->{in_game_id} } );
+            $game->change_state( $self->{next} )
+              unless grep { !$_->{ready} } values %{ $game->{players} };
+        }
+    }
 }
 
 sub on_leave_state {
