@@ -33,6 +33,7 @@ subtest 'start 2 player game' => sub {
     #Everyone is finally ready
     $p2->game( { cmd => 'ready' } );
 	broadcast( $risk, { cmd => 'ready', player => 1 } );
+    broadcast( $risk, { cmd => 'armies' } );
     broadcast( $risk, { state => 'Placing' } );
     is( $risk->{state}->name, 'Placing' );
 
@@ -54,6 +55,7 @@ subtest 'drop/rejoin and start game' => sub {
     $p2->broadcast( { cmd => 'ready' } );
     $p3->game( { cmd => 'ready' } );
 	broadcast( $risk, { cmd => 'ready' } );
+    broadcast( $risk, { cmd => 'armies' } );
     broadcast( $risk, { state => 'Placing' } );
     is( $risk->state->name, 'Placing' );
 
@@ -76,6 +78,7 @@ subtest 'dropping unready player can start game' => sub {
     $p3->broadcast( { cmd => 'ready' }, { cmd => 'ready', player => 3 } );
     $p1->quit;
 
+    broadcast( $risk, { cmd => 'armies' } );
     broadcast( $risk, { state => 'Placing' } );
     is( $risk->{state}->name, 'Placing' );
 
@@ -88,6 +91,7 @@ subtest 'game starts automatically with enough players' => sub {
         my $player = Gamed::Test::Player->new($p);
         $player->join('test');
     }
+    broadcast( $risk, { cmd => 'armies' } );
     broadcast( $risk, { state => 'Placing' } );
     is( $risk->{state}->name, 'Placing' );
 
