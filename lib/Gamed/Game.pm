@@ -81,6 +81,7 @@ sub on_join {
 
     $player->{client}     = $client;
     $client->{in_game_id} = $player_id;
+    $player->{client_id}  = $client->{id};
 
     my %players;
     $self->state->on_join( $self, $player );
@@ -116,8 +117,9 @@ Handle a player leaving.
 
 sub on_quit {
     my ( $self, $client ) = @_;
-    $self->state->on_quit( $self, $self->{players}{ $client->{in_game_id} } );
+    delete $self->{players}{ $client->{in_game_id} }{client};
     $self->broadcast( { cmd => 'quit', player => $client->{in_game_id} } );
+    $self->state->on_quit( $self, $self->{players}{ $client->{in_game_id} } );
 }
 
 sub change_state {
@@ -128,7 +130,7 @@ sub change_state {
 sub broadcast {
     my ( $self, $msg ) = @_;
     for my $c ( values %{ $self->{players} } ) {
-        $c->{client}->send($msg) if defined $c;
+        $c->{client}->send($msg) if defined $c->{client};
     }
 }
 

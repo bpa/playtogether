@@ -67,7 +67,7 @@ sub on_message {
 sub on_quit {
     my ( $self, $game, $player ) = @_;
     delete $game->{players}{ $player->{in_game_id} };
-    delete $game->{ids}{ $player->{client}{id} };
+    delete $game->{ids}{ $player->{client_id} };
 
     if (  !defined( $game->{min_players} )
         || keys %{ $game->{players} } >= $game->{min_players} )

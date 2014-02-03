@@ -45,23 +45,68 @@ subtest 'two players' => sub {
 };
 
 subtest 'all ready starts game' => sub {
-    my $risk = $p1->create( 'SpeedRisk', 'test', { board => 'Classic' } );
-    $p2->join('test');
+    my $risk = placing_with_3();
+
     $p1->broadcast( { cmd => 'ready' } );
-    $p2->game( { cmd => 'ready' } );
-	broadcast( $risk, { cmd   => 'ready' } );
-    broadcast( $risk, { cmd   => 'armies' } );
-    broadcast( $risk, { state => 'Placing' } );
-    $p1->broadcast( { cmd => 'ready' } );
-    $p2->game( { cmd => 'ready' } );
-	broadcast( $risk, { cmd   => 'ready' } );
+    $p2->broadcast( { cmd => 'ready' } );
+    $p3->game( { cmd => 'ready' } );
+    broadcast( $risk, { cmd   => 'ready' } );
     broadcast( $risk, { state => 'Playing' } );
     is( $risk->{state}->name, 'Playing' );
 
-	done();
+    done();
+};
+
+subtest 'can start with dropped player' => sub {
+    my $risk = placing_with_3();
+
+    $p1->quit();
+    $p2->broadcast( { cmd => 'ready' } );
+    $p3->game( { cmd => 'ready' } );
+    broadcast( $risk, { cmd   => 'ready' } );
+    broadcast( $risk, { state => 'Playing' } );
+    is( $risk->{state}->name, 'Playing' );
+
+    done();
+};
+
+subtest 'drop unready player starts game' => sub {
+    my $risk = placing_with_3();
+
+    $p2->broadcast( { cmd => 'ready' } );
+    $p3->broadcast( { cmd => 'ready' } );
+    $p1->quit();
+
+    broadcast( $risk, { state => 'Playing' } );
+    is( $risk->{state}->name, 'Playing' );
+
+    done();
+};
+
+subtest 'last player wins by default' => sub {
+    my $risk = placing_with_3();
+    $p1->quit();
+    $p2->quit();
+
+    broadcast( $risk, { cmd => 'victory', player => 2 } );
+    is( $risk->{state}->name, 'GameOver' );
 };
 
 done_testing();
+
+sub placing_with_3 {
+    my $risk = $p1->create( 'SpeedRisk', 'test', { board => 'Classic' } );
+    $p2->join('test');
+    $p3->join('test');
+    $p1->broadcast( { cmd => 'ready' } );
+    $p2->broadcast( { cmd => 'ready' } );
+    $p3->game( { cmd => 'ready' } );
+    broadcast( $risk, { cmd   => 'ready' } );
+    broadcast( $risk, { cmd   => 'armies' } );
+    broadcast( $risk, { state => 'Placing' } );
+    is( $risk->{state}->name, 'Placing' );
+    return $risk;
+}
 
 sub done {
     for my $p ( $p1, $p2, $p3, $p4 ) {

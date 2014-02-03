@@ -9,14 +9,14 @@ extends qw/Gamed::Game/;
 
 sub BUILD {
     my ( $self, $args ) = @_;
-	$self->{board} = Gamed::Game::SpeedRisk::Board->new( variant => 'ClassicRisk' );
+    $self->{board} = Gamed::Game::SpeedRisk::Board->new( variant => 'ClassicRisk' );
     $self->{min_players} = 2;
     $self->{max_players} = $self->{board}{players};
     $self->{state_table} = {
         WAITING_FOR_PLAYERS => Gamed::State::WaitingForPlayers->new('PLACING'),
         PLACING             => Gamed::Game::SpeedRisk::Placing->new(),
         PLAYING             => Gamed::Game::SpeedRisk::Playing->new(),
-        GAME_OVER => Gamed::State::GameOver->new(),
+        GAME_OVER           => Gamed::State::GameOver->new(),
     };
     apply_all_roles( $self->{state_table}{WAITING_FOR_PLAYERS}, 'Gamed::Themes' );
     apply_all_roles( $self->{state_table}{PLACING},             'Gamed::Themes' );

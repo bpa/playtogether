@@ -11,8 +11,6 @@ extends 'Gamed::State';
 has '+name' => ( default => 'Placing' );
 has 'next' => ( default => 'PLAYING', is => 'bare' );
 
-use Data::Dumper;
-
 sub on_enter_state {
     my ( $self, $game ) = @_;
 
@@ -29,8 +27,8 @@ sub on_enter_state {
     $armies++ unless $countries % @players == 0;
 
     for my $p (@players) {
-        $p->{ready}          = 0;
-        $p->{armies}         = $armies;
+        $p->{ready}     = 0;
+        $p->{armies}    = $armies;
         $p->{countries} = 0;
     }
 
@@ -55,7 +53,7 @@ sub on_enter_state {
 
     #Spread out the dummy player's armies so the countries aren't effectively free
     if ( defined $dummy ) {
-		$dummy->{ready} = 1;
+        $dummy->{ready} = 1;
         while ( $dummy->{armies} ) {
             for my $c ( @{ $game->{countries} } ) {
                 if ( $c->{owner} eq 'd' ) {
@@ -84,7 +82,18 @@ sub on_message {
     }
 }
 
-sub on_leave_state {
+sub on_quit {
+    my ( $self, $game, $player ) = @_;
+    $player->{ready} = 1;
+    my @remaining = grep { exists $_->{client} } values %{ $game->{players} };
+    if ( @remaining == 1 ) {
+        $game->broadcast(
+            { cmd => 'victory', player => $remaining[0]->{in_game_id} } );
+        $game->change_state('GAME_OVER');
+        return;
+    }
+    $game->change_state( $self->{next} )
+      unless grep { !$_->{ready} } values %{ $game->{players} };
 }
 
 __PACKAGE__->meta->make_immutable;
