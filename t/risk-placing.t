@@ -90,6 +90,48 @@ subtest 'last player wins by default' => sub {
 
     broadcast( $risk, { cmd => 'victory', player => 2 } );
     is( $risk->{state}->name, 'GameOver' );
+
+    done();
+};
+
+subtest 'place' => sub {
+    my $risk = placing_with_3();
+
+    $risk->{countries}[0]{owner} = 0;
+    $risk->{countries}[1]{owner} = 1;
+
+    $p1->broadcast( { cmd => 'place', country => 0, armies => 0 },
+        { cmd => 'country', country => { armies => 1, owner => 0 } } );
+    is( $risk->{players}{0}{armies}, 26 );
+
+    $p1->broadcast( { cmd => 'place', country => 0 },
+        { cmd => 'country', country => { armies => 1, owner => 0 } } );
+    is( $risk->{players}{0}{armies}, 26 );
+
+    $p1->broadcast( { cmd => 'place', country => 0, armies => 1 },
+        { cmd => 'country', country => { armies => 2, owner => 0 } } );
+    is( $risk->{players}{0}{armies}, 25 );
+
+    $p1->broadcast( { cmd => 'place', country => 0, armies => 5 },
+        { cmd => 'country', country => { armies => 7, owner => 0 } } );
+    is( $risk->{players}{0}{armies}, 20 );
+
+    $p1->game(
+        { cmd => 'place', country => 0, armies => -1 },
+        { cmd => 'error', reason  => 'Not enough armies' } );
+
+    $p1->game(
+        { cmd => 'place', country => 0, armies => 21 },
+        { cmd => 'error', reason  => 'Not enough armies' } );
+
+    $p1->game(
+        { cmd => 'place', country => 1, armies => 1 },
+        { cmd => 'error', reason  => 'Not owner' } );
+
+    $p1->game( { cmd => 'place', armies => 1 },
+        { cmd => 'error', reason => 'No country specified' } );
+
+    done();
 };
 
 done_testing();

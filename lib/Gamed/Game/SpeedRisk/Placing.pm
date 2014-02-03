@@ -4,6 +4,7 @@ use v5.14;
 use Moose;
 use Gamed::NullPlayer;
 use List::Util qw/shuffle/;
+use Scalar::Util qw/looks_like_number/;
 use namespace::autoclean;
 
 extends 'Gamed::State';
@@ -78,6 +79,31 @@ sub on_message {
             $game->broadcast( { cmd => 'ready', player => $player->{in_game_id} } );
             $game->change_state( $self->{next} )
               unless grep { !$_->{ready} } values %{ $game->{players} };
+        }
+        when ('place') {
+            $player->{client}->err("No country specified") && return
+              unless looks_like_number( $message->{country} );
+            my $c = $message->{country};
+            $player->{client}->err("Invalid country") && return
+              unless 0 <= $c && $c <= $#{ $game->{countries} };
+
+            $player->{client}->err("Not owner") && return
+              unless $game->{countries}[$c]{owner} eq $player->{in_game_id};
+
+            my $armies = $message->{armies} || 0;
+            $player->{client}->err("Invalid armies") && return
+              unless looks_like_number($armies);
+            $player->{client}->err("Not enough armies") && return
+              unless 0 <= $armies && $armies <= $player->{armies};
+
+            $game->{countries}[$c]{armies} += $armies;
+            $player->{armies} -= $armies;
+
+            $game->broadcast(
+                { cmd => 'country', country => $game->{countries}[$c] } );
+        }
+        default {
+            $player->{client}->err('Invalid command');
         }
     }
 }
