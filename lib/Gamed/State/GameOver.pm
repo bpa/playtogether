@@ -14,7 +14,7 @@ sub on_enter_state {
 
 sub on_message {
     my ( $self, $game, $player, $msg ) = @_;
-	$player->err('Invalid command');
+	$player->{client}->err('Invalid command');
 }
 
 __PACKAGE__->meta->make_immutable;
