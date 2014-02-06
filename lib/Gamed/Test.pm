@@ -22,7 +22,7 @@ sub client   { Gamed::Test::Player->new(shift) }
 
 sub game {
     local $Test::Builder::Level = $Test::Builder::Level + 1;
-    my ( $players, $opts, $start_state ) = @_;
+    my ( $players, $opts, $post_join_state, $pre_join_state ) = @_;
     $opts->{game} ||= 'Test';
     $opts->{name} ||= 'test';
     Gamed::on_create($opts);
@@ -32,6 +32,12 @@ sub game {
     while ( my ( $k, $v ) = each %$opts ) {
         $instance->{$k} = $v;
     }
+
+    if ($pre_join_state) {
+        $instance->change_state($pre_join_state);
+    }
+
+    $instance->change_state_if_requested;
     for my $i ( 0 .. $#{$players} ) {
         my $player = $players->[$i];
         my $c      = client($player);
@@ -48,8 +54,9 @@ sub game {
             $instance->{players}{$p}{$k} = $v;
         }
     }
-    if ($start_state) {
-        $instance->change_state('start');
+
+    if ($post_join_state) {
+        $instance->change_state($post_join_state);
     }
     $instance->change_state_if_requested;
     return $instance, @connections;

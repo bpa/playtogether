@@ -8,10 +8,9 @@ extends qw/Gamed::Game/;
 sub BUILD {
     my $self = shift;
     $self->{points}      = [ 0, 0 ];
-    $self->{min_players} = 1;
-    $self->{max_players} = 4;
+    $self->{seats}       = [qw/n e s w/];
     $self->{state_table} = {
-        WAITING_FOR_PLAYERS => Gamed::State::WaitingForPlayers->new('DEALING'),
+        WAITING_FOR_PLAYERS => Gamed::State::WaitingForPlayers->new(next => 'DEALING'),
         DEALING             => Gamed::State::Dealing->new(
             next => 'BIDDING',
             deck => Gamed::Object::Deck::Rook->new('partnership'),
@@ -27,10 +26,8 @@ sub BUILD {
             name => 'Declaring',
             next => 'PLAYING'
         ),
-        PLAYING => Gamed::State::PlayTricks->new(
-            logic => Gamed::Game::Rook::PlayLogic->new
-        ),
-        GAME_OVER => Gamed::State->new( name => 'Game Over' ),
+        PLAYING   => Gamed::State::PlayTricks->new( logic => Gamed::Game::Rook::PlayLogic->new ),
+        GAME_OVER => Gamed::State->new( name              => 'Game Over' ),
     };
     $self->change_state('WAITING_FOR_PLAYERS');
 }

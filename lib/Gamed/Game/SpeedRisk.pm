@@ -13,7 +13,7 @@ sub BUILD {
     $self->{min_players} = 2;
     $self->{max_players} = $self->{board}{players};
     $self->{state_table} = {
-        WAITING_FOR_PLAYERS => Gamed::State::WaitingForPlayers->new('PLACING'),
+        WAITING_FOR_PLAYERS => Gamed::State::WaitingForPlayers->new( next => 'PLACING'),
         PLACING             => Gamed::Game::SpeedRisk::Placing->new(),
         PLAYING             => Gamed::Game::SpeedRisk::Playing->new(),
         GAME_OVER           => Gamed::State::GameOver->new(),
