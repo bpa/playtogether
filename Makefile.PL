@@ -13,7 +13,7 @@ WriteMakefile(
         DBI                    => 0,
         'DBD::SQLite'          => 0,
         EV                     => 0,
-        JSON                   => 0,
+        'JSON::Any'            => 0,
 		'List::Util'           => 0,
         'Mojolicious::Lite'    => 0,
         'Moose'                => 0,
