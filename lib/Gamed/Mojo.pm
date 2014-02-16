@@ -20,6 +20,13 @@ my $sessions = Mojolicious::Sessions->new;
 $sessions->cookie_name('gamed');
 $sessions->default_expiration(86400);
 
+sub startup {
+	my $self = shift;
+	$self->home->parse( catdir( dirname(__FILE__), '..', 'Gamed' ), 'Gamed' );
+	$self->static->paths->[0]   = $self->home->rel_dir('public');
+	$self->renderer->paths->[0] = $self->home->rel_dir('templates');
+}
+
 post '/' => sub {
     my $self = shift;
 	my $user = $self->login;
@@ -147,10 +154,7 @@ get '/flushcache' => sub {
     $self->render( text => "OK" );
 };
 
-my $daemon = Mojo::Server::Daemon->new( app => app, listen => ['http://*:8080'] );
-$daemon->app->home->parse( catdir( dirname(__FILE__), '..', 'Gamed' ), 'Gamed' );
-$daemon->app->static->paths->[0]   = $daemon->app->home->rel_dir('public');
-$daemon->app->renderer->paths->[0] = $daemon->app->home->rel_dir('templates');
-$daemon->start;
+my $daemon = Mojo::Server::Daemon->new( app => app, listen => ['http://*:8088'] );
+$daemon->run;
 
 AE::cv->recv;
