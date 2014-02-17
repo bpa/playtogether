@@ -20,8 +20,8 @@ sub got_one {
     $desc ||= 'gotOne';
 
     if ( @{ $self->{packets} } == 1 ) {
-    	local $Test::Builder::Level = $Test::Builder::Level + 1;
-		$self->got($hash, $desc);
+        local $Test::Builder::Level = $Test::Builder::Level + 1;
+        $self->got( $hash, $desc );
     }
     else {
         $tb->is_eq( scalar @{ $self->{packets} }, 1, "$desc Received response" );
@@ -41,10 +41,12 @@ sub got {
             }
         }
         elsif ( ref($v) eq 'ARRAY' ) {
-            if ( Dumper($v) ne Dumper($msg->{$k}) ) {
-                $pass = 0;
-                last;
-            }
+			my ($exp) = $tb->explain($msg->{$k});
+			my ($want) = $tb->explain($v);
+			if ( $exp ne $want ) {
+				$pass = 0;
+				last;
+			}
         }
         else {
             if ( !exists($msg->{$k}) || $msg->{$k} ne $v ) {
@@ -53,7 +55,8 @@ sub got {
             }
         }
     }
-    $pass ? $tb->ok( 1, $desc ) : $tb->is_eq( Dumper($msg), Dumper($hash), $desc );
+    $pass ? $tb->ok( 1, $desc ) : $tb->is_eq( $tb->explain($msg),
+        $tb->explain($hash), $desc );
 }
 
 1;
