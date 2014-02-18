@@ -2,7 +2,7 @@ package Gamed::Game::SpeedRisk;
 
 use Moose;
 use Moose::Util qw( apply_all_roles );
-use Gamed::Themes;
+use Gamed::Game::SpeedRisk::Themes;
 use namespace::autoclean;
 
 extends qw/Gamed::Game/;
@@ -19,8 +19,12 @@ sub BUILD {
         PLAYING             => Gamed::Game::SpeedRisk::Playing->new(),
         GAME_OVER           => Gamed::State::GameOver->new(),
     };
-    apply_all_roles( $self->{state_table}{WAITING_FOR_PLAYERS}, 'Gamed::Themes' );
-    apply_all_roles( $self->{state_table}{PLACING},             'Gamed::Themes' );
+    apply_all_roles(
+        $self->{state_table}{WAITING_FOR_PLAYERS},
+        'Gamed::Game::SpeedRisk::Themes'
+    );
+    apply_all_roles( $self->{state_table}{PLACING},
+        'Gamed::Game::SpeedRisk::Themes' );
     $self->change_state('WAITING_FOR_PLAYERS');
 }
 

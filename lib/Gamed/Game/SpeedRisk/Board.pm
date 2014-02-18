@@ -3,6 +3,7 @@ package Gamed::Game::SpeedRisk::Board;
 use Moose;
 use JSON::Any;
 use File::Slurp;
+use File::Spec::Functions 'catdir';
 use namespace::clean;
 
 has 'variant' => ( is => 'ro', required => 1 );
@@ -10,7 +11,8 @@ my $json = JSON::Any->new;
 
 sub BUILD {
     my $self = shift;
-    my $text = read_file( "$Gamed::resources/" . $self->variant . "Risk/board.json" );
+    my $text = read_file(
+        catdir( $Gamed::public, "g", "SpeedRisk", $self->variant . ".json" ) );
     die "No board named " . $self->variant . " known" unless $text;
     my $board = $json->decode($text);
     while ( my ( $k, $v ) = each %$board ) {

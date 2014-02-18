@@ -5,6 +5,8 @@ use warnings;
 
 use AnyEvent;
 use EV;
+use File::Basename 'dirname';
+use File::Spec::Functions 'catdir';
 use Gamed::Const;
 use Gamed::Game;
 use Gamed::Player;
@@ -12,8 +14,7 @@ use JSON;
 use Module::Pluggable::Object;
 use FindBin;
 
-our $resources = "$FindBin::Bin/../resources";
-
+our $public = catdir( dirname(__FILE__), 'Gamed', 'public' );
 my $json = JSON->new->convert_blessed;
 
 our %games;

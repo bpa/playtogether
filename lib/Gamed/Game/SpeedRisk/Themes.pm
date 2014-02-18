@@ -1,8 +1,9 @@
-package Gamed::Themes;
+package Gamed::Game::SpeedRisk::Themes;
 
 use Moose::Role;
 use File::Find;
 use File::Basename;
+use File::Spec::Functions 'catdir';
 use namespace::autoclean;
 
 has 'themes' => (
@@ -55,7 +56,7 @@ sub load_themes {
         if ( $_ eq 'theme.properties' ) {
             $themes{ basename($File::Find::dir) } = ();
         }
-    }, "$Gamed::resources/themes";
+    }, catdir($Gamed::public, "g", "SpeedRisk", "themes");
     return \%themes;
 }
 

@@ -1,4 +1,0 @@
-<div id="header"><%= $self->session('name') %></div>
-% if (defined $self->stash('error')) {
-<div class="error"><%= $self->stash('error') =%></div>
-% }
