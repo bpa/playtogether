@@ -100,20 +100,22 @@ subtest 'place' => sub {
     $risk->{countries}[0]{owner} = 0;
     $risk->{countries}[1]{owner} = 1;
 
-    $p1->broadcast( { cmd => 'place', country => 0, armies => 0 },
-        { cmd => 'country', country => { armies => 1, owner => 0 } } );
-    is( $risk->{players}{0}{armies}, 26 );
+    $p1->game(
+        { cmd => 'place', country => 0, armies => 0 },
+        { cmd => 'error', reason  => 'Not enough armies' } );
 
-    $p1->broadcast( { cmd => 'place', country => 0 },
-        { cmd => 'country', country => { armies => 1, owner => 0 } } );
-    is( $risk->{players}{0}{armies}, 26 );
+    $p1->game(
+		{ cmd => 'place', country => 0 },
+        { cmd => 'error', reason  => 'Not enough armies' } );
 
-    $p1->broadcast( { cmd => 'place', country => 0, armies => 1 },
-        { cmd => 'country', country => { armies => 2, owner => 0 } } );
+    $p1->game( { cmd => 'place', country => 0, armies => 1 } );
+    $p1->got( { cmd => 'armies', armies => 25 } );
+    broadcast( $risk, { cmd => 'country', country => { armies => 2, owner => 0 } } );
     is( $risk->{players}{0}{armies}, 25 );
 
-    $p1->broadcast( { cmd => 'place', country => 0, armies => 5 },
-        { cmd => 'country', country => { armies => 7, owner => 0 } } );
+    $p1->game( { cmd => 'place', country => 0, armies => 5 } );
+    $p1->got( { cmd => 'armies', armies => 20 } );
+    broadcast( $risk, { cmd => 'country', country => { armies => 7, owner => 0 } } );
     is( $risk->{players}{0}{armies}, 20 );
 
     $p1->game(

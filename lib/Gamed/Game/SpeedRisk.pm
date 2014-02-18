@@ -9,7 +9,8 @@ extends qw/Gamed::Game/;
 
 sub BUILD {
     my ( $self, $args ) = @_;
-    $self->{board} = Gamed::Game::SpeedRisk::Board->new( variant => 'ClassicRisk' );
+    $self->{board} = Gamed::Game::SpeedRisk::Board->new( variant => 'Classic' );
+    $self->{countries} = $self->{board}{territories};
     $self->{min_players} = 2;
     $self->{max_players} = $self->{board}{players};
     $self->{state_table} = {

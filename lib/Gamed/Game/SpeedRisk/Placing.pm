@@ -87,20 +87,26 @@ sub on_message {
             $player->{client}->err("Invalid country") && return
               unless 0 <= $c && $c <= $#{ $game->{countries} };
 
+            my $country = $game->{countries}[$c];
             $player->{client}->err("Not owner") && return
-              unless $game->{countries}[$c]{owner} eq $player->{in_game_id};
+              unless $country->{owner} eq $player->{in_game_id};
 
             my $armies = $message->{armies} || 0;
             $player->{client}->err("Invalid armies") && return
               unless looks_like_number($armies);
             $player->{client}->err("Not enough armies") && return
-              unless 0 <= $armies && $armies <= $player->{armies};
+              unless 0 < $armies && $armies <= $player->{armies};
 
-            $game->{countries}[$c]{armies} += $armies;
+            $country->{armies} += $armies;
             $player->{armies} -= $armies;
 
+            $player->{client}
+              ->send( { cmd => 'armies', armies => $player->{armies} } );
             $game->broadcast(
-                { cmd => 'country', country => $game->{countries}[$c] } );
+                {   cmd => 'country',
+                    country =>
+                      { armies => $country->{armies}, owner => $country->{owner} } }
+            );
         }
         default {
             $player->{client}->err('Invalid command');
