@@ -1,0 +1,89 @@
+#! /usr/bin/env perl
+
+=head1 NAME
+
+pack - Utility to create sprite sheets
+
+=head1 SYNOPSIS
+
+pack sheet *.png *.jpg 
+
+=head1 INSTALLATION
+
+One of the following will work to get dependencies:
+
+=over 4
+
+=item apt-get
+
+sudo apt-get install perlmagick
+
+=item CPAN
+
+cpan Image::Magic
+
+=back
+
+=head1 AUTHOR
+
+Bruce Armstrong bruce@fortressofgeekdom.org
+
+=cut
+
+use strict;
+use warnings;
+use Image::Magick;
+
+sub pack_sheet {
+    my @images = sort { $a->Get('height') <=> $b->Get('height') } read_images();
+    my $size;
+    for my $i (@images) {
+        $size += $i->Get('height') * $i->Get('width');
+    }
+
+    my $width = 16;
+    while ( $width**2 < $size ) {
+        $width *= 2;
+    }
+
+    while (1) {
+        eval {
+            pack_images( $width, \@images );
+            last;
+        };
+        $width *= 2;
+    }
+}
+
+sub read_images {
+    my @images;
+    for my $file (@ARGV) {
+        eval {
+            my $image = Image::Magick->new;
+            $image->Read($file);
+            push @images, $image;
+        };
+        print "Error: $@\n" if $@;
+    }
+}
+
+sub pack_images {
+    my ( $width, $images ) = @_;
+    my @space = [ { h => $width, w => $width, f => 0 } ];
+    for my $i (@$images) {
+        for my $y (0 .. $#space) {
+			for my $x (0 .. $#$row) {
+				goto FOUND if place($i, $x, $y, \@space));
+			}
+		}
+		die "Can't place image\n";
+		FOUND:
+    }
+}
+
+sub place {
+	my ($image, $x, $y, $space) = @_;
+	
+}
+
+pack_sheet();
