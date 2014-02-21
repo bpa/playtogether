@@ -69,11 +69,11 @@ sub read_images {
 
 sub pack_images {
     my ( $width, $images ) = @_;
-    my @space = [ { h => $width, w => $width, f => 0 } ];
+    my @space = [ { h => $width, w => $width, full => 0 } ];
     for my $i (@$images) {
         for my $y (0 .. $#space) {
-			for my $x (0 .. $#$row) {
-				goto FOUND if place($i, $x, $y, \@space));
+			for my $x (0 .. $#{ $space[$y] }) {
+				goto FOUND if place($i, $x, $y, \@space);
 			}
 		}
 		die "Can't place image\n";
@@ -83,7 +83,31 @@ sub pack_images {
 
 sub place {
 	my ($image, $x, $y, $space) = @_;
-	
+	my ($dx, $dy) = ($x, $y);
+	my ($w, $h) = $image->Get('width', 'height');
+	my ($aw, $ah) = 0, 0;
+	while ($aw < $w) {
+		my $cell = $space->[$dx][$dy++];
+		return () if $cell->{full};
+		$w += $cell->{w};
+	}
+	while ($ah < $h) {
+		my $cell = $space->[$dx++][$dy];
+		return () if $cell->{full};
+		$w += $cell->{h};
+	}
+	for my $row_id ( $y .. --$dy ) {
+		my $row = $space->[$row_id];
+		for my $col_id ( $x .. --$dx ) {
+			my $cell = $row->[$col_id];
+			$cell->{full} = 1;
+		}
+	}
+	if ($aw > $w) {
+		for my $row (@$space) {
+		
+		}
+	}
 }
 
 pack_sheet();
