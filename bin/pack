@@ -33,12 +33,14 @@ Bruce Armstrong bruce@fortressofgeekdom.org
 use strict;
 use warnings;
 use Image::Magick;
+use Data::Dumper;
 
 sub pack_sheet {
-    my @images = sort { $a->Get('height') <=> $b->Get('height') } read_images();
+	my $sheet = shift @ARGV;
+    my @images = sort { $a->{h} <=> $b->{h} } read_images();
     my $size;
     for my $i (@images) {
-        $size += $i->Get('height') * $i->Get('width');
+        $size += $i->{h} * $i->{w};
     }
 
     my $width = 16;
@@ -53,6 +55,7 @@ sub pack_sheet {
         };
         $width *= 2;
     }
+	print Dumper [$width, \@images];
 }
 
 sub read_images {
@@ -61,15 +64,29 @@ sub read_images {
         eval {
             my $image = Image::Magick->new;
             $image->Read($file);
-            push @images, $image;
+            push @images,
+              { filename         => $file,
+                rotated          => 'false',
+                trimmed          => 'false',
+                spriteSourceSize => {
+                    x => 0,
+                    y => 0,
+                    w => $image->Get('width'),
+                    h => $image->Get('height'),
+                },
+                sourceSize =>
+                  { w => $image->Get('width'), h => $image->Get('height'), },
+                #image => $image,
+              };
         };
         print "Error: $@\n" if $@;
     }
+    return @images;
 }
 
 sub pack_images {
     my ( $width, $images ) = @_;
-    my @space = [ { h => $width, w => $width, full => 0 } ];
+    my @space = [ { h => $width, w => $width, full => 0, x => 0, y => 0 } ];
     for my $i (@$images) {
         for my $y (0 .. $#space) {
 			for my $x (0 .. $#{ $space[$y] }) {
@@ -84,8 +101,10 @@ sub pack_images {
 sub place {
 	my ($image, $x, $y, $space) = @_;
 	my ($dx, $dy) = ($x, $y);
-	my ($w, $h) = $image->Get('width', 'height');
+	my ($w, $h) = $image->{sourceSize}{w}, $image->{sourceSize}{h};
 	my ($aw, $ah) = 0, 0;
+
+	#Check to see if cells are used
 	while ($aw < $w) {
 		my $cell = $space->[$dx][$dy++];
 		return () if $cell->{full};
@@ -96,6 +115,10 @@ sub place {
 		return () if $cell->{full};
 		$w += $cell->{h};
 	}
+
+	#Space is available, mark used
+	my $cell = $space->[$x][$y];
+	$image->{frame} = { x => $cell->{x}, y => $cell->{y}, w => $w, h => $h };
 	for my $row_id ( $y .. --$dy ) {
 		my $row = $space->[$row_id];
 		for my $col_id ( $x .. --$dx ) {
@@ -103,10 +126,38 @@ sub place {
 			$cell->{full} = 1;
 		}
 	}
-	if ($aw > $w) {
+
+	#Split cells if image doesn't fill space
+	if ( $aw > $w ) {
+		my $diff = $aw - $w;
 		for my $row (@$space) {
-		
+			my $c = $row->{$dx};
+			$c->{w} -= $diff;
+			splice(
+				@$row, $dx + 1, 0,
+				{   w    => $diff,
+					h    => $c->{h},
+					full => 0,
+					x    => $c->{x} + $c->{w},
+					y    => $c->{y} } );
 		}
+	}
+
+	if ( $ah > $h ) {
+		my $diff = $ah - $h;
+		my $row  = $space->{$dy};
+		my @new_row;
+		for my $c (@$row) {
+			$row->{h}    = $row->{h} - $diff;
+			$row->{full} = 0;
+			push @new_row,
+			  { w    => $c->{w},
+				h    => $diff,
+				full => 0,
+				x    => $c->{x},
+				y    => $c->{y} + $c->{h} };
+		}
+		splice( @$space, $dy + 1, 0, \@new_row );
 	}
 }
 
