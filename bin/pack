@@ -33,14 +33,16 @@ Bruce Armstrong bruce@fortressofgeekdom.org
 use strict;
 use warnings;
 use Image::Magick;
+use JSON::Any;
+use File::Slurp;
 use Data::Dumper;
 
 sub pack_sheet {
 	my $sheet = shift @ARGV;
-    my @images = sort { $a->{h} <=> $b->{h} } read_images();
+    my @images = sort { $b->{sourceSize}{h} <=> $a->{sourceSize}{h} } read_images();
     my $size;
     for my $i (@images) {
-        $size += $i->{h} * $i->{w};
+        $size += $i->{sourceSize}{h} * $i->{sourceSize}{w};
     }
 
     my $width = 16;
@@ -51,11 +53,15 @@ sub pack_sheet {
     while (1) {
         eval {
             pack_images( $width, \@images );
-            last;
         };
+		last unless $@;
         $width *= 2;
     }
-	print Dumper [$width, \@images];
+	
+	write_file( "$sheet.json", JSON::Any->objToJson(\@images));
+	write_sheet( "$sheet.png", \@images);
+	print "$width x $width\n";
+	print Dumper \@images;
 }
 
 sub read_images {
@@ -66,14 +72,14 @@ sub read_images {
             $image->Read($file);
             push @images,
               { filename         => $file,
-                rotated          => 'false',
-                trimmed          => 'false',
-                spriteSourceSize => {
-                    x => 0,
-                    y => 0,
-                    w => $image->Get('width'),
-                    h => $image->Get('height'),
-                },
+#                rotated          => 'false',
+#                trimmed          => 'false',
+#                spriteSourceSize => {
+#                    x => 0,
+#                    y => 0,
+#                    w => $image->Get('width'),
+#                    h => $image->Get('height'),
+#                },
                 sourceSize =>
                   { w => $image->Get('width'), h => $image->Get('height'), },
                 #image => $image,
@@ -101,64 +107,76 @@ sub pack_images {
 sub place {
 	my ($image, $x, $y, $space) = @_;
 	my ($dx, $dy) = ($x, $y);
-	my ($w, $h) = $image->{sourceSize}{w}, $image->{sourceSize}{h};
-	my ($aw, $ah) = 0, 0;
+	my ($w, $h) = ($image->{sourceSize}{w}, $image->{sourceSize}{h});
+	my ($aw, $ah) = (0, 0);
 
 	#Check to see if cells are used
-	while ($aw < $w) {
-		my $cell = $space->[$dx][$dy++];
-		return () if $cell->{full};
-		$w += $cell->{w};
+	while (1) {
+		return if $dx > $#$space;
+		my $cell = $space->[$dx][$dy];
+		return if $cell->{full};
+		$aw += $cell->{w};
+		last if $aw >= $w;
+		$dx++;
 	}
-	while ($ah < $h) {
-		my $cell = $space->[$dx++][$dy];
-		return () if $cell->{full};
-		$w += $cell->{h};
+	while (1) {
+		return if $dy > $#{$space->[$x]};
+		my $cell = $space->[$x][$dy];
+		return if $cell->{full};
+		$ah += $cell->{h};
+		last if $ah >= $h;
+		$dy++;
 	}
 
-	#Space is available, mark used
+	#Split cells if image doesn't fill space
+	if ( $ah > $h ) {
+		my $diff = $ah - $h;
+		for my $row (@$space) {
+			my $c = $row->[$dy];
+			$c->{h} -= $diff;
+			splice(
+				@$row, $dy + 1, 0,
+				{   w    => $c->{w},
+					h    => $diff,
+					full => $c->{full},
+					x    => $c->{x},
+					y    => $c->{y} + $c->{h}} );
+		}
+	}
+
+	if ( $aw > $w ) {
+		my $diff = $aw - $w;
+		my $row  = $space->[$dx];
+		my @new_row;
+		for my $c (@$row) {
+			$c->{w} = $c->{w} - $diff;
+			push @new_row,
+			  { w    => $diff,
+				h    => $c->{h},
+				full => $c->{full},
+				x    => $c->{x} + $c->{w},
+				y    => $c->{y}};
+		}
+		splice( @$space, $dx + 1, 0, \@new_row );
+	}
+
+	#Mark space as used
 	my $cell = $space->[$x][$y];
 	$image->{frame} = { x => $cell->{x}, y => $cell->{y}, w => $w, h => $h };
-	for my $row_id ( $y .. --$dy ) {
+	for my $row_id ( $y .. $dy ) {
 		my $row = $space->[$row_id];
-		for my $col_id ( $x .. --$dx ) {
+		for my $col_id ( $x .. $dx ) {
 			my $cell = $row->[$col_id];
 			$cell->{full} = 1;
 		}
 	}
 
-	#Split cells if image doesn't fill space
-	if ( $aw > $w ) {
-		my $diff = $aw - $w;
-		for my $row (@$space) {
-			my $c = $row->{$dx};
-			$c->{w} -= $diff;
-			splice(
-				@$row, $dx + 1, 0,
-				{   w    => $diff,
-					h    => $c->{h},
-					full => 0,
-					x    => $c->{x} + $c->{w},
-					y    => $c->{y} } );
-		}
-	}
+	return 1;
+}
 
-	if ( $ah > $h ) {
-		my $diff = $ah - $h;
-		my $row  = $space->{$dy};
-		my @new_row;
-		for my $c (@$row) {
-			$row->{h}    = $row->{h} - $diff;
-			$row->{full} = 0;
-			push @new_row,
-			  { w    => $c->{w},
-				h    => $diff,
-				full => 0,
-				x    => $c->{x},
-				y    => $c->{y} + $c->{h} };
-		}
-		splice( @$space, $dy + 1, 0, \@new_row );
-	}
+sub write_sheet {
+	my ($file, $images) = @_;
+
 }
 
 pack_sheet();
