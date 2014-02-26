@@ -26,7 +26,7 @@ cpan Image::Magic
 
 =head1 AUTHOR
 
-Bruce Armstrong bruce@fortressofgeekdom.org
+Bruce Armstrong <bruce@fortressofgeekdom.org>
 
 =cut
 
@@ -38,8 +38,14 @@ use File::Slurp;
 use Data::Dumper;
 
 sub pack_sheet {
-	my $sheet = shift @ARGV;
-    my @images = sort { $b->{sourceSize}{h} <=> $a->{sourceSize}{h} } read_images();
+    my $sheet  = shift @ARGV;
+    my @images = sort {
+        my $as = $a->{sourceSize};
+        my $bs = $b->{sourceSize};
+        ( $bs->{h} > $bs->{w} ? $bs->{h} : $bs->{w} )
+          <=>
+		( $as->{h} > $as->{w} ? $as->{h} : $as->{w} )
+    } read_images();
     my $size;
     for my $i (@images) {
         $size += $i->{sourceSize}{h} * $i->{sourceSize}{w};
@@ -51,17 +57,13 @@ sub pack_sheet {
     }
 
     while (1) {
-        eval {
-            pack_images( $width, \@images );
-        };
-		last unless $@;
+        eval { pack_images( $width, \@images ); };
+        last unless $@;
         $width *= 2;
     }
-	
-	write_file( "$sheet.json", JSON::Any->objToJson(\@images));
-	write_sheet( "$sheet.png", \@images);
-	print "$width x $width\n";
-	print Dumper \@images;
+
+    write_sheet( "$sheet.png", $width, \@images );
+    write_file( "$sheet.json", JSON::Any->objToJson( \@images ) );
 }
 
 sub read_images {
@@ -72,17 +74,17 @@ sub read_images {
             $image->Read($file);
             push @images,
               { filename         => $file,
-#                rotated          => 'false',
-#                trimmed          => 'false',
-#                spriteSourceSize => {
-#                    x => 0,
-#                    y => 0,
-#                    w => $image->Get('width'),
-#                    h => $image->Get('height'),
-#                },
+                rotated          => 'false',
+                trimmed          => 'false',
+                spriteSourceSize => {
+                    x => 0,
+                    y => 0,
+                    w => $image->Get('width'),
+                    h => $image->Get('height'),
+                },
                 sourceSize =>
                   { w => $image->Get('width'), h => $image->Get('height'), },
-                #image => $image,
+                image => $image,
               };
         };
         print "Error: $@\n" if $@;
@@ -93,6 +95,7 @@ sub read_images {
 sub pack_images {
     my ( $width, $images ) = @_;
     my @space = [ { h => $width, w => $width, full => 0, x => 0, y => 0 } ];
+	my @display;
     for my $i (@$images) {
         for my $y (0 .. $#space) {
 			for my $x (0 .. $#{ $space[$y] }) {
@@ -101,7 +104,28 @@ sub pack_images {
 		}
 		die "Can't place image\n";
 		FOUND:
+		push @display, $i;
+		display($width, \@space, \@display);
     }
+}
+
+sub display {
+	my ($width, $space, $images) = @_;
+
+	my $image = Image::Magick->new( size => $width . 'x' . $width );
+    $image->Read('NULL:black');
+	$image->Set(fill=>'black');
+	for my $row (@$space) {
+		for my $s (@$row) {
+		$image->Draw(primitive=>'rectangle', stroke=>'red', fill=>($s->{full}?'black':'gray'),points=>$s->{x}.','.$s->{y}.' '.($s->{x}+ $s->{w}).','.($s->{y}+$s->{h}));
+		}
+	}
+	for my $i (@$images) {
+		$image->Composite(image=>$i->{image}, x=>$i->{frame}{x}, y=>$i->{frame}{y});
+	}
+	$image->Write('tmp.png');
+	print "Wrote image...";
+	my $x = <STDIN>;
 }
 
 sub place {
@@ -113,7 +137,7 @@ sub place {
 	#Check to see if cells are used
 	while (1) {
 		return if $dx > $#$space;
-		my $cell = $space->[$dx][$dy];
+		my $cell = $space->[$dx][$y];
 		return if $cell->{full};
 		$aw += $cell->{w};
 		last if $aw >= $w;
@@ -163,9 +187,9 @@ sub place {
 	#Mark space as used
 	my $cell = $space->[$x][$y];
 	$image->{frame} = { x => $cell->{x}, y => $cell->{y}, w => $w, h => $h };
-	for my $row_id ( $y .. $dy ) {
+	for my $row_id ( $x .. $dx ) {
 		my $row = $space->[$row_id];
-		for my $col_id ( $x .. $dx ) {
+		for my $col_id ( $y .. $dy ) {
 			my $cell = $row->[$col_id];
 			$cell->{full} = 1;
 		}
@@ -175,8 +199,16 @@ sub place {
 }
 
 sub write_sheet {
-	my ($file, $images) = @_;
+	my ($file, $width, $images) = @_;
 
+	my $image = Image::Magick->new( size => $width . 'x' . $width );
+    $image->Read('NULL:black');
+	for my $i (@$images) {
+		my $mask = delete $i->{image};
+		$image->Composite(image=>$mask, x=>$i->{frame}{x}, y=>$i->{frame}{y});
+	}
+	$image->Trim();
+	$image->Write($file);
 }
 
 pack_sheet();
