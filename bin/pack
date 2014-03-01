@@ -35,7 +35,8 @@ use warnings;
 use Image::Magick;
 use JSON::Any;
 use File::Slurp;
-use Data::Dumper;
+use File::Basename;
+use List::Util 'max';
 
 sub pack_sheet {
     my $sheet  = shift @ARGV;
@@ -62,8 +63,7 @@ sub pack_sheet {
         $width *= 2;
     }
 
-    write_sheet( "$sheet.png", $width, \@images );
-    write_file( "$sheet.json", JSON::Any->objToJson( \@images ) );
+    write_sheet( $sheet, $width, \@images );
 }
 
 sub read_images {
@@ -105,7 +105,7 @@ sub pack_images {
 		die "Can't place image\n";
 		FOUND:
 		push @display, $i;
-		display($width, \@space, \@display);
+		#display($width, \@space, \@display);
     }
 }
 
@@ -126,7 +126,7 @@ sub display {
 	$image->Write('tmp.png');
 	print "Wrote image...";
 	my $x = <STDIN>;
-}
+} 
 
 sub place {
 	my ($image, $x, $y, $space) = @_;
@@ -199,16 +199,35 @@ sub place {
 }
 
 sub write_sheet {
-	my ($file, $width, $images) = @_;
+    my ( $file, $width, $images ) = @_;
 
-	my $image = Image::Magick->new( size => $width . 'x' . $width );
+    my (%frames);
+    my ( $max_x, $max_y ) = ( 0, 0 );
+    my $image = Image::Magick->new( size => $width . 'x' . $width );
     $image->Read('NULL:black');
-	for my $i (@$images) {
-		my $mask = delete $i->{image};
-		$image->Composite(image=>$mask, x=>$i->{frame}{x}, y=>$i->{frame}{y});
+    for my $i (@$images) {
+        my $mask = delete $i->{image};
+        my ($base) = fileparse( delete $i->{filename}, qr/\.[^.]*/ );
+        $image->Composite(
+            image => $mask,
+            x     => $i->{frame}{x},
+            y     => $i->{frame}{y} );
+        $frames{$base} = $i;
+        $max_x = max( $max_x, $i->{frame}{x} + $i->{frame}{w} );
+        $max_y = max( $max_y, $i->{frame}{y} + $i->{frame}{h} );
+    }
+    $image->Crop( width => next_square($max_x), height => next_square($max_y) );
+    $image->Write("$file.png");
+    write_file( "$file.json", JSON::Any->objToJson( { frames => \%frames } ) );
+}
+
+sub next_square {
+	my $i = shift;
+	my $s = 2;
+	while ($s < $i) {
+		$s *= 2;
 	}
-	$image->Trim();
-	$image->Write($file);
+	return $s;
 }
 
 pack_sheet();
