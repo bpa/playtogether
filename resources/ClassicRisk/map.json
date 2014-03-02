@@ -1,0 +1,296 @@
+{
+  "Afghanistan" :
+  {
+    "x":      409,
+	"y":      75,
+	"icon_x": 428,
+	"icon_y": 109
+  },
+  "Alaska" :
+  {
+    "x":      12,
+	"y":      49,
+	"icon_x": 44,
+	"icon_y": 62
+  },
+  "Alberta" :
+  {
+    "x":      87,
+	"y":      84,
+	"icon_x": 109,
+	"icon_y": 92
+  },
+  "Argentina" :
+  {
+    "x":      189,
+	"y":      240,
+	"icon_x": 197,
+	"icon_y": 267
+  },
+  "Brazil" :
+  {
+    "x":      196,
+	"y":      198,
+	"icon_x": 227,
+	"icon_y": 219
+  },
+  "Central America" :
+  {
+    "x":      114,
+	"y":      148,
+	"icon_x": 140,
+	"icon_y": 168
+  },
+  "China" :
+  {
+    "x":      451,
+	"y":      124,
+	"icon_x": 491,
+	"icon_y": 133
+  },
+  "Congo" :
+  {
+    "x":      341,
+	"y":      189,
+	"icon_x": 353,
+	"icon_y": 213
+  },
+  "East Africa" :
+  {
+    "x":      362,
+	"y":      166,
+	"icon_x": 379,
+	"icon_y": 190
+  },
+  "Eastern Australia" :
+  {
+    "x":      569,
+	"y":      227,
+	"icon_x": 572,
+	"icon_y": 248
+  },
+  "Eastern US" :
+  {
+    "x":      133,
+	"y":      114,
+	"icon_x": 157,
+	"icon_y": 131
+  },
+  "Egypt" :
+  {
+    "x":      340,
+	"y":      143,
+	"icon_x": 358,
+	"icon_y": 151
+  },
+  "Great Britain" :
+  {
+    "x":      306,
+	"y":      88,
+	"icon_x": 306,
+	"icon_y": 92
+  },
+  "Greenland" :
+  {
+    "x":      99,
+	"y":      1,
+	"icon_x": 187,
+	"icon_y": 38
+  },
+  "Iceland" :
+  {
+    "x":      282,
+	"y":      65,
+	"icon_x": 282,
+	"icon_y": 62
+  },
+  "India" :
+  {
+    "x":      433,
+	"y":      142,
+	"icon_x": 456,
+	"icon_y": 156
+  },
+  "Indonesia" :
+  {
+    "x":      498,
+	"y":      174,
+	"icon_x": 520,
+	"icon_y": 199
+  },
+  "Irkutsk" :
+  {
+    "x":      482,
+	"y":      81,
+	"icon_x": 523,
+	"icon_y": 85
+  },
+  "Japan" :
+  {
+    "x":      560,
+	"y":      120,
+	"icon_x": 569,
+	"icon_y": 131
+  },
+  "Kamchatka" :
+  {
+    "x":      0,
+	"y":      32,
+	"icon_x": 601,
+	"icon_y": 60
+  },
+  "Madagascar" :
+  {
+    "x":      403,
+	"y":      231,
+	"icon_x": 400,
+	"icon_y": 236
+  },
+  "Middle East" :
+  {
+    "x":      372,
+	"y":      127,
+	"icon_x": 398,
+	"icon_y": 147
+  },
+  "Mongolia" :
+  {
+    "x":      484,
+	"y":      98,
+	"icon_x": 517,
+	"icon_y": 109
+  },
+  "New Guinea" :
+  {
+    "x":      562,
+	"y":      208,
+	"icon_x": 573,
+	"icon_y": 211
+  },
+  "North Africa" :
+  {
+    "x":      293,
+	"y":      136,
+	"icon_x": 317,
+	"icon_y": 167
+  },
+  "Northern Europe" :
+  {
+    "x":      325,
+	"y":      90,
+	"icon_x": 339,
+	"icon_y": 99
+  },
+  "Northwest Territory" :
+  {
+    "x":      79,
+	"y":      52,
+	"icon_x": 103,
+	"icon_y": 65
+  },
+  "Ontario" :
+  {
+    "x":      150,
+	"y":      84,
+	"icon_x": 154,
+	"icon_y": 97
+  },
+  "Peru" :
+  {
+    "x":      177,
+	"y":      199,
+	"icon_x": 197,
+	"icon_y": 228
+  },
+  "Quebec" :
+  {
+    "x":      180,
+	"y":      76,
+	"icon_x": 191,
+	"icon_y": 92
+  },
+  "Scandinavia" :
+  {
+    "x":      333,
+	"y":      50,
+	"icon_x": 348,
+	"icon_y": 66
+  },
+  "Siam" :
+  {
+    "x":      489,
+	"y":      157,
+	"icon_x": 495,
+	"icon_y": 167
+  },
+  "Siberia" :
+  {
+    "x":      455,
+	"y":      8,
+	"icon_x": 483,
+	"icon_y": 58
+  },
+  "South Africa" :
+  {
+    "x":      349,
+	"y":      242,
+	"icon_x": 359,
+	"icon_y": 251
+  },
+  "Southern Europe" :
+  {
+    "x":      332,
+	"y":      113,
+	"icon_x": 348,
+	"icon_y": 118
+  },
+  "Ukraine" :
+  {
+    "x":      362,
+	"y":      29,
+	"icon_x": 388,
+	"icon_y": 84
+  },
+  "Ural" :
+  {
+    "x":      432,
+	"y":      43,
+	"icon_x": 443,
+	"icon_y": 78
+  },
+  "Venezuela" :
+  {
+    "x":      180,
+	"y":      184,
+	"icon_x": 194,
+	"icon_y": 191
+  },
+  "Western Australia" :
+  {
+    "x":      529,
+	"y":      228,
+	"icon_x": 542,
+	"icon_y": 247
+  },
+  "Western Europe" :
+  {
+    "x":      304,
+	"y":      108,
+	"icon_x": 310,
+	"icon_y": 119
+  },
+  "Western US" :
+  {
+    "x":      100,
+	"y":      112,
+	"icon_x": 117,
+	"icon_y": 123
+  },
+  "Yakutsk" :
+  {
+    "x":      519,
+	"y":      42,
+	"icon_x": 546,
+	"icon_y": 62
+  }
+}

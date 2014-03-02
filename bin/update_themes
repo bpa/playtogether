@@ -1,0 +1,51 @@
+#!/usr/bin/env perl
+
+use strict;
+use warnings;
+use FindBin '$Bin';
+use JSON::Any;
+use File::Basename;
+use File::Copy;
+use File::Path;
+use File::Slurp;
+use Config::INI::Reader;
+use Data::Dumper;
+
+our $| = 1;
+chdir($Bin);
+my $json = read_file("$Bin/../resources/ClassicRisk/map.json");
+my $classic = JSON::Any->jsonToObj($json);
+$json = read_file("$Bin/../resources/UltimateRisk/map.json");
+my $ultimate = JSON::Any->jsonToObj($json);
+
+for my $theme (glob "$Bin/../resources/themes/*/theme.properties") {
+	my ($name) = $theme =~ m#([^/]*)/theme.properties$#;
+	my $config = Config::INI::Reader->read_file($theme);
+	generate_theme($theme, $name, 'Classic', $classic, $config);
+	generate_theme($theme, $name, 'Ultimate', $ultimate, $config);
+}
+	
+sub generate_theme {
+	my ($theme, $name, $game, $board, $config);
+	mkdir('.theme');
+	my ($file, $path) = fileparse($theme);
+	for my $f (qw/background-image icon-image/) {
+		if (my $image = $config->{f}) {
+			copy("$path/$image", ".theme/$image");
+		}
+	}
+	for my $t ($board->{territories}) {
+		copy("$Bin/../resources/$game"."Risk/".$t->{name}.".png", ".theme/".$t->{name}.".png");
+	}
+	chdir('.theme');
+	system("../pack $name *");
+	$json = read_file("$name.json");
+	my $map = JSON::Any->jsonToObj($json);
+	while (my ($k, $v) = each %$config) {
+		$map->{meta}{$k} = $v;
+	}
+	write_file(("$name.json", "$Bin/../lib/Gamed/public/g/SpeedRisk/$game/themes/$name.json");
+	move("$name.png", "$Bin/../lib/Gamed/public/g/SpeedRisk/$game/themes/$name.png");
+	chdir($Bin);
+	rmtree('.theme');
+}
