@@ -1,0 +1,10 @@
+<h2>Welcome</h2>
+<ul>Available games:
+  <li ng-repeat="g in games"><a href="/create/{{g.name}}">{{g.description}}</a></li>
+</ul>
+
+<ul>Join existing game:
+  <li ng-repeat="i in instances">
+    <a href="{{i.url}}">{{i.name}}({{i.game}})</a>
+  </li>
+</ul>

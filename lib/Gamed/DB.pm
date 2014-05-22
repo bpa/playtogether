@@ -1,55 +1,53 @@
+package Gamed::DB;
+
 use DBI;
-use Mojolicious::Lite;
-use Data::UUID;
 use Authen::Passphrase::SaltedDigest;
 
-my $uuid = Data::UUID->new;
 my $dbh = DBI->connect("dbi:SQLite:data") or die "Could not connect to database";
 unless (
     $dbh->selectrow_arrayref(
-        "SELECT 1 FROM sqlite_master WHERE type='table' AND name = 'user'") )
+        "SELECT 1 FROM sqlite_master WHERE type='table' AND name = 'users'") )
 {
     $dbh->do(
         "create table users (username text PRIMARY KEY, passphrase, name text, avatar text)"
     );
 }
 
-helper login => sub {
-    my $self = shift;
-    my $user = $dbh->selectall_arrayref(
+sub login {
+    my $param = shift;
+    my $user  = $dbh->selectall_arrayref(
         "select * from users where username=?",
         { Slice => {} },
-        $self->param('username'),
+        $param->{username},
     );
     return unless @$user > 0;
     $user = $user->[0];
-    my $ppr
-      = Authen::Passphrase::SaltedDigest->from_rfc2307( delete $user->{passphrase} );
-    return $ppr->match( $self->param('passphrase') ) ? $user : ();
-};
+    my $ppr = Authen::Passphrase::SaltedDigest->from_rfc2307( delete $user->{passphrase} );
+    return $ppr->match( $param->{passphrase} ) ? $user : ();
+}
 
-helper create_user => sub {
-    my $self = shift;
-    my $ppr  = Authen::Passphrase::SaltedDigest->new(
+sub create_user {
+    my $param = shift;
+    my $ppr   = Authen::Passphrase::SaltedDigest->new(
         algorithm   => 'SHA-1',
         salt_random => 20,
-        passphrase  => $self->param('passphrase') );
+        passphrase  => $param->{passphrase} );
     if (
         $dbh->do(
             "insert into users (username, passphrase, name, avatar) values (?,?,?,?)",
             {},
-            $self->param('username'),
+            $param->{username},
             $ppr->as_rfc2307,
-            $self->param('name'),
-            $self->param('avatar') ) )
+            $param->{name},
+            $param->{avatar} ) )
     {
         return {
-            username => $self->param('username'),
-            name     => $self->param('name'),
-            avatar   => $self->param('avatar'),
+            username => $param->{username},
+            name     => $param->{name},
+            avatar   => $param->{avatar},
         };
     }
     return;
-};
+}
 
 1;
