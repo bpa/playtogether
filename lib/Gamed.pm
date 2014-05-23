@@ -73,12 +73,12 @@ sub on_create_user {
 sub on_login {
     my ( $player, $msg ) = @_;
     if ( defined $msg->{cmd} && $msg->{cmd} eq 'reconnect' ) {
-        my $p = $players{ $msg->{id} };
+        my $p = $players{ $msg->{token} };
         if ( defined $p ) {
             while ( my ( $k, $v ) = each(%$p) ) {
                 $player->{$k} = $v;
             }
-            $players{ $msg->{id} } = $player;
+            $players{ $msg->{token} } = $player;
             my @inst;
             while ( my ( $k, $v ) = each %game_instances ) {
                 push @inst,
@@ -104,6 +104,7 @@ sub login {
         $player->{user}           = $user;
         $player->{id}             = $uuid->create_str();
         $players{ $player->{id} } = $player;
+		$player->send({cmd => 'welcome', token => $player->{id}});
         my @inst;
         while ( my ( $k, $v ) = each %game_instances ) {
             push @inst,
@@ -181,10 +182,12 @@ sub on_quit {
     my $game   = $player->{game};
     eval { $game->on_quit($player); };
     eval {
+			if (defined $game) {
         if ( !keys %{ $game->{players} } ) {
             delete $game_instances{ $game->{name} };
             $game->on_destroy();
         }
+			}
     };
 }
 

@@ -13,6 +13,10 @@ use File::Basename 'dirname';
 use File::Spec::Functions 'catdir';
 use Gamed;
 
+get '/' => sub {
+	shift->render_static('index.html');
+};
+
 websocket '/websocket' => sub {
 	my $self = shift;
 	$self->app->log->debug('WebSocket connected.');
@@ -37,6 +41,7 @@ websocket '/websocket' => sub {
 			finish => sub {
 				my $self = shift;
 				Gamed::on_quit($player);
+				delete $player->{sock};
 				$self->app->log->debug('WebSocket disconnected.');
 			} );
 	}

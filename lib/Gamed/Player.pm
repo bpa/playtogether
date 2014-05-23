@@ -10,13 +10,14 @@ sub new {
 }
 
 sub send {
-    shift->{sock}->send( $json->encode( $_[0] ) );
+    my ( $self, $msg ) = @_;
+    $self->{sock}->send( $json->encode($msg) );
 }
 
 sub err {
     my ( $self, $reason ) = @_;
-	chomp $reason;
-    $self->{sock}->send( $json->encode({ cmd => 'error', reason => $reason }));
+    chomp $reason;
+    $self->{sock}->send( $json->encode( { cmd => 'error', reason => $reason } ) );
 }
 
 1;
