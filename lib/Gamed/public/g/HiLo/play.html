@@ -1,0 +1,7 @@
+<div ng-controller="HiLoCtl">
+  Pick a number: <input type="number" ng-model="guess">
+  <button type="button" class="btn btn-standard" ng-click="pick()">Pick</button>
+</div>
+<div class="well">
+  <alert ng-repeat="g in guesses" type="{{g.type}}">{{g.number}}</alert>
+</div>

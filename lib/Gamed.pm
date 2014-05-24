@@ -49,7 +49,7 @@ sub import {
 sub on_message {
     my ( $player, $msg_json ) = @_;
     my $msg = $json->decode($msg_json);
-    my $cmd = $msg->{cmd};
+    my $cmd = $msg->{cmd} || 'game';
     if ( !defined $player->{id} ) {
         $cmd = 'login';
     }
@@ -61,7 +61,7 @@ sub on_message {
         $action->( $player, $msg );
     }
     else {
-        die "Command '" + $cmd + "' not valid\n";
+        die "Command '" . $cmd . "' not valid\n";
     }
 }
 
@@ -121,10 +121,12 @@ sub login {
 }
 
 sub on_create {
-    my $msg = shift;
+    my ( $player, $msg ) = @_;
+	die "No name given\n" unless exists $msg->{name};
+	die "No game specified\n" unless exists $msg->{game};
+
     if ( exists $game_instances{ $msg->{name} } ) {
         die "A game named '" . $msg->{name} . "' already exists.\n";
-        return;
     }
     if ( exists $games{ $msg->{game} } ) {
         eval {
