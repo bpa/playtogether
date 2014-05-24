@@ -151,7 +151,8 @@ sub on_create {
 }
 
 sub on_join {
-    my ( $player, $name ) = @_;
+    my ( $player, $msg ) = @_;
+    my $name = $msg->{name};
     if ( !defined( $game_instances{$name} ) ) {
         $player->err("No game named '$name' exists");
     }
