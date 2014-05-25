@@ -26,7 +26,7 @@ our %game_instances;
 our $VERSION = 0.1;
 our %cmd     = (
     login       => \&on_login,
-    create_user => \&on_create_user,
+    games       => \&on_games,
     join        => \&on_join,
     create      => \&on_create,
     quit        => \&on_quit,
@@ -72,22 +72,14 @@ sub on_create_user {
 
 sub on_login {
     my ( $player, $msg ) = @_;
-    if ( defined $msg->{cmd} && $msg->{cmd} eq 'reconnect' ) {
+    if ( defined $msg->{token} ) {
         my $p = $players{ $msg->{token} };
         if ( defined $p ) {
             while ( my ( $k, $v ) = each(%$p) ) {
                 $player->{$k} = $v;
             }
             $players{ $msg->{token} } = $player;
-            my @inst;
-            while ( my ( $k, $v ) = each %game_instances ) {
-                push @inst,
-                  { name    => $k,
-                    game    => $v->{game},
-                    players => [ map { $_->{name} } $v->{players} ],
-                    status  => $v->{status} };
-            }
-            $player->send( { cmd => 'games', games => [ sort keys %games ], instances => \@inst } );
+			$player->send({cmd => 'welcome', token => $player->{id}});
         }
         else {
             $player->err("Can't reconnect");
@@ -105,19 +97,23 @@ sub login {
         $player->{id}             = $uuid->create_str();
         $players{ $player->{id} } = $player;
 		$player->send({cmd => 'welcome', token => $player->{id}});
-        my @inst;
-        while ( my ( $k, $v ) = each %game_instances ) {
-            push @inst,
-              { name    => $k,
-                game    => $v->{game},
-                players => [ map { $_->{name} } $v->{players} ],
-                status  => $v->{status} };
-        }
-        $player->send( { cmd => 'games', games => [ sort keys %games ], instances => \@inst } );
     }
     else {
         $player->err("Login failed");
     }
+}
+
+sub on_games {
+	my ( $player, $msg ) = @_;
+	my @inst;
+	while ( my ( $k, $v ) = each %game_instances ) {
+		push @inst,
+		{ name    => $k,
+			game    => $v->{game},
+			players => [ map { $_->{name} } $v->{players} ],
+			status  => $v->{status} };
+	}
+	$player->send( { cmd => 'games', games => [ sort keys %games ], instances => \@inst } );
 }
 
 sub on_create {
