@@ -10,7 +10,8 @@ sub new {
 }
 
 sub send {
-    my ( $self, $msg ) = @_;
+    my ( $self, $cmd, $msg ) = @_;
+    $msg->{cmd} = $cmd;
     $self->{sock}->send( $json->encode($msg) );
 }
 

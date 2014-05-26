@@ -26,8 +26,7 @@ sub on_message {
     {
         push @{ $self->{trick} }, $msg->{play};
         $player->{cards}->remove( $msg->{play} );
-        $game->broadcast(
-            { player => $self->{active_player}, play => $msg->{play} } );
+        $game->broadcast( play => { player => $self->{active_player}, play => $msg->{play} } );
         $self->{active_player}++;
         $self->{active_player} = 0
           if $self->{active_player} >= keys %{ $game->{players} };
@@ -37,8 +36,7 @@ sub on_message {
               + $self->{active_player};
             $self->{active_player} -= keys %{ $game->{players} }
               if $self->{active_player} >= keys %{ $game->{players} };
-            $game->broadcast(
-                { trick => $self->{trick}, winner => $self->{active_player} } );
+            $game->broadcast( trick => { trick => $self->{trick}, winner => $self->{active_player} } );
             push @{ $game->{players}{ $self->{active_player} }{taken} },
               @{ $self->{trick} };
             $self->{trick} = [];

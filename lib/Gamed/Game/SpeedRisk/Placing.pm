@@ -49,7 +49,7 @@ sub on_enter_state {
     for my $p (@players) {
         $p->{armies} *= 2;
         $p->{armies} += $game->{board}{starting_armies}[$#players];
-        $p->{client}->send( { cmd => 'armies', armies => $p->{armies} } );
+        $p->{client}->send( armies => { armies => $p->{armies} } );
     }
 
     #Spread out the dummy player's armies so the countries aren't effectively free
@@ -66,8 +66,7 @@ sub on_enter_state {
         }
     }
 
-    $game->broadcast(
-        { cmd => 'state', state => 'Placing', countries => $game->{countries} } );
+    $game->broadcast( state => { state => 'Placing', countries => $game->{countries} } );
 
 }
 
@@ -76,7 +75,7 @@ sub on_message {
     for ( $message->{cmd} ) {
         when ('ready') {
             $player->{ready} = 1;
-            $game->broadcast( { cmd => 'ready', player => $player->{in_game_id} } );
+            $game->broadcast( ready => { player => $player->{in_game_id} } );
             $game->change_state( $self->{next} )
               unless grep { !$_->{ready} } values %{ $game->{players} };
         }
@@ -101,12 +100,8 @@ sub on_message {
             $player->{armies} -= $armies;
 
             $player->{client}
-              ->send( { cmd => 'armies', armies => $player->{armies} } );
-            $game->broadcast(
-                {   cmd => 'country',
-                    country =>
-                      { armies => $country->{armies}, owner => $country->{owner} } }
-            );
+              ->send( armies => { armies => $player->{armies} } );
+            $game->broadcast( country => { country => { armies => $country->{armies}, owner => $country->{owner} } });
         }
         default {
             $player->{client}->err('Invalid command');
@@ -119,8 +114,7 @@ sub on_quit {
     $player->{ready} = 1;
     my @remaining = grep { exists $_->{client} } values %{ $game->{players} };
     if ( @remaining == 1 ) {
-        $game->broadcast(
-            { cmd => 'victory', player => $remaining[0]->{in_game_id} } );
+        $game->broadcast( victory => { player => $remaining[0]->{in_game_id} } );
         $game->change_state('GAME_OVER');
         return;
     }

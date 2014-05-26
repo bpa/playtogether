@@ -13,7 +13,7 @@ has 'next' => ( default => 'GAME_OVER', is => 'bare' );
 
 sub on_enter_state {
     my ( $self, $game ) = @_;
-    $game->broadcast( { cmd => 'state', state => 'Playing' } );
+    $game->broadcast( state => { state => 'Playing' } );
     $self->{timer} = AE::timer $game->{board}{army_generation_period}, 0, sub {
         $self->generate_armies($game);
     };
@@ -42,12 +42,7 @@ sub generate_armies {
     $self->{timer} = AE::timer $game->{board}{army_generation_period}, 0, sub {
         $self->generate_armies($game);
     };
-    $game->broadcast(
-        {
-            cmd     => 'army timer',
-            seconds => $game->{board}{army_generation_period}
-        }
-    );
+    $game->broadcast( 'army timer' => { seconds => $game->{board}{army_generation_period} });
 
     for my $p ( values %{ $game->{players} } ) {
         if ( $p->{countries} ) {
@@ -69,7 +64,7 @@ sub generate_armies {
                 }
                 $p->{armies} += $c->{bonus} if $holds_region;
             }
-            $p->{client}->send( { cmd => 'armies', armies => $p->{armies} } );
+            $p->{client}->send( armies => { armies => $p->{armies} } );
         }
     }
 }
@@ -122,7 +117,7 @@ sub send_update {
             country => $c->{id},
             armies  => $c->{armies} };
     }
-    $game->broadcast( { cmd => $cmd, result => \@update } );
+    $game->broadcast( $cmd => { result => \@update } );
 }
 
 sub do_attack {
@@ -157,12 +152,11 @@ sub do_attack {
     send_update( $game, $from, $to, 'attack' );
 
     unless ( $defender->{countries} ) {
-        $game->broadcast( { cmd => 'defeated', player => $defender->{in_game_id} } );
+        $game->broadcast( defeated => { player => $defender->{in_game_id} } );
     }
     if ( $attacker->{countries} == @{ $game->{countries} } ) {
-        $game->broadcast(
-            { cmd => 'Game Over', victor => $attacker->{in_game_id} } );
-		$game->change_state('GAME_OVER');
+        $game->broadcast( 'Game Over' => { victor => $attacker->{in_game_id} } );
+	$game->change_state('GAME_OVER');
     }
 }
 
@@ -176,8 +170,7 @@ sub on_quit {
     $player->{ready} = 1;
     my @remaining = grep { exists $_->{client} } values %{ $game->{players} };
     if ( @remaining == 1 ) {
-        $game->broadcast(
-            { cmd => 'victory', player => $remaining[0]->{in_game_id} } );
+        $game->broadcast( victory => { player => $remaining[0]->{in_game_id} } );
         $game->change_state('GAME_OVER');
     }
 }

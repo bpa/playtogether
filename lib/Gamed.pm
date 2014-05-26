@@ -79,7 +79,7 @@ sub on_login {
                 $player->{$k} = $v;
             }
             $players{ $msg->{token} } = $player;
-			$player->send({cmd => 'welcome', token => $player->{id}});
+			$player->send( welcome => { token => $player->{id}});
         }
         else {
             $player->err("Can't reconnect");
@@ -96,7 +96,7 @@ sub login {
         $player->{user}           = $user;
         $player->{id}             = $uuid->create_str();
         $players{ $player->{id} } = $player;
-		$player->send({cmd => 'welcome', token => $player->{id}});
+		$player->send( welcome => { token => $player->{id}});
     }
     else {
         $player->err("Login failed");
@@ -113,7 +113,7 @@ sub on_games {
 			players => [ map { $_->{name} } $v->{players} ],
 			status  => $v->{status} };
 	}
-	$player->send( { cmd => 'games', games => [ sort keys %games ], instances => \@inst } );
+	$player->send( games => { games => [ sort keys %games ], instances => \@inst } );
 }
 
 sub on_create {
@@ -128,9 +128,10 @@ sub on_create {
         eval {
             my $game = $games{ $msg->{game} }->create($msg);
             $game->{name} = $msg->{name};
+            $game->{game} = $msg->{game};
             $game_instances{ $msg->{name} } = $game;
             for my $p ( values %players ) {
-                $p->send( { cmd => 'create', name => $msg->{name}, game => $msg->{game} } )
+                $p->send( create => { name => $msg->{name}, game => $msg->{game} } )
                   if defined $p->{sock} && !defined $p->{game};
             }
         };

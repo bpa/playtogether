@@ -31,10 +31,7 @@ around 'on_message' => sub {
             $self->{themes}{ $player->{public}{theme} } = ();
             $player->{public}{theme} = $message->{theme};
             delete $self->{themes}{ $message->{theme} };
-            $game->broadcast(
-                {   cmd    => 'theme',
-                    theme  => $message->{theme},
-                    player => $player->{in_game_id} } );
+            $game->broadcast( theme => { theme => $message->{theme}, player => $player->{in_game_id} } );
         }
         else {
             $player->{client}->err("Invalid theme");

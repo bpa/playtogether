@@ -25,7 +25,7 @@ sub game {
     my ( $players, $opts, $post_join_state, $pre_join_state ) = @_;
     $opts->{game} ||= 'Test';
     $opts->{name} ||= 'test';
-    Gamed::on_create($opts);
+    Gamed::on_create({}, $opts);
     my @connections;
     my $instance    = $Gamed::game_instances{ $opts->{name} };
     my $player_data = delete $opts->{players};
@@ -45,7 +45,7 @@ sub game {
             $instance->{next_player_id}++;
             $instance->{ids}{ $c->{id} } = $i;
         }
-        Gamed::on_join( $c, $opts->{name} );
+        Gamed::on_join( $c, { name => $opts->{name} });
         push @connections, $c;
         $_->got( { cmd => 'join' } ) for @connections;
     }

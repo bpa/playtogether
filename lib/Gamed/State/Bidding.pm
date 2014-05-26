@@ -34,7 +34,7 @@ sub on_message {
     }
     elsif ( $msg->{bid} eq 'pass' ) {
         $player->{pass} = 1;
-        $game->broadcast( { bid => 'pass', player => $self->{bidder} } );
+        $game->broadcast( bid => { bid => 'pass', player => $self->{bidder} } );
         $self->next_bidder($game);
     }
     elsif ( !looks_like_number( $msg->{bid} ) ) {
@@ -54,7 +54,7 @@ sub on_message {
     }
     else {
         $self->{bid} = $msg->{bid};
-        $game->broadcast( { bid => $msg->{bid}, player => $self->{bidder} } );
+        $game->broadcast( bid => { bid => $msg->{bid}, player => $self->{bidder} } );
         $self->next_bidder($game);
     }
 }
@@ -67,7 +67,7 @@ sub on_leave_state {
     }
     $game->{bidder} = delete $self->{bidder};
     $game->{bid}    = delete $self->{bid};
-    $game->broadcast( { bid => $game->{bid}, bidder => $game->{bidder} } );
+    $game->broadcast( bid => { bid => $game->{bid}, bidder => $game->{bidder} } );
 }
 
 sub next_bidder {

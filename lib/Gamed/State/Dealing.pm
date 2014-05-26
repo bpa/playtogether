@@ -23,7 +23,7 @@ sub BUILD {
 
 sub on_enter_state {
     my ( $self, $game ) = @_;
-    $game->broadcast( { dealing => $self->{dealer} } );
+    $game->broadcast( dealing => { dealer => $self->{dealer} } );
 }
 
 sub on_message {
@@ -46,9 +46,7 @@ sub on_leave_state {
             for my $s ( 0 .. $seats ) {
                 my $cards = bag( $self->{deck}->deal($num) );
                 $game->{players}{$s}{cards} = $cards;
-                $game->{players}{$s}{client}->send(
-                    { cmd => 'game', action => 'deal', hand => [ $cards->values ] }
-                );
+                $game->{players}{$s}{client}->send( game => { action => 'deal', hand => [ $cards->values ] });
             }
         }
         else {

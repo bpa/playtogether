@@ -22,7 +22,7 @@ my ( $game, $n, $e, $s, $w ) = game(
     'start'
 );
 
-broadcast_one( $game, { dealing => 0 }, 'Dealer announced' );
+broadcast_one( $game, { dealer => 0 }, 'Dealer announced' );
 $e->game( { cmd => 'deal' }, { reason => 'Not your turn' }, 'Deal out of turn' );
 $n->game( { cmd => 'deal' } );
 my $rook = qr/(\d+[RGBY])|0/;

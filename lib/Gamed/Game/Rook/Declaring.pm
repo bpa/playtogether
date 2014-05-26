@@ -11,7 +11,7 @@ has 'next' => ( is => 'bare', required => 1 );
 
 sub on_enter_state {
     my ( $self, $game ) = @_;
-    $game->{players}{ $game->{bidder} }{client}->send( { nest => $game->{nest} } );
+    $game->{players}{ $game->{bidder} }{client}->send( 'nest', { nest => $game->{nest} } );
     $game->{players}{ $game->{bidder} }{cards}->add( $game->{nest} );
     delete $game->{nest};
 }
@@ -39,7 +39,7 @@ sub on_message {
         $game->{nest}  = bag( $msg->{nest} );
         my $hand = $cards - $nest;
         $player->{cards} = $hand;
-        $game->broadcast( { trump => $game->{trump} } );
+        $game->broadcast( trump => { trump => $game->{trump} } );
         $game->change_state( $self->{next} );
     }
 }
