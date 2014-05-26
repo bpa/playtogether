@@ -16,7 +16,7 @@
 <div class="well">
   <ul>Join existing game:
     <li ng-repeat="i in instances">
-      <a href="{{i.url}}">{{i.name}}({{i.game}})</a>
+      <button type="button" class="btn btn-primary" ng-click="join()">{{i.name}}({{i.game}})</button>
     </li>
   </ul>
 </div>
