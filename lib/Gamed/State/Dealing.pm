@@ -1,43 +1,38 @@
 package Gamed::State::Dealing;
 
-use Moose;
 use Scalar::Util 'looks_like_number';
 use Gamed::Object;
 
-extends 'Gamed::State';
+use Gamed::Handler;
+use parent 'Gamed::State';
 
-has '+name' => ( default => 'Dealing' );
-has 'next' => ( is => 'ro', required => 1 );
-has 'deck' => ( is => 'ro', required => 1 );
+sub new {
+    my ( $pkg, $self ) = @_;
+	bless $self, $pkg;
 
-sub BUILD {
-    my ( $self, $opts ) = @_;
-    if ( looks_like_number( $opts->{deal} ) ) {
-        $self->{deal} = { seat => $opts->{deal} };
+	$self->{name} ||= 'Dealing';
+	die "No next given\n" unless $self->{next};
+	die "No deck given\n" unless $self->{deck}->isa('Gamed::Object::Deck');
+
+    if ( looks_like_number( $self->{deal} ) ) {
+        $self->{deal} = { seat => $self->{deal} };
     }
     else {
         $self->{deal} = $opts->{deal};
     }
     $self->{dealer} = 0;
+	return $self;
 }
 
 sub on_enter_state {
-    my ( $self, $game ) = @_;
-    $game->broadcast( dealing => { dealer => $self->{dealer} } );
-}
-
-sub on_message {
-    my ( $self, $game, $player, $msg ) = @_;
-    if ( $player->{in_game_id} eq $self->{dealer} ) {
-        $game->change_state( $self->{next} );
-    }
-    else {
-        $player->{client}->err('Not your turn');
-    }
+    my $self = shift;
+    $self->{game}->broadcast( dealing => { dealer => $self->{dealer} } );
 }
 
 sub on_leave_state {
-    my ( $self, $game ) = @_;
+    my $self = shift;
+	my $game = $self->{game};
+
     $self->{deck}->reset->shuffle;
 
     while ( my ( $k, $num ) = each( %{ $self->{deal} } ) ) {
@@ -58,4 +53,14 @@ sub on_leave_state {
     $game->{leader} = $self->{dealer};
 }
 
-__PACKAGE__->meta->make_immutable;
+on 'deal' => sub {
+    my ( $self, $player, $msg ) = @_;
+    if ( $player->{in_game_id} eq $self->{dealer} ) {
+        $self->{game}->change_state( $self->{next} );
+    }
+    else {
+        $player->{client}->err('Not your turn');
+    }
+};
+
+1;

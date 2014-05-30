@@ -1,8 +1,5 @@
 package Gamed::Game::Rook::PlayLogic;
 
-use Moose;
-use namespace::autoclean;
-
 sub is_valid_play {
     my ( $self, $card, $trick, $hand ) = @_;
     return unless $hand->contains($card);
@@ -76,4 +73,4 @@ sub on_round_end {
     }
 }
 
-__PACKAGE__->meta->make_immutable;
+1;

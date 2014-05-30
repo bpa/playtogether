@@ -11,7 +11,7 @@ use AnyEvent;
 use Mojo::IOLoop;
 use File::Basename 'dirname';
 use File::Spec::Functions 'catdir';
-use Gamed;
+use Gamed::Player;
 
 get '/' => sub {
 	shift->render_static('index.html');
@@ -21,7 +21,7 @@ websocket '/websocket' => sub {
 	my $self = shift;
 	$self->app->log->debug('WebSocket connected.');
 	Mojo::IOLoop->stream( $self->tx->connection )->timeout(3600);
-	my $player = Gamed::Player->new( { sock => $self } );
+	my $player = Gamed::Player->new($self);
 	if ($@) {
 		$self->send('{"cmd":"error","reason":"'.$@.'"}');
 		$self->finish;
@@ -32,7 +32,7 @@ websocket '/websocket' => sub {
 			message => sub {
 				my ( $self, $msg ) = @_;
 				eval {
-					Gamed::on_message( $player, $msg );
+					$player->handle( $msg );
 				};
 				$player->err($@) if $@;
 			} );
@@ -40,7 +40,7 @@ websocket '/websocket' => sub {
 		$self->on(
 			finish => sub {
 				my $self = shift;
-				Gamed::on_quit($player);
+				$player->disconnected();
 				delete $player->{sock};
 				$self->app->log->debug('WebSocket disconnected.');
 			} );

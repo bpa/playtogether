@@ -1,37 +1,22 @@
 package Gamed::Game::SpeedRisk::Playing;
 
 use v5.14;
-use Moose;
 use AnyEvent;
-require Gamed::Game::SpeedRisk::Placing;
-use namespace::autoclean;
 
-extends 'Gamed::State';
-
-has '+name' => ( default => 'Playing' );
-has 'next' => ( default => 'GAME_OVER', is => 'bare' );
+use parent 'Gamed::State';
 
 sub on_enter_state {
-    my ( $self, $game ) = @_;
+    my $self = shift;
+	my $game = $self->{game};
     $game->broadcast( state => { state => 'Playing' } );
     $self->{timer} = AE::timer $game->{board}{army_generation_period}, 0, sub {
         $self->generate_armies($game);
     };
 }
 
-sub on_message {
-    my ( $self, $game, $player, $message ) = @_;
-    for ( $message->{cmd} ) {
-        when ("move") {
-            $self->do_move( $game, $player, $message );
-        }
-        when ("place") {
-            Gamed::Game::SpeedRisk::Placing::on_message( $self, $game, $player, $message );
-        }
-        default {
-            $player->{client}->err('Invalid command');
-        }
-    }
+sub on_leave_state {
+    my $self = shift;
+    undef $self->{timer};
 }
 
 sub generate_armies {
@@ -69,8 +54,10 @@ sub generate_armies {
     }
 }
 
-sub do_move {
-    my ( $self, $game, $player, $message ) = @_;
+on 'move' {
+    my ( $self, $player, $message ) = @_;
+	my $game = $self->{game};
+
     my $f = $message->{from};
     my $t = $message->{to};
     my $a = $message->{armies};
@@ -160,13 +147,9 @@ sub do_attack {
     }
 }
 
-sub on_leave_state {
-    my ( $self, $game ) = @_;
-    undef $self->{timer};
-}
-
-sub on_quit {
-    my ( $self, $game, $player ) = @_;
+on 'quit' => sub {
+    my ( $self, $player, $msg ) = @_;
+	my $game = $self->{game};
     $player->{ready} = 1;
     my @remaining = grep { exists $_->{client} } values %{ $game->{players} };
     if ( @remaining == 1 ) {
@@ -175,4 +158,4 @@ sub on_quit {
     }
 }
 
-__PACKAGE__->meta->make_immutable;
+1;

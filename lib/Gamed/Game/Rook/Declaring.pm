@@ -1,23 +1,19 @@
 package Gamed::Game::Rook::Declaring;
 
-use Moose;
 use Gamed::Object;
-use namespace::clean;
-
-extends 'Gamed::State';
-
-has '+name' => ( default => 'Declaring' );
-has 'next' => ( is => 'bare', required => 1 );
+parent 'Gamed::State';
 
 sub on_enter_state {
-    my ( $self, $game ) = @_;
+    my $self = shift;
+	my $game = $self->{game};
     $game->{players}{ $game->{bidder} }{client}->send( 'nest', { nest => $game->{nest} } );
     $game->{players}{ $game->{bidder} }{cards}->add( $game->{nest} );
     delete $game->{nest};
 }
 
-sub on_message {
-    my ( $self, $game, $player, $msg ) = @_;
+on 'declare' => sub {
+    my ( $self, $player, $msg ) = @_;
+	my $game = $self->{game};
     if ( $player->{in_game_id} ne $game->{bidder} ) {
         $player->{client}->err('Not your turn');
         return;
@@ -44,4 +40,4 @@ sub on_message {
     }
 }
 
-__PACKAGE__->meta->make_immutable;
+1;

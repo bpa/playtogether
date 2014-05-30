@@ -1,45 +1,31 @@
 package Gamed::Test::Game::HiLo;
 
+use Gamed::Handler;
 use parent 'Gamed::Game';
-use Gamed::Const;
-use Moose;
-use namespace::autoclean;
 
-has 'num' => (
-	is => 'rw',
-	isa => 'Int',
-);
-
-has 'guesses' => (
-	is => 'rw',
-	isa => 'Int',
-	default => 0,
-);
-
-sub BUILD {
-    my $self = shift;
-    $self->{num} = int( rand(101) );
-}
-
-sub on_message {
-    my ( $self, $player, $message ) = @_;
-    $self->{guesses}++;
-    my $guess = $message->{guess};
-    my %resp = ( guesses => $self->{guesses} );
-    if ( $guess == $self->{num} ) {
-        $resp{answer} = 'Correct!';
-        $self->{num} = int( rand(101) );
-		$self->{guesses} = 0;
-    }
-    else {
-        $resp{answer} = $guess < $self->{num} ? 'Too low' : 'Too high';
-    }
-    $player->send( 'game', \%resp );
-}
-
-before 'on_join' => sub {
-    my ($self, $player) = @_;
-    die GAME_FULL() if keys %{ $self->{players} };
+on 'create' => sub {
+	my ($game, $player, $msg) = @_;
+	$game->{guesses} = 0;
+	$game->{number} = int(rand(100)) + 1;
 };
 
-__PACKAGE__->meta->make_immutable;
+before 'join' => sub {
+	my ($game, $player, $msg) = @_;
+	die "Game full" if keys %{ $game->{players} };
+};
+
+on 'guess' => sub {
+	my ($game, $player, $msg) = @_;
+	my %res = ( guesses => ++$game->{guesses} );
+	if ( $msg->{guess} == $game->{number} ) {
+		$res{answer} = 'Correct!';
+		$game->{number} = int( rand(101) ) + 1;
+		$game->{guesses} = 0;
+	}
+	else {
+		$res{answer} = $msg->{guess} < $game->{number} ? 'Too low' : 'Too high';
+	}
+	$player->send('guess', \%res);
+};
+
+1;

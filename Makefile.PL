@@ -16,8 +16,6 @@ WriteMakefile(
         'JSON::Any'            => 0,
 		'List::Util'           => 0,
         'Mojolicious::Lite'    => 0,
-        'Moose'                => 0,
-        'namespace::autoclean' => 0,
     },    # e.g., Module::Name => 1.1
     (   $] >= 5.005
         ?    ## Add these new keywords supported since 5.005

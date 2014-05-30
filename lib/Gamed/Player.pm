@@ -6,7 +6,23 @@ my $json = JSON->new->convert_blessed;
 
 sub new {
     my $pkg = shift;
-    bless $_[0], $pkg;
+    my $self = bless $_[0], $pkg;
+    $self->{handlers} = [ Gamed::Login->new() ];
+	return $self;
+}
+
+sub handle {
+    my ( $self, $msg_json ) = @_;
+    my $msg = $json->decode($msg_json);
+    my $cmd = $msg->{cmd};
+    if ( !defined $self->{id} ) {
+        $cmd = 'login';
+    }
+    for my $p (qw/before on after/) {
+        for my $h ( @{ $self->{handlers} } ) {
+            $h->handle( $self, $msg );
+        }
+    }
 }
 
 sub send {

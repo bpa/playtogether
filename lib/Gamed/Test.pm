@@ -4,6 +4,7 @@ use strict;
 use warnings;
 use Gamed 'Gamed::Test::Game';
 use Exporter 'import';
+use JSON;
 our @EXPORT = qw/json text client game broadcast broadcasted broadcast_one error/;
 
 Module::Pluggable::Object->new(

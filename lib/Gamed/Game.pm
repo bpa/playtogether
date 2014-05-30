@@ -1,10 +1,9 @@
 package Gamed::Game;
 
 use Gamed::Const;
-use Gamed::State;
+use Gamed::Handler;
 use Gamed::Object;
-use Moose;
-use namespace::autoclean;
+use Gamed::State;
 
 =head1 NAME
 
@@ -12,31 +11,17 @@ Gamed::Game - Superclass for all games played.
 
 =head1 SYNOPSIS
 
-Override whatever you need
-
-=head1 METHODS
-
-=head2 build 
-
-Initialize a game.  L<on_join> will be called immediately following return with the creator of the game.
+Sets up the basic event handling, augment with before, on, or after
 
 =cut
 
-has 'state' => (
-    is      => 'ro',
-    isa     => 'Gamed::State',
-    default => sub { Gamed::State->new( { name => 'Start' } ) },
-);
+on 'create' => sub {
+    my ( $game, $player, $msg ) = @_;
+    my $instance = $game->new($msg);
+};
 
-has 'next_player_id' => (
-    is  => 'bare',
-    isa => 'Int',
-);
-
-after 'on_join', 'on_message', 'on_quit' => \&change_state_if_requested;
-
-sub change_state_if_requested {
-    my $self = shift;
+after '*' => sub {
+    my ( $self, $player, $msg ) = @_;
     if ( exists $self->{_change_state} ) {
         my $state_name = delete $self->{_change_state};
         my $state      = $self->{state_table}{$state_name};
@@ -47,20 +32,8 @@ sub change_state_if_requested {
     }
 };
 
-sub create {
-	my $instance = shift->new(@_);
-	$instance->change_state_if_requested;
-	return $instance;
-}
-
-=head2 on_join($player) => Game::Const
-
-Handle a player joining.  If the game is full, or there is any issue joining, throw an exception and the player won't be able to join.
-
-=cut
-
-sub on_join {
-    my ( $self, $client ) = @_;
+on 'join' => sub {
+    my ( $self, $client, $msg ) = @_;
     my $player_id = $self->{ids}{ $client->{id} };
     my $player;
 
@@ -90,37 +63,22 @@ sub on_join {
         $players{ $p->{in_game_id} } = $p->{public};
     }
 
-    my %msg
-      = ( players => \%players, player => $client->{in_game_id} );
+    my %msg = ( players => \%players, player => $client->{in_game_id} );
     for my $p ( values %{ $self->{players} } ) {
         $p->{client}->send( join => \%msg ) if defined $p->{client};
     }
-}
+};
 
-=head2 on_message($player, $message)
-
-Handle a message from a player.
-
-=cut
-
-sub on_message {
-    my ( $self, $client, $message ) = @_;
-    $self->state->on_message( $self, $self->{players}{ $client->{in_game_id} },
-        $message );
-}
-
-=head2 on_quit($player)
-
-Handle a player leaving.
-
-=cut
-
-sub on_quit {
-    my ( $self, $client ) = @_;
+after 'quit' => sub {
+    my ( $self, $client, $msg ) = @_;
     delete $self->{players}{ $client->{in_game_id} }{client};
     $self->broadcast( quit => { player => $client->{in_game_id} } );
-    $self->state->on_quit( $self, $self->{players}{ $client->{in_game_id} } );
-}
+    eval {
+        if ( !keys %{ $self->{players} } ) {
+            delete $Gamed::game_instances{ $self->{name} };
+        }
+    };
+};
 
 sub change_state {
     my ( $self, $state_name ) = @_;
@@ -130,8 +88,8 @@ sub change_state {
 sub broadcast {
     my ( $self, $cmd, $msg ) = @_;
     for my $c ( values %{ $self->{players} } ) {
-        $c->{client}->send($cmd, $msg) if defined $c->{client};
+        $c->{client}->send( $cmd, $msg ) if defined $c->{client};
     }
 }
 
-__PACKAGE__->meta->make_immutable;
+1;

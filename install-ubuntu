@@ -1,3 +1,3 @@
-sudo apt-get install libanyevent-perl libauthen-passphrase-perl libdbi-perl libdata-uuid-perl libev-perl libmoose-perl libnamespace-autoclean-perl
+sudo apt-get install libanyevent-perl libauthen-passphrase-perl libdbi-perl libdata-uuid-perl libev-perl
 
 sudo cpan Mojolicious::Lite DBD::SQLite

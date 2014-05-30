@@ -1,20 +1,14 @@
 package Gamed::State::GameOver;
 
-use Moose;
-use namespace::autoclean;
+use parent 'Gamed::State';
 
-extends 'Gamed::State';
-
-has '+name' => ( default => 'GameOver' );
+sub new {
+	return bless { name => 'GameOver' }, shift;
+}
 
 sub on_enter_state {
-    my ( $self, $game ) = @_;
+    my $self = shift;
     #TODO: set timer to destroy game
 }
 
-sub on_message {
-    my ( $self, $game, $player, $msg ) = @_;
-	$player->{client}->err('Invalid command');
-}
-
-__PACKAGE__->meta->make_immutable;
+1;

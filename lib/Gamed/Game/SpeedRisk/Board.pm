@@ -1,19 +1,18 @@
 package Gamed::Game::SpeedRisk::Board;
 
-use Moose;
 use JSON::Any;
 use File::Slurp;
 use File::Spec::Functions 'catdir';
-use namespace::clean;
 
-has 'variant' => ( is => 'ro', required => 1 );
 my $json = JSON::Any->new;
 
-sub BUILD {
-    my $self = shift;
+sub new {
+    my ($pkg, $variant) = @_;
+	my $self = bless { variant => $variant }, $pkg;
+
     my $text = read_file(
-        catdir( $Gamed::public, "g", "SpeedRisk", $self->variant . ".json" ) );
-    die "No board named " . $self->variant . " known" unless $text;
+        catdir( $Gamed::public, "g", "SpeedRisk", $variant . ".json" ) );
+    die "No board named " . $variant . " known" unless $text;
     my $board = $json->decode($text);
     while ( my ( $k, $v ) = each %$board ) {
         $self->{$k} = $v;
@@ -40,6 +39,8 @@ sub BUILD {
     for my $c ( values %{ $self->{continents} } ) {
         $c->{territories} = [ map { $self->{map}{$_} } @{ $c->{territories} } ];
     }
+
+	return $self;
 }
 
-__PACKAGE__->meta->make_immutable;
+1;

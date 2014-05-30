@@ -1,20 +1,19 @@
 package Gamed::State::Bidding;
 
-use Moose;
 use Scalar::Util 'looks_like_number';
-use namespace::autoclean;
 
-extends 'Gamed::State';
+use Gamed::Handler;
+use parent 'Gamed::State';
 
-has '+name' => ( default => 'Bidding' );
-has 'next'  => ( is => 'ro', required => 1 );
-has 'min'   => ( is => 'ro', required => 1 );
-has 'max'   => ( is => 'ro', required => 1 );
-has 'valid' => ( is => 'ro', required => 1 );
-
-sub BUILD {
-    my ( $self, $opts ) = @_;
+sub new {
+    my ( $pkg, $self ) = @_;
+    bless $self, $pkg;
     $self->{starting_player} = 0;
+    $self->{name} ||= 'Bidding';
+    die "Missing next\n"  unless $self->{next};
+    die "Missing min\n"   unless looks_like_number( $self->{min} );
+    die "Missing max\n"   unless looks_like_number( $self->{max} );
+    die "Missing valid\n" unless ref( $self->{valid} ) eq 'CODE';
 }
 
 sub on_enter_state {
@@ -23,16 +22,26 @@ sub on_enter_state {
     $self->{starting_player}++;
 }
 
-sub on_message {
-    my ( $self, $game, $player, $msg ) = @_;
+sub on_leave_state {
+    my ( $self, $game ) = @_;
+    for ( values %{ $game->{players} } ) {
+        delete $_->{bid};
+        delete $_->{pass};
+    }
+    $game->{bidder} = delete $self->{bidder};
+    $game->{bid}    = delete $self->{bid};
+    $game->broadcast( bid => { bid => $game->{bid}, bidder => $game->{bidder} } );
+}
+
+on 'bid' => sub {
+    my ( $self, $player, $msg ) = @_;
+    my $game = $self->{game};
     if ( $player->{in_game_id} ne $self->{bidder} ) {
         $player->{client}->err('Not your turn');
         return;
     }
-    if ( !defined $msg->{bid} ) {
-        $player->{client}->err('No bid given');
-    }
-    elsif ( $msg->{bid} eq 'pass' ) {
+
+    if ( $msg->{bid} eq 'pass' ) {
         $player->{pass} = 1;
         $game->broadcast( bid => { bid => 'pass', player => $self->{bidder} } );
         $self->next_bidder($game);
@@ -57,18 +66,7 @@ sub on_message {
         $game->broadcast( bid => { bid => $msg->{bid}, player => $self->{bidder} } );
         $self->next_bidder($game);
     }
-}
-
-sub on_leave_state {
-    my ( $self, $game ) = @_;
-    for ( values %{ $game->{players} } ) {
-        delete $_->{bid};
-        delete $_->{pass};
-    }
-    $game->{bidder} = delete $self->{bidder};
-    $game->{bid}    = delete $self->{bid};
-    $game->broadcast( bid => { bid => $game->{bid}, bidder => $game->{bidder} } );
-}
+};
 
 sub next_bidder {
     my ( $self, $game ) = @_;
@@ -82,4 +80,4 @@ sub next_bidder {
     }
 }
 
-__PACKAGE__->meta->make_immutable;
+1;
