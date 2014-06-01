@@ -10,13 +10,11 @@ use FindBin;
 
 our $public = catdir( dirname(__FILE__), 'Gamed', 'public' );
 
-our %games;
-our %players;
-our %game_instances;
 our $VERSION = 0.1;
+our %games;
 
 sub import {
-    my ( $pgk, $path ) = ( @_, "Gamed::Game" );
+    my ( $pkg, $path ) = ( @_, "Gamed::Game" );
     my $finder = Module::Pluggable::Object->new(
         search_path => $path,
         require     => 1,

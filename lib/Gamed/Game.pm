@@ -15,11 +15,6 @@ Sets up the basic event handling, augment with before, on, or after
 
 =cut
 
-on 'create' => sub {
-    my ( $game, $player, $msg ) = @_;
-    my $instance = $game->new($msg);
-};
-
 after '*' => sub {
     my ( $self, $player, $msg ) = @_;
     if ( exists $self->{_change_state} ) {
@@ -57,8 +52,6 @@ on 'join' => sub {
     $player->{client_id}  = $client->{id};
 
     my %players;
-    $self->state->on_join( $self, $player );
-
     for my $p ( values %{ $self->{players} } ) {
         $players{ $p->{in_game_id} } = $p->{public};
     }

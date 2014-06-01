@@ -1,27 +1,24 @@
 package Gamed::Player;
 
 use JSON;
+use Gamed::Login;
 
 my $json = JSON->new->convert_blessed;
 
 sub new {
     my $pkg = shift;
     my $self = bless $_[0], $pkg;
-    $self->{handlers} = [ Gamed::Login->new() ];
-	return $self;
+    $self->{game} = Gamed::Login->new;
+    return $self;
 }
 
 sub handle {
     my ( $self, $msg_json ) = @_;
     my $msg = $json->decode($msg_json);
-    my $cmd = $msg->{cmd};
-    if ( !defined $self->{id} ) {
-        $cmd = 'login';
-    }
     for my $p (qw/before on after/) {
-        for my $h ( @{ $self->{handlers} } ) {
-            $h->handle( $self, $msg );
-        }
+		#These aren't put in a temporary variable because the game can change in a handler
+        ref($self->{game})->handle( $self->{game}, $self, $p, $msg );
+        ref($self->{game}{state})->handle( $self->{game}{state}, $self, $p, $msg ) if $self->{game}{state};
     }
 }
 

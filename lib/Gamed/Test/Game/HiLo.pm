@@ -11,7 +11,7 @@ on 'create' => sub {
 
 before 'join' => sub {
 	my ($game, $player, $msg) = @_;
-	die "Game full" if keys %{ $game->{players} };
+	die "Game full\n" if keys %{ $game->{players} };
 };
 
 on 'guess' => sub {

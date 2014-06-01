@@ -1,24 +1,28 @@
 package Gamed::Test::Player;
 
+use JSON;
 use Data::UUID;
 use Test::Builder;
+use Gamed::Test;
+use parent 'Gamed::Player';
+
+my $json = JSON->new->convert_blessed;
 my $tb   = Test::Builder->new;
 my $uuid = Data::UUID->new;
 
 sub new {
     my ( $pkg, $name ) = @_;
     $name ||= 'test';
-    bless { sock => SocketMock->new, id => $uuid->create_b64, name => $name }, shift;
+    my $self = bless Gamed::Player->new( { sock => SocketMock->new } ), $pkg;
+    $self->handle( { cmd => 'login', name => $name } );
+    $self->{sock}->got( { cmd => 'welcome' } );
+    return $self;
 }
 
 sub handle {
     my ( $self, $msg ) = @_;
-    my $cmd = $msg->{cmd};
-    for my $p (qw/before on after/) {
-        for my $h ( @{ $self->{handlers} } ) {
-            $h->handle( $self, $msg );
-        }
-    }
+    eval { Gamed::Player::handle( $self, $json->encode($msg) ); };
+    $self->err($@) if $@;
 }
 
 sub create {
@@ -42,7 +46,8 @@ sub join {
     }
     Gamed::Test::broadcast(
         $self->{game},
-        {   cmd     => 'join',
+        {
+            cmd     => 'join',
             players => \%players,
             player  => $self->{in_game_id},
         },

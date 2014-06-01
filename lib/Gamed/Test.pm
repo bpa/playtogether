@@ -2,6 +2,7 @@ package Gamed::Test;
 
 use strict;
 use warnings;
+use Gamed::Test::DB;
 use Gamed 'Gamed::Test::Game';
 use Exporter 'import';
 use JSON;
