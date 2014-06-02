@@ -2,6 +2,7 @@ package Gamed::Handler;
 
 use Exporter 'import';
 our @EXPORT = qw/before on after handle/;
+my %handler;
 
 sub before {
 	_install('before', @_);
@@ -18,23 +19,22 @@ sub after {
 sub _install {
 	my ($when, $cmd, $code) = @_;
 	my $pkg = caller(1);
-	*h = *{"$pkg\::_h"};
-	$h{$when}{$cmd} = $code;
+	$handler{$pkg}{$when}{$cmd} = $code;
 }
 
 sub handle {
-	my ($pkg, $self, $player, $when, $msg) = @_;
+	my ($pkg, $handle, $player, $when, $msg) = @_;
 	*isa = *{"$pkg\::ISA"};
 	if (@isa) {
 		my $parent = $isa[0];
-		$parent->handle($self, $player, $when, $msg);
+		handle($parent, $handle, $player, $when, $msg);
 	}
-	*h = *{"$pkg\::_h"};
-	my $p = $h{$when};
-	return unless $p;
-	my $cmd = $msg->{cmd};
-	$p->{$cmd}($self, $player, $msg) if $p->{$cmd};
-	$p->{'*'}($self, $player, $msg) if $p->{'*'};
+	my $p = $handler{$pkg}{$when};
+	for my $cmd ($msg->{cmd}, '*') {
+		print($pkg, " $when ", $msg->{cmd}, "\n") if $p->{$cmd};
+		$p->{$cmd}($handle, $player, $msg) if $p->{$cmd};
+	}
+	handle(ref($handle->{state}), $handle->{state}, $player, $when, $msg) if defined $handle->{state};
 }
 
 1;

@@ -4,8 +4,8 @@ use Gamed::Handler;
 use parent 'Gamed::State';
 
 sub new {
-    my ( $pkg, $opts ) = @_;
-    my $self = bless $opts, $pkg;
+    my ( $pkg, %opts ) = @_;
+    my $self = bless \%opts, $pkg;
     $self->{name} ||= 'PlayTricks';
     die "No logic given\n" unless $self->{logic}->can('is_valid_play');
 }

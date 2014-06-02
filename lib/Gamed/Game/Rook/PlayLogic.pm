@@ -1,5 +1,7 @@
 package Gamed::Game::Rook::PlayLogic;
 
+sub new { bless {}, shift; }
+
 sub is_valid_play {
     my ( $self, $card, $trick, $hand ) = @_;
     return unless $hand->contains($card);

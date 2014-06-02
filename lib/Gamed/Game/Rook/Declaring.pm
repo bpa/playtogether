@@ -1,7 +1,8 @@
 package Gamed::Game::Rook::Declaring;
 
+use Gamed::Handler;
 use Gamed::Object;
-parent 'Gamed::State';
+use parent 'Gamed::State';
 
 sub on_enter_state {
     my $self = shift;
@@ -38,6 +39,6 @@ on 'declare' => sub {
         $game->broadcast( trump => { trump => $game->{trump} } );
         $game->change_state( $self->{next} );
     }
-}
+};
 
 1;

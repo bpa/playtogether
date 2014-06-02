@@ -15,16 +15,9 @@ Sets up the basic event handling, augment with before, on, or after
 
 =cut
 
-after '*' => sub {
-    my ( $self, $player, $msg ) = @_;
-    if ( exists $self->{_change_state} ) {
-        my $state_name = delete $self->{_change_state};
-        my $state      = $self->{state_table}{$state_name};
-        die "No state '$state_name' found\n" unless defined $state;
-        $self->{state}->on_leave_state($self);
-        $self->{state} = $state;
-        $state->on_enter_state($self);
-    }
+before 'join' => sub {
+	my ($game, $player, $msg) = @_;
+	die "Game full\n" if defined $game->{max_players} && keys(%{ $game->{players} }) >= $game->{max_players};
 };
 
 on 'join' => sub {
@@ -72,11 +65,6 @@ after 'quit' => sub {
         }
     };
 };
-
-sub change_state {
-    my ( $self, $state_name ) = @_;
-    $self->{_change_state} = $state_name;
-}
 
 sub broadcast {
     my ( $self, $cmd, $msg ) = @_;

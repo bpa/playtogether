@@ -7,8 +7,8 @@ use Gamed::Handler;
 use parent 'Gamed::State';
 
 sub new {
-    my ( $pkg, $self ) = @_;
-	bless $self, $pkg;
+    my ( $pkg, %opts ) = @_;
+	my $self = bless \%opts, $pkg;
 
 	$self->{name} ||= 'Dealing';
 	die "No next given\n" unless $self->{next};

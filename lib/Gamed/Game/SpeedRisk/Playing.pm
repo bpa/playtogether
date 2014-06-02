@@ -1,9 +1,9 @@
 package Gamed::Game::SpeedRisk::Playing;
 
-use v5.14;
 use AnyEvent;
-
+use Gamed::Handler;
 use parent 'Gamed::State';
+use diagnostics;
 
 sub on_enter_state {
     my $self = shift;
@@ -54,7 +54,7 @@ sub generate_armies {
     }
 }
 
-on 'move' {
+on 'move' => sub {
     my ( $self, $player, $message ) = @_;
 	my $game = $self->{game};
 
@@ -93,7 +93,7 @@ on 'move' {
     else {
         do_attack( $game, $from, $to, $a );
     }
-}
+};
 
 sub send_update {
 	my ($game, $from, $to, $cmd) = @_;
@@ -113,10 +113,8 @@ sub do_attack {
     my $defender = $game->{players}{ $to->{owner} };
     my $attacker = $game->{players}{ $from->{owner} };
 
-    my @attack
-      = sort { $b <=> $a } map { int( rand(6) ) } 1 .. ( $armies > 3 ? 3 : $armies );
-    my @defend
-      = sort { $b <=> $a } map { int( rand(6) ) } 1 .. ( $to->{armies} > 1 ? 2 : 1 );
+    my @attack = sort { $b <=> $a } map { int( rand(6) ) } 1 .. ( $armies > 3 ? 3 : $armies );
+    my @defend = sort { $b <=> $a } map { int( rand(6) ) } 1 .. ( $to->{armies} > 1 ? 2 : 1 );
 
     for my $die ( 0 .. ( @attack < @defend ? $#attack : $#defend ) ) {
         if ( $attack[$die] > $defend[$die] ) {
@@ -156,6 +154,6 @@ on 'quit' => sub {
         $game->broadcast( victory => { player => $remaining[0]->{in_game_id} } );
         $game->change_state('GAME_OVER');
     }
-}
+};
 
 1;

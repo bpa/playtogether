@@ -6,14 +6,15 @@ use Gamed::Handler;
 use parent 'Gamed::State';
 
 sub new {
-    my ( $pkg, $self ) = @_;
-    bless $self, $pkg;
+    my ( $pkg, %opts ) = @_;
+    my $self = bless \%opts, $pkg;
     $self->{starting_player} = 0;
     $self->{name} ||= 'Bidding';
     die "Missing next\n"  unless $self->{next};
     die "Missing min\n"   unless looks_like_number( $self->{min} );
     die "Missing max\n"   unless looks_like_number( $self->{max} );
     die "Missing valid\n" unless ref( $self->{valid} ) eq 'CODE';
+	return $self;
 }
 
 sub on_enter_state {

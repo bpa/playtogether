@@ -6,7 +6,7 @@ use Gamed::Test::DB;
 use Gamed 'Gamed::Test::Game';
 use Exporter 'import';
 use JSON;
-our @EXPORT = qw/json text client game broadcast broadcasted broadcast_one error/;
+our @EXPORT = qw/json text game broadcast broadcasted broadcast_one error/;
 
 Module::Pluggable::Object->new(
     search_path => 'Gamed::Test',
@@ -20,43 +20,48 @@ my $tb = Test::Builder->new;
 my $j = JSON->new->convert_blessed;
 sub json ($) { $j->encode( $_[0] ) }
 sub hash ($) { $j->decode( $_[0] ) }
-sub client   { Gamed::Test::Player->new(shift) }
 
 sub game {
     local $Test::Builder::Level = $Test::Builder::Level + 1;
     my ( $players, $opts, $post_join_state, $pre_join_state ) = @_;
+
+	#Create each player
+	my @connections = map { Gamed::Test::Player->new($_) } @$players;
+
+	#Create game with first player
+    $opts->{cmd} = 'create';
     $opts->{game} ||= 'Test';
     $opts->{name} ||= 'test';
-    Gamed::on_create({}, $opts);
-    my @connections;
-    my $instance    = $Gamed::game_instances{ $opts->{name} };
+	$connections[0]->handle($opts);
+	$connections[0]->got_one($opts);
+
+	#Initialize game to test state
+    my $instance    = $Gamed::Lobby::game_instances{ $opts->{name} };
     my $player_data = delete $opts->{players};
     while ( my ( $k, $v ) = each %$opts ) {
         $instance->{$k} = $v;
     }
 
+	#Switch to appropriate state for joining
     if ($pre_join_state) {
         $instance->change_state($pre_join_state);
     }
 
+	#Have all players join
     $instance->change_state_if_requested;
-    for my $i ( 0 .. $#{$players} ) {
-        my $player = $players->[$i];
-        my $c      = client($player);
-        if ( defined $instance->{players}{$i} ) {
-            $instance->{next_player_id}++;
-            $instance->{ids}{ $c->{id} } = $i;
-        }
-        Gamed::on_join( $c, { name => $opts->{name} });
-        push @connections, $c;
-        $_->got( { cmd => 'join' } ) for @connections;
+    for my $c (@connections) {
+		$c->handle({ cmd => 'join', name=>$opts->{name}});
+        $_->got( { cmd => 'join' } );
     }
+
+	#Initialize all player states
     while ( my ( $p, $data ) = each %$player_data ) {
         while ( my ( $k, $v ) = each %$data ) {
             $instance->{players}{$p}{$k} = $v;
         }
     }
 
+	#Switch to state to be tested
     if ($post_join_state) {
         $instance->change_state($post_join_state);
     }

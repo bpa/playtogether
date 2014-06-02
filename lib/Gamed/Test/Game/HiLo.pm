@@ -7,11 +7,7 @@ on 'create' => sub {
 	my ($game, $player, $msg) = @_;
 	$game->{guesses} = 0;
 	$game->{number} = int(rand(100)) + 1;
-};
-
-before 'join' => sub {
-	my ($game, $player, $msg) = @_;
-	die "Game full\n" if keys %{ $game->{players} };
+	$game->{max_players} = 1;
 };
 
 on 'guess' => sub {

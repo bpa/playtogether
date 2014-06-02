@@ -1,18 +1,14 @@
 package Gamed::State::WaitingForPlayers;
 
+use strict;
+use warnings;
+
 use Gamed::Handler;
 use parent 'Gamed::State';
 
-sub new {
-    my ( $pkg, $opts ) = @_;
-    my $self = bless $opts, $pkg;
-    $self->{name} ||= 'WaitingForPlayers';
-    die "Missing next state\n" unless $self->{next};
-    return $self;
-}
-
 sub on_enter_state {
-    my ( $self, $game ) = @_;
+    my $self = shift;
+	my $game = $self->{game};
     if ( defined $game->{seats} ) {
         $self->{available} = $game->{seats};
     }
@@ -48,14 +44,17 @@ on 'list_players' => sub {
 on 'ready' => sub {
     my ( $self, $player, $msg ) = @_;
     my $game = $self->{game};
-    if ( keys %{ $game->{players} } >= $game->{min_players} ) {
+	print "Ready? ";
+    if ( keys %{ $game->{players} } >= $self->{min} ) {
+		print "yes\n";
         $player->{ready} = 1;
         $game->broadcast( ready => { player => $player->{in_game_id} } );
         $game->change_state( $self->{next} )
           unless grep { !$_->{ready} } values %{ $game->{players} };
     }
     else {
-        $player->{client}->err("Not enough players");
+		print "no\n";
+        $player->err("Not enough players");
     }
 };
 

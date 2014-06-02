@@ -3,7 +3,6 @@ package Gamed::Test::Player;
 use JSON;
 use Data::UUID;
 use Test::Builder;
-use Gamed::Test;
 use parent 'Gamed::Player';
 
 my $json = JSON->new->convert_blessed;
@@ -75,7 +74,6 @@ sub game {
 sub broadcast {
     my ( $self, $msg, $test, $desc ) = @_;
     $test ||= $msg;
-    print Dumper $msg;
     $self->handle($msg);
     local $Test::Builder::Level = $Test::Builder::Level + 1;
     Gamed::Test::broadcast_one( $self->{game}, $test, $desc );

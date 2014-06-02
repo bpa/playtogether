@@ -11,10 +11,12 @@ on 'games' => sub {
     my @inst;
     while ( my ( $k, $v ) = each %game_instances ) {
         push @inst,
-          { name    => $k,
+          {
+            name    => $k,
             game    => $v->{game},
             players => [ map { $_->{name} } $v->{players} ],
-            status  => $v->{status} };
+            status  => $v->{status}
+          };
     }
     $player->send( games => { games => [ sort keys %Gamed::games ], instances => \@inst } );
 };
@@ -33,8 +35,9 @@ on 'create' => sub {
             $game->{name}                   = $msg->{name};
             $game->{game}                   = $msg->{game};
             $game_instances{ $msg->{name} } = $game;
+
             ref($game)->handle( $game, $player, 'on', $msg );
-            for my $p ( values %players ) {
+            for my $p ( values %Gamed::Login::players ) {
                 $p->send( create => { name => $msg->{name}, game => $msg->{game} } )
                   if defined $p->{sock} && !defined $p->{game};
             }

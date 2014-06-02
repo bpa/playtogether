@@ -11,7 +11,7 @@ sub new {
 	my $self = bless { variant => $variant }, $pkg;
 
     my $text = read_file(
-        catdir( $Gamed::public, "g", "SpeedRisk", $variant . ".json" ) );
+        catdir( $Gamed::public, "g", "SpeedRisk", $variant, "board.json" ) );
     die "No board named " . $variant . " known" unless $text;
     my $board = $json->decode($text);
     while ( my ( $k, $v ) = each %$board ) {

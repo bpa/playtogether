@@ -14,11 +14,10 @@ sub new {
 
 sub handle {
     my ( $self, $msg_json ) = @_;
+	print "$msg_json\n";
     my $msg = $json->decode($msg_json);
     for my $p (qw/before on after/) {
-		#These aren't put in a temporary variable because the game can change in a handler
         ref($self->{game})->handle( $self->{game}, $self, $p, $msg );
-        ref($self->{game}{state})->handle( $self->{game}{state}, $self, $p, $msg ) if $self->{game}{state};
     }
 }
 
