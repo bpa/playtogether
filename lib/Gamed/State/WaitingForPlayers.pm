@@ -44,16 +44,13 @@ on 'list_players' => sub {
 on 'ready' => sub {
     my ( $self, $player, $msg ) = @_;
     my $game = $self->{game};
-	print "Ready? ";
     if ( keys %{ $game->{players} } >= $self->{min} ) {
-		print "yes\n";
-        $player->{ready} = 1;
+    	$game->{players}{ $player->{in_game_id} }{ready} = 1;
         $game->broadcast( ready => { player => $player->{in_game_id} } );
         $game->change_state( $self->{next} )
           unless grep { !$_->{ready} } values %{ $game->{players} };
     }
     else {
-		print "no\n";
         $player->err("Not enough players");
     }
 };

@@ -36,7 +36,7 @@ on 'create' => sub {
             $game->{game}                   = $msg->{game};
             $game_instances{ $msg->{name} } = $game;
 
-            ref($game)->handle( $game, $player, 'on', $msg );
+			$game->handle( $player, $msg );
             for my $p ( values %Gamed::Login::players ) {
                 $p->send( create => { name => $msg->{name}, game => $msg->{game} } )
                   if defined $p->{sock} && !defined $p->{game};
@@ -60,7 +60,7 @@ before 'join' => sub {
         die "No game named '$name' exists\n";
     }
     else {
-        ref($instance)->handle( $instance, $player, 'before', $msg );
+        $instance->handle( $player, $msg );
         $player->{game} = $instance;
     }
 };

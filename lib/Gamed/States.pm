@@ -2,6 +2,7 @@ package Gamed::States;
 
 import Gamed::Handler;
 
+use Data::Dumper;
 sub import {
     my ( $pkg, $state_table ) = @_;
     my $callpkg = caller(0);

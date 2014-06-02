@@ -3,7 +3,6 @@ package Gamed::Game::SpeedRisk::Playing;
 use AnyEvent;
 use Gamed::Handler;
 use parent 'Gamed::State';
-use diagnostics;
 
 sub on_enter_state {
     my $self = shift;

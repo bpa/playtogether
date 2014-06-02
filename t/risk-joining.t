@@ -35,7 +35,7 @@ subtest 'start 2 player game' => sub {
 	broadcast( $risk, { cmd => 'ready', player => 1 } );
     broadcast( $risk, { cmd => 'armies' } );
     broadcast( $risk, { state => 'Placing' } );
-    is( $risk->{state}->name, 'Placing' );
+    is( $risk->{state}{name}, 'Placing' );
 
     done();
 };
@@ -57,7 +57,7 @@ subtest 'drop/rejoin and start game' => sub {
 	broadcast( $risk, { cmd => 'ready' } );
     broadcast( $risk, { cmd => 'armies' } );
     broadcast( $risk, { state => 'Placing' } );
-    is( $risk->state->name, 'Placing' );
+    is( $risk->{state}{name}, 'Placing' );
 
     done();
 };
@@ -71,7 +71,7 @@ subtest 'dropping unready player can start game' => sub {
         'P2 is ready'
     );
     $p1->quit;
-    is( $risk->{state}->name , 'WaitingForPlayers', 'Need enough players' );
+    is( $risk->{state}{name} , 'WaitingForPlayers', 'Need enough players' );
 
     $p1->join('test');
     $p3->join('test');
@@ -80,7 +80,7 @@ subtest 'dropping unready player can start game' => sub {
 
     broadcast( $risk, { cmd => 'armies' } );
     broadcast( $risk, { state => 'Placing' } );
-    is( $risk->{state}->name, 'Placing' );
+    is( $risk->{state}{name}, 'Placing' );
 
     done();
 };
@@ -93,7 +93,7 @@ subtest 'game starts automatically with enough players' => sub {
     }
     broadcast( $risk, { cmd => 'armies' } );
     broadcast( $risk, { state => 'Placing' } );
-    is( $risk->{state}->name, 'Placing' );
+    is( $risk->{state}{name}, 'Placing' );
 
     done();
 };
@@ -124,7 +124,7 @@ subtest 'set theme' => sub {
     my $risk = $p1->create( 'SpeedRisk', 'test', { board => 'Classic' } );
     $p2->join('test');
 
-    $risk->state->{themes}{test} = ();
+    $risk->{themes}{test} = ();
     $p1->game( { cmd => 'theme', theme => undef },  error => 'Invalid theme' );
     $p1->game( { cmd => 'theme', theme => "none" }, error => 'Invalid theme' );
     $p1->broadcast( { cmd => 'theme', theme => "test" },
