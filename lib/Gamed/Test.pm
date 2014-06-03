@@ -24,7 +24,7 @@ sub hash ($) { $j->decode( $_[0] ) }
 sub game {
     local $Test::Builder::Level = $Test::Builder::Level + 1;
     my ( $players, $opts, $post_join_state, $pre_join_state ) = @_;
-	my $state_table = delete $opts->{state_table};
+    my $player_data = delete $opts->{players};
 
 	#Create each player
 	my @connections = map { Gamed::Test::Player->new($_) } @$players;
@@ -38,15 +38,6 @@ sub game {
 
 	#Initialize game to test state
     my $instance    = $Gamed::instance{ $opts->{name} };
-	while ( my ( $k, $v ) = each %$state_table ) {
-		$instance->{states}{$k} = $v;
-		$instance->{states}{$k}{game} = $instance;
-	}
-
-    my $player_data = delete $opts->{players};
-    while ( my ( $k, $v ) = each %$opts ) {
-        $instance->{$k} = $v;
-    }
 
 	#Switch to appropriate state for joining
     if ($pre_join_state) {

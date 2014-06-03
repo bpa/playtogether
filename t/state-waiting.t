@@ -6,15 +6,11 @@ use Gamed::Test;
 
 subtest 'seat names given out' => sub {
     my ( $game, $p1, $p2 ) = game(
-        [ 1, 2 ],
+
         {
-            seats       => [ 'n', 's' ],
-            state_table => {
-                start => Gamed::State::WaitingForPlayers->new( next => 'end' ),
-                end => Gamed::State->new( next => 'end', name => 'end' )
-            }
+            game  => 'Waiting',
+            seats => [ 'n', 's' ],
         },
-        undef, 'start'
     );
     is( $p1->{in_game_id}, 'n' );
     is( $p2->{in_game_id}, 's' );
@@ -31,8 +27,7 @@ subtest 'drop/rejoin with names' => sub {
             seats       => [qw/n e s w/],
             state_table => {
                 start => Gamed::State::WaitingForPlayers->new( next => 'end' ),
-                end   => Gamed::State->new( name                    => 'end' )
-            }
+                end   => Gamed::State->new( name                    => 'end' ) }
         },
         undef, 'start'
     );
@@ -56,8 +51,7 @@ subtest 'game starts automatically with all players' => sub {
             seats       => [qw/n e s w/],
             state_table => {
                 start => Gamed::State::WaitingForPlayers->new( next => 'end' ),
-                end   => Gamed::State->new( name                    => 'end' )
-            }
+                end   => Gamed::State->new( name                    => 'end' ) }
         },
         undef, 'start'
     );
@@ -76,3 +70,14 @@ sub done {
     done_testing();
 }
 done_testing();
+
+package Waiting;
+
+use parent 'Gamed::Test::Game::Test';
+
+use Gamed::State {
+    start => Gamed::State::WaitingForPlayers->new( next => 'end' ),
+    end   => Gamed::State::GameOver->new,
+};
+
+1;
