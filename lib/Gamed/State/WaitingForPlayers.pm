@@ -8,7 +8,7 @@ use parent 'Gamed::State';
 
 sub on_enter_state {
     my $self = shift;
-	my $game = $self->{game};
+    my $game = $self->{game};
     if ( defined $game->{seats} ) {
         $self->{available} = $game->{seats};
     }
@@ -41,33 +41,44 @@ on 'list_players' => sub {
     $player->send( 'list_players' => { players => \@players } );
 };
 
+use Data::Dumper;
 on 'ready' => sub {
-    my ( $self, $player, $msg ) = @_;
+    my ( $self, $client, $msg ) = @_;
     my $game = $self->{game};
     if ( keys %{ $game->{players} } >= $self->{min} ) {
-    	$game->{players}{ $player->{in_game_id} }{ready} = 1;
-        $game->broadcast( ready => { player => $player->{in_game_id} } );
+	print "-"x40,"\n";
+	for my $p (values %{$game->{players}} ) {
+		my $c = delete $p->{client};
+		print Dumper $p;
+		#print $p->{public}{name}, ' ', $p->{public}{ready}, "\n"
+		$p->{client} = $c;
+	}
+        $game->{players}{ $client->{in_game_id} }{public}{ready} = 1;
+        $game->broadcast( ready => { player => $client->{in_game_id} } );
         $game->change_state( $self->{next} )
-          unless grep { !$_->{ready} } values %{ $game->{players} };
+          unless grep { !$_->{public}{ready} } values %{ $game->{players} };
     }
     else {
-        $player->err("Not enough players");
+        $client->err("Not enough players");
     }
 };
 
 on 'not ready' => sub {
     my ( $self, $player, $msg ) = @_;
     my $game = $self->{game};
-    $game->{players}{ $player->{in_game_id} }{ready} = 0;
+    $game->{players}{ $player->{in_game_id} }{public}{ready} = 0;
     $game->broadcast( 'not ready' => { player => $player->{in_game_id} } );
 };
 
 on 'quit' => sub {
     my ( $self, $player, $msg ) = @_;
+	my $g = delete $player->{game};
+	print Dumper $player;
+	$player->{game} = $g;
     my $game = $self->{game};
 
     delete $game->{players}{ $player->{in_game_id} };
-    delete $game->{ids}{ $player->{client_id} };
+    delete $game->{ids}{ $player->{id} };
     if ( defined( $self->{available} ) ) {
         unshift @{ $self->{available} }, $player->{in_game_id};
     }

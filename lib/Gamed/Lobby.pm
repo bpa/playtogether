@@ -2,14 +2,12 @@ package Gamed::Lobby;
 
 use Gamed::Handler;
 
-our %game_instances;
-
 sub new { bless {}, shift; }
 
 on 'games' => sub {
     my ( $game, $player, $msg ) = @_;
     my @inst;
-    while ( my ( $k, $v ) = each %game_instances ) {
+    while ( my ( $k, $v ) = each %Gamed::instance ) {
         push @inst,
           {
             name    => $k,
@@ -26,15 +24,15 @@ on 'create' => sub {
     die "No name given\n"     unless exists $msg->{name};
     die "No game specified\n" unless exists $msg->{game};
 
-    if ( exists $game_instances{ $msg->{name} } ) {
+    if ( exists $Gamed::instance{ $msg->{name} } ) {
         die "A game named '" . $msg->{name} . "' already exists.\n";
     }
-    if ( exists $Gamed::games{ $msg->{game} } ) {
+    if ( exists $Gamed::game{ $msg->{game} } ) {
         eval {
-            my $game = bless {}, $Gamed::games{ $msg->{game} };
+            my $game = bless {}, $Gamed::game{ $msg->{game} };
             $game->{name}                   = $msg->{name};
             $game->{game}                   = $msg->{game};
-            $game_instances{ $msg->{name} } = $game;
+            $Gamed::instance{ $msg->{name} } = $game;
 
 			$game->handle( $player, $msg );
             for my $p ( values %Gamed::Login::players ) {
@@ -43,7 +41,7 @@ on 'create' => sub {
             }
         };
         if ($@) {
-            delete $game_instances{ $msg->{name} };
+            delete $Gamed::instance{ $msg->{name} };
             die $@;
         }
     }
@@ -55,7 +53,7 @@ on 'create' => sub {
 before 'join' => sub {
     my ( $game, $player, $msg ) = @_;
     my $name     = $msg->{name};
-    my $instance = $game_instances{$name};
+    my $instance = $Gamed::instance{$name};
     if ( !defined $instance ) {
         die "No game named '$name' exists\n";
     }

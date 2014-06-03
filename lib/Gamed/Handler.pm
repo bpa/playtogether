@@ -2,7 +2,7 @@ package Gamed::Handler;
 
 use Exporter 'import';
 our @EXPORT = qw/before on after handle/;
-my %handler;
+our %handler;
 
 sub before {
     _install( 'before', @_ );

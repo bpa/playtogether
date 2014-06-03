@@ -11,7 +11,8 @@ use FindBin;
 our $public = catdir( dirname(__FILE__), 'Gamed', 'public' );
 
 our $VERSION = 0.1;
-our %games;
+our %game;
+our %instance;
 
 sub import {
     my ( $pkg, $path ) = ( @_, "Gamed::Game" );
@@ -22,7 +23,7 @@ sub import {
     );
     for my $game ( $finder->plugins ) {
         if ( my ($shortname) = $game =~ /::Game::([^:]+)$/ ) {
-            $games{$shortname} = $game;
+            $game{$shortname} = $game;
         }
     }
 }

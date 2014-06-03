@@ -73,4 +73,9 @@ sub broadcast {
     }
 }
 
+sub player {
+	my ($self, $client) = @_;
+	return $self->{players}{$client->{in_game_id}};
+}
+
 1;

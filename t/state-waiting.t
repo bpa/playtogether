@@ -8,8 +8,11 @@ subtest 'seat names given out' => sub {
     my ( $game, $p1, $p2 ) = game(
         [ 1, 2 ],
         {
-            seats => [ 'n', 's' ],
-            state_table => { start => Gamed::State::WaitingForPlayers->new( next => 'end' ), end => Gamed::State->new( name => 'end' ) }
+            seats       => [ 'n', 's' ],
+            state_table => {
+                start => Gamed::State::WaitingForPlayers->new( next => 'end' ),
+                end => Gamed::State->new( next => 'end', name => 'end' )
+            }
         },
         undef, 'start'
     );
@@ -17,23 +20,26 @@ subtest 'seat names given out' => sub {
     is( $p2->{in_game_id}, 's' );
     is( ~~ keys %{ $game->{players} }, 2 );
 
-	done();
+    done();
 };
 
 subtest 'drop/rejoin with names' => sub {
-	my $p3 = Gamed::Test::Player->new('3');
+    my $p3 = Gamed::Test::Player->new('3');
     my ( $game, $p1, $p2 ) = game(
         [ 1, 2 ],
         {
-            seats => [ qw/n e s w/ ],
-            state_table => { start => Gamed::State::WaitingForPlayers->new( next => 'end' ), end => Gamed::State->new( name => 'end' ) }
+            seats       => [qw/n e s w/],
+            state_table => {
+                start => Gamed::State::WaitingForPlayers->new( next => 'end' ),
+                end   => Gamed::State->new( name                    => 'end' )
+            }
         },
         undef, 'start'
     );
     is( $p1->{in_game_id}, 'n' );
     is( $p2->{in_game_id}, 'e' );
 
-	$p1->quit();
+    $p1->quit();
     $p3->join('test');
     is( $p3->{in_game_id}, 'n' );
 
@@ -47,8 +53,11 @@ subtest 'game starts automatically with all players' => sub {
     my ( $game, $p1, $p2, $p3, $p4 ) = game(
         [ 1, 2, 3, 4 ],
         {
-            seats => [ qw/n e s w/ ],
-            state_table => { start => Gamed::State::WaitingForPlayers->new( next => 'end' ), end => Gamed::State->new( name => 'end' ) }
+            seats       => [qw/n e s w/],
+            state_table => {
+                start => Gamed::State::WaitingForPlayers->new( next => 'end' ),
+                end   => Gamed::State->new( name                    => 'end' )
+            }
         },
         undef, 'start'
     );
@@ -57,7 +66,7 @@ subtest 'game starts automatically with all players' => sub {
     is( $p3->{in_game_id}, 's' );
     is( $p4->{in_game_id}, 'w' );
 
-	is( $game->state->name, 'end' );
+    is( $game->state->name, 'end' );
 
     done();
 };

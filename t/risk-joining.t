@@ -14,9 +14,9 @@ subtest 'start 2 player game' => sub {
     is( $p1->{in_game_id}, 0 );
     is( ~~ keys %{ $risk->{players} }, 1 );
 
-    ok( !$risk->{players}{0}{ready} );
+    ok( !$risk->{players}{0}{public}{ready} );
     $p1->game( { cmd => 'ready' }, error 'Not enough players' );
-    ok( !$risk->{players}{0}{ready} );
+    ok( !$risk->{players}{0}{public}{ready} );
 
     $p2->join('test');
     is( $p2->{in_game_id}, 1 );
@@ -24,11 +24,11 @@ subtest 'start 2 player game' => sub {
 
     #Toggle ready state
     $p1->broadcast( { cmd => 'ready' }, { cmd => 'ready', player => 0 } );
-    ok( $risk->{players}{0}{ready}, "N is ready" );
+    ok( $risk->{players}{0}{public}{ready}, "N is ready" );
     $p1->broadcast( { cmd => 'not ready' }, { cmd => 'not ready', player => 0 } );
-    ok( !$risk->{players}{0}{ready}, "N is not ready" );
+    ok( !$risk->{players}{0}{public}{ready}, "N is not ready" );
     $p1->broadcast( { cmd => 'ready' }, { cmd => 'ready', player => 0 } );
-    ok( $risk->{players}{0}{ready}, "N is ready" );
+    ok( $risk->{players}{0}{public}{ready}, "N is ready" );
 
     #Everyone is finally ready
     $p2->game( { cmd => 'ready' } );
@@ -137,9 +137,9 @@ subtest 'set theme' => sub {
 sub done {
     for my $p ( $p1, $p2, $p3, $p4 ) {
         $p->{sock}{packets} = ();
-        delete $p->{game};
+        $p->{game} = Gamed::Lobby->new;;
     }
-    delete $Gamed::game_instances{test};
+    delete $Gamed::instance{test};
     done_testing();
 }
 done_testing();
