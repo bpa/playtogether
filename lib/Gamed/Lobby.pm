@@ -37,7 +37,7 @@ on 'create' => sub {
 			$game->handle( $player, $msg );
             for my $p ( values %Gamed::Login::players ) {
                 $p->send( create => { name => $msg->{name}, game => $msg->{game} } )
-                  if defined $p->{sock} && !defined $p->{game};
+                  if ref($p->{game}) eq 'Gamed::Lobby';;
             }
         };
         if ($@) {

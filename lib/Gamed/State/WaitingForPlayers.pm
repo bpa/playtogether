@@ -22,10 +22,10 @@ on 'join' => sub {
 
     if ( defined $self->{available} ) {
         my $id = shift @{ $self->{available} };
-        $game->{ids}{ $player->{client}{id} } = $id;
-        $game->{players}{$id}                 = delete $game->{players}{ $player->{in_game_id} };
-        $player->{in_game_id}                 = $id;
-        $player->{client}{in_game_id}         = $id;
+        $game->{ids}{ $player->{id} } = $id;
+        $game->{players}{$id}         = delete $game->{players}{ $player->{in_game_id} };
+        $player->{in_game_id}         = $id;
+        $player->{in_game_id}         = $id;
     }
     my $players = grep { defined $_->{client} } values %{ $game->{players} };
     $game->change_state( $self->{next} )
@@ -41,18 +41,17 @@ on 'list_players' => sub {
     $player->send( 'list_players' => { players => \@players } );
 };
 
-use Data::Dumper;
 on 'ready' => sub {
     my ( $self, $client, $msg ) = @_;
     my $game = $self->{game};
     if ( keys %{ $game->{players} } >= $self->{min} ) {
-	print "-"x40,"\n";
-	for my $p (values %{$game->{players}} ) {
-		my $c = delete $p->{client};
-		print Dumper $p;
-		#print $p->{public}{name}, ' ', $p->{public}{ready}, "\n"
-		$p->{client} = $c;
-	}
+        print "-" x 40, "\n";
+        for my $p ( values %{ $game->{players} } ) {
+            my $c = delete $p->{client};
+
+            #print $p->{public}{name}, ' ', $p->{public}{ready}, "\n"
+            $p->{client} = $c;
+        }
         $game->{players}{ $client->{in_game_id} }{public}{ready} = 1;
         $game->broadcast( ready => { player => $client->{in_game_id} } );
         $game->change_state( $self->{next} )
@@ -72,9 +71,8 @@ on 'not ready' => sub {
 
 on 'quit' => sub {
     my ( $self, $player, $msg ) = @_;
-	my $g = delete $player->{game};
-	print Dumper $player;
-	$player->{game} = $g;
+    my $g = delete $player->{game};
+    $player->{game} = $g;
     my $game = $self->{game};
 
     delete $game->{players}{ $player->{in_game_id} };

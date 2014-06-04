@@ -26,43 +26,44 @@ sub game {
     my ( $players, $opts, $post_join_state, $pre_join_state ) = @_;
     my $player_data = delete $opts->{players};
 
-	#Create each player
-	my @connections = map { Gamed::Test::Player->new($_) } @$players;
+    #Create each player
+    my @connections = map { Gamed::Test::Player->new($_) } @$players;
 
-	#Create game with first player
+    #Create game with first player
     $opts->{cmd} = 'create';
     $opts->{game} ||= 'Test';
     $opts->{name} ||= 'test';
-	$connections[0]->handle($opts);
-	$connections[0]->got_one($opts);
+    $connections[0]->handle($opts);
+    map { $_->got_one( { cmd => 'create', game => $opts->{game}, name => $opts->{name} } ) } @connections;
 
-	#Initialize game to test state
-    my $instance    = $Gamed::instance{ $opts->{name} };
+    #Initialize game to test state
+    my $instance = $Gamed::instance{ $opts->{name} };
 
-	#Switch to appropriate state for joining
+    #Switch to appropriate state for joining
     if ($pre_join_state) {
         $instance->change_state($pre_join_state);
     }
 
-	#Have all players join
-    $instance->change_state_if_requested;
+    #Have all players join
+    $instance->handle( $connections[0], { cmd => 'start_test' } );
     for my $c (@connections) {
-		$c->handle({ cmd => 'join', name=>$opts->{name}});
-        $_->got( { cmd => 'join' } );
+        $c->handle( { cmd => 'join', name => $opts->{name} } );
+        $c->got( { cmd => 'join' } );
     }
 
-	#Initialize all player states
+    #Initialize all player states
     while ( my ( $p, $data ) = each %$player_data ) {
         while ( my ( $k, $v ) = each %$data ) {
             $instance->{players}{$p}{$k} = $v;
         }
     }
 
-	#Switch to state to be tested
+    #Switch to state to be tested
     if ($post_join_state) {
         $instance->change_state($post_join_state);
     }
-    $instance->change_state_if_requested;
+
+    $instance->handle( $connections[0], { cmd => 'start_test' } );
     return $instance, @connections;
 }
 

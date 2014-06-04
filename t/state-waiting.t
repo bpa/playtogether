@@ -4,9 +4,11 @@ use Test::More;
 use Gamed;
 use Gamed::Test;
 
+$Gamed::game{Waiting} = 'Waiting';
+
 subtest 'seat names given out' => sub {
     my ( $game, $p1, $p2 ) = game(
-
+        [ 1, 2 ],
         {
             game  => 'Waiting',
             seats => [ 'n', 's' ],
@@ -24,12 +26,9 @@ subtest 'drop/rejoin with names' => sub {
     my ( $game, $p1, $p2 ) = game(
         [ 1, 2 ],
         {
-            seats       => [qw/n e s w/],
-            state_table => {
-                start => Gamed::State::WaitingForPlayers->new( next => 'end' ),
-                end   => Gamed::State->new( name                    => 'end' ) }
+            game  => 'Waiting',
+            seats => [qw/n e s w/],
         },
-        undef, 'start'
     );
     is( $p1->{in_game_id}, 'n' );
     is( $p2->{in_game_id}, 'e' );
@@ -45,16 +44,7 @@ subtest 'drop/rejoin with names' => sub {
 };
 
 subtest 'game starts automatically with all players' => sub {
-    my ( $game, $p1, $p2, $p3, $p4 ) = game(
-        [ 1, 2, 3, 4 ],
-        {
-            seats       => [qw/n e s w/],
-            state_table => {
-                start => Gamed::State::WaitingForPlayers->new( next => 'end' ),
-                end   => Gamed::State->new( name                    => 'end' ) }
-        },
-        undef, 'start'
-    );
+    my ( $game, $p1, $p2, $p3, $p4 ) = game( [ 1, 2, 3, 4 ], { seats => [qw/n e s w/], } );
     is( $p1->{in_game_id}, 'n' );
     is( $p2->{in_game_id}, 'e' );
     is( $p3->{in_game_id}, 's' );
@@ -66,7 +56,7 @@ subtest 'game starts automatically with all players' => sub {
 };
 
 sub done {
-    delete $Gamed::game_instances{test};
+    delete $Gamed::instance{test};
     done_testing();
 }
 done_testing();
@@ -75,7 +65,7 @@ package Waiting;
 
 use parent 'Gamed::Test::Game::Test';
 
-use Gamed::State {
+use Gamed::States {
     start => Gamed::State::WaitingForPlayers->new( next => 'end' ),
     end   => Gamed::State::GameOver->new,
 };

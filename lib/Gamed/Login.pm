@@ -6,7 +6,7 @@ use Gamed::Lobby;
 use Gamed::DB;
 use Data::UUID;
 
-my %players;
+our %players;
 my $uuid = Data::UUID->new;
 
 sub new { bless {}, shift; }
