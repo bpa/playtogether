@@ -39,7 +39,7 @@ sub _handle {
     my $name = $player->{user} ? $player->{user}{name} : 'undef';
     my $p = $handler{$pkg}{$when};
     for my $cmd ( $msg->{cmd}, '*' ) {
-        print( $pkg, " $when ", $msg->{cmd}, " ($name)\n" ) if $p->{$cmd};
+        #print( $pkg, " $when ", $msg->{cmd}, " ($name)\n" ) if $p->{$cmd};
         $p->{$cmd}( $obj, $player, $msg ) if $p->{$cmd};
     }
     _handle( ref( $obj->{state} ), $obj->{state}, $player, $when, $msg )

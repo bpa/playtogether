@@ -94,6 +94,7 @@ sub got_one {
 sub send {
     my ( $self, $cmd, $msg ) = @_;
     $msg->{cmd} = $cmd;
+	my $user = $self->{user} ? $self->{user}{name} : '?';
     $self->{sock}->send($msg);
 }
 

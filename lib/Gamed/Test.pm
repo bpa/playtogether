@@ -48,7 +48,7 @@ sub game {
     $instance->handle( $connections[0], { cmd => 'start_test' } );
     for my $c (@connections) {
         $c->handle( { cmd => 'join', name => $opts->{name} } );
-        $c->got( { cmd => 'join' } );
+        broadcast_one( $instance, { cmd => 'join' } );
     }
 
     #Initialize all player states

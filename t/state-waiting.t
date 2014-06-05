@@ -30,6 +30,7 @@ subtest 'drop/rejoin with names' => sub {
             seats => [qw/n e s w/],
         },
     );
+    $p3->got( { cmd => 'create' } );
     is( $p1->{in_game_id}, 'n' );
     is( $p2->{in_game_id}, 'e' );
 
@@ -44,13 +45,13 @@ subtest 'drop/rejoin with names' => sub {
 };
 
 subtest 'game starts automatically with all players' => sub {
-    my ( $game, $p1, $p2, $p3, $p4 ) = game( [ 1, 2, 3, 4 ], { seats => [qw/n e s w/], } );
+    my ( $game, $p1, $p2, $p3, $p4 ) = game( [ 1, 2, 3, 4 ], { game => 'Waiting', seats => [qw/n e s w/] } );
     is( $p1->{in_game_id}, 'n' );
     is( $p2->{in_game_id}, 'e' );
     is( $p3->{in_game_id}, 's' );
     is( $p4->{in_game_id}, 'w' );
 
-    is( $game->state->name, 'end' );
+    is( $game->{state}{name}, 'GameOver' );
 
     done();
 };

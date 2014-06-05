@@ -27,6 +27,7 @@ on 'join' => sub {
         $player->{in_game_id}         = $id;
         $player->{in_game_id}         = $id;
     }
+
     my $players = grep { defined $_->{client} } values %{ $game->{players} };
     $game->change_state( $self->{next} )
       if $players >= $self->{max};

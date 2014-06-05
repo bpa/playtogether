@@ -43,7 +43,10 @@ on 'join' => sub {
     $player->{client}     = $client;
     $client->{in_game_id} = $player_id;
     $player->{client_id}  = $client->{id};
+};
 
+after 'join' => sub {
+    my ( $self, $client, $msg ) = @_;
     my %players;
     for my $p ( values %{ $self->{players} } ) {
         $players{ $p->{in_game_id} } = $p->{public};
