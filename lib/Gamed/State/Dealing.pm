@@ -18,7 +18,7 @@ sub new {
         $self->{deal} = { seat => $self->{deal} };
     }
     else {
-        $self->{deal} = $opts->{deal};
+        $self->{deal} = $opts{deal};
     }
     $self->{dealer} = 0;
 	return $self;
@@ -41,15 +41,14 @@ sub on_leave_state {
             for my $s ( 0 .. $seats ) {
                 my $cards = bag( $self->{deck}->deal($num) );
                 $game->{players}{$s}{cards} = $cards;
-                $game->{players}{$s}{client}->send( game => { action => 'deal', hand => [ $cards->values ] });
+                $game->{players}{$s}{client}->send( deal => { action => 'deal', hand => [ $cards->values ] });
             }
         }
         else {
             $game->{$k} = bag( $self->{deck}->deal($num) );
         }
     }
-    $self->{dealer}++;
-    $self->{dealer} = 0 if $self->{dealer} >= keys %{ $game->{players} };
+    $self->{dealer} = ($self->{dealer} + 1) % keys %{ $game->{players} };
     $game->{leader} = $self->{dealer};
 }
 
@@ -59,7 +58,7 @@ on 'deal' => sub {
         $self->{game}->change_state( $self->{next} );
     }
     else {
-        $player->{client}->err('Not your turn');
+        $player->err('Not your turn');
     }
 };
 

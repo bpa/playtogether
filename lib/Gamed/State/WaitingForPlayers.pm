@@ -12,8 +12,8 @@ sub on_enter_state {
     if ( defined $game->{seats} ) {
         $self->{available} = $game->{seats};
     }
-    $self->{min} = $game->{min_players} || scalar( @{ $game->{seats} } );
-    $self->{max} = $game->{max_players} || scalar( @{ $game->{seats} } );
+    $self->{min} = $game->{min_players} || $game->{seats} ? scalar( @{ $game->{seats} } ) : 1;
+    $self->{max} = $game->{max_players} || $game->{seats} ? scalar( @{ $game->{seats} } ) : 1000;
 }
 
 on 'join' => sub {
@@ -24,7 +24,6 @@ on 'join' => sub {
         my $id = shift @{ $self->{available} };
         $game->{ids}{ $player->{id} } = $id;
         $game->{players}{$id}         = delete $game->{players}{ $player->{in_game_id} };
-        $player->{in_game_id}         = $id;
         $player->{in_game_id}         = $id;
     }
 
