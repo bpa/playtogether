@@ -32,6 +32,9 @@ sub create {
     $opts->{game} = $game;
     $opts->{name} = $name;
     $self->handle($opts);
+	for my $p (values %Gamed::Login::players) {
+		$p->{sock}{packets} = [];
+	}
     return $self->join($name);
 }
 

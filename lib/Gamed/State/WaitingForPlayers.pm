@@ -7,13 +7,12 @@ use Gamed::Handler;
 use parent 'Gamed::State';
 
 sub on_enter_state {
-    my $self = shift;
-    my $game = $self->{game};
+    my ($self, $game) = @_;
     if ( defined $game->{seats} ) {
         $self->{available} = $game->{seats};
     }
-    $self->{min} = $game->{min_players} || $game->{seats} ? scalar( @{ $game->{seats} } ) : 1;
-    $self->{max} = $game->{max_players} || $game->{seats} ? scalar( @{ $game->{seats} } ) : 1000;
+    $self->{min} = $game->{min_players} || ($game->{seats} ? scalar( @{ $game->{seats} } ) : 1);
+    $self->{max} = $game->{max_players} || ($game->{seats} ? scalar( @{ $game->{seats} } ) : 1000);
 }
 
 on 'join' => sub {
@@ -45,10 +44,12 @@ on 'ready' => sub {
     my ( $self, $client, $msg ) = @_;
     my $game = $self->{game};
     if ( keys %{ $game->{players} } >= $self->{min} ) {
-        for my $p ( values %{ $game->{players} } ) {
-            my $c = delete $p->{client};
-            $p->{client} = $c;
-        }
+#		print "-"x20,"\n";
+#        for my $p ( values %{ $game->{players} } ) {
+#            my $c = delete $p->{client};
+#            print Dumper $p;
+#            $p->{client} = $c;
+#        }
         $game->{players}{ $client->{in_game_id} }{public}{ready} = 1;
         $game->broadcast( ready => { player => $client->{in_game_id} } );
         $game->change_state( $self->{next} )
