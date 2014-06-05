@@ -25,8 +25,11 @@ sub after_star {
         my $state_name = delete $game->{_change_state};
         my $state      = $game->{states}{$state_name};
         die "No state '$state_name' found\n" unless defined $state;
+		my $from = 'none';
+        $from = $game->{state}{name} if $game->{state};
         $game->{state}->on_leave_state($game) if $game->{state};
         $game->{state} = $state;
+		#print "========= $from > ", $game->{state}{name}, "\n";
         $state->on_enter_state($game);
     }
 }

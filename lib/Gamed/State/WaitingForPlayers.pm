@@ -46,11 +46,8 @@ on 'ready' => sub {
     my ( $self, $client, $msg ) = @_;
     my $game = $self->{game};
     if ( keys %{ $game->{players} } >= $self->{min} ) {
-        print "-" x 40, "\n";
         for my $p ( values %{ $game->{players} } ) {
             my $c = delete $p->{client};
-
-            #print $p->{public}{name}, ' ', $p->{public}{ready}, "\n"
             $p->{client} = $c;
         }
         $game->{players}{ $client->{in_game_id} }{public}{ready} = 1;

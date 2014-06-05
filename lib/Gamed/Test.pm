@@ -33,6 +33,7 @@ sub game {
     $opts->{cmd} = 'create';
     $opts->{game} ||= 'Test';
     $opts->{name} ||= 'test';
+	$Gamed::game{$opts->{game}} ||= $opts->{game};
     $connections[0]->handle($opts);
     map { $_->got_one( { cmd => 'create', game => $opts->{game}, name => $opts->{name} } ) } @connections;
 

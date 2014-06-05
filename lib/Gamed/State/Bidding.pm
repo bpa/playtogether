@@ -38,29 +38,29 @@ on 'bid' => sub {
     my ( $self, $player, $msg ) = @_;
     my $game = $self->{game};
     if ( $player->{in_game_id} ne $self->{bidder} ) {
-        $player->{client}->err('Not your turn');
+        $player->err('Not your turn');
         return;
     }
 
     if ( $msg->{bid} eq 'pass' ) {
-        $player->{pass} = 1;
+        $game->{players}{$player->{in_game_id}}{pass} = 1;
         $game->broadcast( bid => { bid => 'pass', player => $self->{bidder} } );
         $self->next_bidder($game);
     }
     elsif ( !looks_like_number( $msg->{bid} ) ) {
-        $player->{client}->err('Invalid bid');
+        $player->err('Invalid bid');
     }
     elsif ( defined $self->{min} && $msg->{bid} < $self->{min} ) {
-        $player->{client}->err( 'Bidding starts at ' . $self->{min} );
+        $player->err( 'Bidding starts at ' . $self->{min} );
     }
     elsif ( defined $self->{max} && $msg->{bid} > $self->{max} ) {
-        $player->{client}->err( 'Max bid is ' . $self->{max} );
+        $player->err( 'Max bid is ' . $self->{max} );
     }
     elsif ( defined $self->{valid} && !$self->{valid}( $msg->{bid} ) ) {
-        $player->{client}->err('Invalid bid');
+        $player->err('Invalid bid');
     }
     elsif ( defined $self->{bid} && $self->{bid} >= $msg->{bid} ) {
-        $player->{client}->err('You must bid up or pass');
+        $player->err('You must bid up or pass');
     }
     else {
         $self->{bid} = $msg->{bid};

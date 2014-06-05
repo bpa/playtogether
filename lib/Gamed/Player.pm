@@ -14,6 +14,7 @@ sub new {
 
 sub handle {
     my ( $self, $msg_json ) = @_;
+	#print "$msg_json\n";
     my $msg = $json->decode($msg_json);
     $self->{game}->handle( $self, $msg );
 }

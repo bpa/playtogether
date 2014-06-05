@@ -4,8 +4,6 @@ use Test::More;
 use Gamed;
 use Gamed::Test;
 
-$Gamed::game{Waiting} = 'Waiting';
-
 subtest 'seat names given out' => sub {
     my ( $game, $p1, $p2 ) = game(
         [ 1, 2 ],
