@@ -23,7 +23,7 @@ use Gamed::States {
 		name => 'Declaring',
 		next => 'PLAYING'
 	),
-	PLAYING   => Gamed::State::PlayTricks->new( logic => Gamed::Game::Rook::PlayLogic->new ),
+	PLAYING   => Gamed::State::PlayTricks->new( next => '?', logic => Gamed::Game::Rook::PlayLogic->new ),
 	GAME_OVER => Gamed::State::GameOver->new,
 };
 

@@ -8,6 +8,7 @@ sub new {
     my $self = bless \%opts, $pkg;
     $self->{name} ||= 'PlayTricks';
     die "No logic given\n" unless $self->{logic}->can('is_valid_play');
+	return $self;
 }
 
 sub on_enter_state {
@@ -21,13 +22,14 @@ on 'play' => sub {
     my $game = $self->{game};
 
     if ( $player->{in_game_id} != $self->{active_player} ) {
-        $player->{client}->err('Not your turn');
+        $player->err('Not your turn');
         return;
     }
+	my $player_data = $game->{players}{$player->{in_game_id}};
 
-    if ( $self->{logic}->is_valid_play( $msg->{play}, $self->{trick}, $player->{cards}, $game ) ) {
+    if ( $self->{logic}->is_valid_play( $msg->{play}, $self->{trick}, $player_data->{cards}, $game ) ) {
         push @{ $self->{trick} }, $msg->{play};
-        $player->{cards}->remove( $msg->{play} );
+        $player_data->{cards}->remove( $msg->{play} );
         $game->broadcast( play => { player => $self->{active_player}, play => $msg->{play} } );
         $self->{active_player}++;
         $self->{active_player} = 0 if $self->{active_player} >= keys %{ $game->{players} };
@@ -44,7 +46,7 @@ on 'play' => sub {
         }
     }
     else {
-        $player->{client}->err('Invalid card');
+        $player->err('Invalid card');
     }
 };
 
