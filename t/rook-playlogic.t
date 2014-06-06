@@ -7,7 +7,7 @@ use Gamed::Test;
 use Gamed::Object;
 use Data::Dumper;
 
-my $rook  = bless { trump => 'R', }, 'Gamed::Game';
+my $rook  = bless { trump => 'R', }, 'Gamed::Game::Rook';
 my $logic = Gamed::Game::Rook::PlayLogic->new;
 my $hand  = bag(qw/1R 1G 5G 10Y 9Y/);
 
@@ -77,7 +77,7 @@ sub round_end {
     local $Test::Builder::Level = $Test::Builder::Level + 1;
     my %opts = @_;
     my $rook = bless {
-        state_table => {
+        states => {
             DEALING   => bless( { name => 'Dealing' },   'Gamed::State' ),
             GAME_OVER => bless( { name => 'Game Over' }, 'Gamed::State' ),
         },
@@ -87,10 +87,10 @@ sub round_end {
         bid    => $opts{bid},
         seat => [ map { { taken => $_ } } @{$opts{taken}} ],
       },
-      'Gamed::Game';
+      'Gamed::Game::Rook';
 	
     $logic->on_round_end($rook);
-	$rook->change_state_if_requested;
+	Gamed::States::after_star($rook);
 	my $name = $opts{name};
 	is_deeply($rook->{points}, $opts{end_points}, "$name - end points");
     is($rook->{state}{name}, $opts{state}, "$name - state");
