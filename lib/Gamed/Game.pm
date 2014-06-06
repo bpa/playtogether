@@ -61,9 +61,8 @@ after 'join' => sub {
 };
 
 after 'quit' => sub {
-    my ( $self, $client, $msg ) = @_;
-    delete $self->{players}{ $client->{in_game_id} }{client}
-      if $self->{players}{ $client->{in_game_id} };
+    my ( $self, $client, $msg, $player_data ) = @_;
+    delete $player_data->{client};
 	$client->{game} = Gamed::Lobby->new;
     $self->broadcast( quit => { player => $client->{in_game_id} } );
     eval {

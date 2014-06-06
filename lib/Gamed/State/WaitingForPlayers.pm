@@ -16,7 +16,7 @@ sub on_enter_state {
 }
 
 on 'join' => sub {
-    my ( $self, $player, $msg ) = @_;
+    my ( $self, $player, $msg, $player_data ) = @_;
     my $game = $self->{game};
 
     if ( defined $self->{available} ) {
@@ -32,7 +32,7 @@ on 'join' => sub {
 };
 
 on 'list_players' => sub {
-    my ( $self, $player, $msg ) = @_;
+    my ( $self, $player, $msg, $player_data ) = @_;
     my @players;
     for my $p ( $self->{game}->{players} ) {
         push @players, $p->{public};
@@ -41,10 +41,10 @@ on 'list_players' => sub {
 };
 
 on 'ready' => sub {
-    my ( $self, $client, $msg ) = @_;
+    my ( $self, $client, $msg, $player_data ) = @_;
     my $game = $self->{game};
     if ( keys %{ $game->{players} } >= $self->{min} ) {
-        $game->{players}{ $client->{in_game_id} }{public}{ready} = 1;
+        $player_data->{public}{ready} = 1;
         $game->broadcast( ready => { player => $client->{in_game_id} } );
         $game->change_state( $self->{next} )
           unless grep { !$_->{public}{ready} } values %{ $game->{players} };

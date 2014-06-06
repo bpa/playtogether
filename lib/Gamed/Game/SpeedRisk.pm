@@ -7,6 +7,7 @@ use Gamed::Handler;
 use Gamed::Game::SpeedRisk::Playing;
 use Gamed::Game::SpeedRisk::Placing;
 
+use Gamed::Handler;
 use parent 'Gamed::Game';
 
 use Gamed::States {

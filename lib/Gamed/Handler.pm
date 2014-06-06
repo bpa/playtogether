@@ -40,7 +40,8 @@ sub _handle {
     my $p = $handler{$pkg}{$when};
     for my $cmd ( $msg->{cmd}, '*' ) {
         #print( $pkg, " $when ", $cmd, " ($name)\n" ) if $p->{$cmd};
-        $p->{$cmd}( $obj, $player, $msg ) if $p->{$cmd};
+		my $player_data = exists $player->{game}{players} ? $player->{game}{players}{$player->{in_game_id}} : undef;
+        $p->{$cmd}( $obj, $player, $msg, $player_data ) if $p->{$cmd};
     }
     _handle( ref( $obj->{state} ), $obj->{state}, $player, $when, $msg )
       if defined $obj->{state} && ref($obj) eq $pkg;

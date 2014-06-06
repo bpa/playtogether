@@ -16,7 +16,7 @@ subtest 'two players' => sub {
     $p1->broadcast( { cmd => 'ready' } );
     $p2->game( { cmd => 'ready' } );
     broadcast( $risk, { cmd => 'ready', player => 1 }, "Got ready" );
-    is( $risk->{state}->name, 'Placing' );
+    is( $risk->{state}{name}, 'Placing' );
 
     my %player_countries;
     $p1->got( { cmd => 'armies' } );
@@ -52,7 +52,7 @@ subtest 'all ready starts game' => sub {
     $p3->game( { cmd => 'ready' } );
     broadcast( $risk, { cmd   => 'ready' } );
     broadcast( $risk, { state => 'Playing' } );
-    is( $risk->{state}->name, 'Playing' );
+    is( $risk->{state}{name}, 'Playing' );
 
     done();
 };
@@ -65,7 +65,7 @@ subtest 'can start with dropped player' => sub {
     $p3->game( { cmd => 'ready' } );
     broadcast( $risk, { cmd   => 'ready' } );
     broadcast( $risk, { state => 'Playing' } );
-    is( $risk->{state}->name, 'Playing' );
+    is( $risk->{state}{name}, 'Playing' );
 
     done();
 };
@@ -78,7 +78,7 @@ subtest 'drop unready player starts game' => sub {
     $p1->quit();
 
     broadcast( $risk, { state => 'Playing' } );
-    is( $risk->{state}->name, 'Playing' );
+    is( $risk->{state}{name}, 'Playing' );
 
     done();
 };
@@ -86,10 +86,11 @@ subtest 'drop unready player starts game' => sub {
 subtest 'last player wins by default' => sub {
     my $risk = placing_with_3();
     $p1->quit();
-    $p2->quit();
+    $p2->game({ cmd => 'quit' });
 
     broadcast( $risk, { cmd => 'victory', player => 2 } );
-    is( $risk->{state}->name, 'GameOver' );
+    broadcast( $risk, { cmd => 'quit', player => 1 } );
+    is( $risk->{state}{name}, 'GameOver' );
 
     done();
 };
@@ -148,15 +149,15 @@ sub placing_with_3 {
     broadcast( $risk, { cmd   => 'ready' } );
     broadcast( $risk, { cmd   => 'armies' } );
     broadcast( $risk, { state => 'Placing' } );
-    is( $risk->{state}->name, 'Placing' );
+    is( $risk->{state}{name}, 'Placing' );
     return $risk;
 }
 
 sub done {
     for my $p ( $p1, $p2, $p3, $p4 ) {
-        $p->{sock}{packets} = ();
-        delete $p->{game};
+        $p->{sock}{packets} = [];
+        $p->{game} = Gamed::Lobby->new;
     }
-    delete $Gamed::game_instances{test};
+    delete $Gamed::instance{test};
     done_testing();
 }

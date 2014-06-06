@@ -5,7 +5,13 @@ use Gamed::NullPlayer;
 use List::Util qw/shuffle/;
 use Scalar::Util qw/looks_like_number/;
 
+use Gamed::Handler;
 use parent 'Gamed::State';
+
+sub new {
+    my ( $pkg, %opts ) = @_;
+    bless { name => 'Placing', next => $opts{next} }, $pkg;
+}
 
 sub on_enter_state {
     my $self = shift;
@@ -24,9 +30,9 @@ sub on_enter_state {
     $armies++ unless $countries % @players == 0;
 
     for my $p (@players) {
-        $p->{ready}     = 0;
-        $p->{armies}    = $armies;
-        $p->{countries} = 0;
+        $p->{public}{ready} = 0;
+        $p->{armies}        = $armies;
+        $p->{countries}     = 0;
     }
 
     #Give out countries in a random, but equal way
@@ -67,52 +73,54 @@ sub on_enter_state {
 }
 
 on 'ready' => sub {
-    my ( $self, $player, $message ) = @_;
+    my ( $self, $player, $message, $player_data ) = @_;
     my $game = $self->{game};
-    $player->{ready} = 1;
+    $player_data->{public}{ready} = 1;
     $game->broadcast( ready => { player => $player->{in_game_id} } );
     $game->change_state( $self->{next} )
-      unless grep { !$_->{ready} } values %{ $game->{players} };
+      unless grep { !$_->{public}{ready} } values %{ $game->{players} };
 };
 
 on 'place' => sub {
-    my ( $self, $player, $message ) = @_;
+    my ( $self, $player, $message, $player_data ) = @_;
     my $game = $self->{game};
-    $player->{client}->err("No country specified") && return
+    $player->err("No country specified") && return
       unless looks_like_number( $message->{country} );
     my $c = $message->{country};
-    $player->{client}->err("Invalid country") && return
+    $player->err("Invalid country") && return
       unless 0 <= $c && $c <= $#{ $game->{countries} };
 
     my $country = $game->{countries}[$c];
-    $player->{client}->err("Not owner") && return
+    $player->err("Not owner") && return
       unless $country->{owner} eq $player->{in_game_id};
 
     my $armies = $message->{armies} || 0;
-    $player->{client}->err("Invalid armies") && return
+    $player->err("Invalid armies") && return
       unless looks_like_number($armies);
-    $player->{client}->err("Not enough armies") && return
-      unless 0 < $armies && $armies <= $player->{armies};
+    $player->err("Not enough armies") && return
+      unless 0 < $armies && $armies <= $player_data->{armies};
 
     $country->{armies} += $armies;
-    $player->{armies} -= $armies;
+    $player_data->{armies} -= $armies;
 
-    $player->{client}->send( armies => { armies => $player->{armies} } );
+    $player->send( armies => { armies => $player_data->{armies} } );
     $game->broadcast( country => { country => { armies => $country->{armies}, owner => $country->{owner} } } );
 };
 
 on 'quit' => sub {
-    my ( $self, $player, $msg ) = @_;
+    my ( $self, $player, $msg, $player_data ) = @_;
     my $game = $self->{game};
-    $player->{ready} = 1;
+	delete $player_data->{client};
+    $game->{players}{$player->{in_game_id}}{public}{ready} = 1;
     my @remaining = grep { exists $_->{client} } values %{ $game->{players} };
     if ( @remaining == 1 ) {
         $game->broadcast( victory => { player => $remaining[0]->{in_game_id} } );
         $game->change_state('GAME_OVER');
-        return;
     }
-    $game->change_state( $self->{next} )
-      unless grep { !$_->{ready} } values %{ $game->{players} };
+    else {
+        $game->change_state( $self->{next} )
+          unless grep { !$_->{public}{ready} } values %{ $game->{players} };
+    }
 };
 
 1;

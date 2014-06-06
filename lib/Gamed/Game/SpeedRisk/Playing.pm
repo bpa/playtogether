@@ -4,6 +4,10 @@ use AnyEvent;
 use Gamed::Handler;
 use parent 'Gamed::State';
 
+sub new {
+	bless { name => 'Playing' }, shift;
+}
+
 sub on_enter_state {
     my $self = shift;
 	my $game = $self->{game};
