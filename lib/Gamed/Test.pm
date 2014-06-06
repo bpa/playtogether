@@ -45,18 +45,18 @@ sub game {
         $instance->change_state($pre_join_state);
     }
 
-    #Have all players join
-    $instance->handle( $connections[0], { cmd => 'start_test' } );
-    for my $c (@connections) {
-        $c->handle( { cmd => 'join', name => $opts->{name} } );
-        broadcast_one( $instance, { cmd => 'join' } );
-    }
-
     #Initialize all player states
     while ( my ( $p, $data ) = each %$player_data ) {
         while ( my ( $k, $v ) = each %$data ) {
             $instance->{players}{$p}{$k} = $v;
         }
+    }
+
+    #Have all players join
+    $instance->handle( $connections[0], { cmd => 'start_test' } );
+    for my $c (@connections) {
+        $c->handle( { cmd => 'join', name => $opts->{name} } );
+        broadcast( $instance, { cmd => 'join' } );
     }
 
     #Switch to state to be tested

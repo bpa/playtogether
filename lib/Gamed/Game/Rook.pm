@@ -19,10 +19,7 @@ use Gamed::States {
 		max   => 200,
 		valid => sub { $_[0] % 5 == 0 }
 	),
-	DECLARING => Gamed::Game::Rook::Declaring->new(
-		name => 'Declaring',
-		next => 'PLAYING'
-	),
+	DECLARING => Gamed::Game::Rook::Declaring->new( next => 'PLAYING'),
 	PLAYING   => Gamed::State::PlayTricks->new( next => '?', logic => Gamed::Game::Rook::PlayLogic->new ),
 	GAME_OVER => Gamed::State::GameOver->new,
 };
@@ -31,6 +28,7 @@ on 'create' => sub {
     my ($self, $player, $msg) = @_;
     $self->{points}      = [ 0, 0 ];
     $self->{seats}       = [qw/n e s w/];
+	$self->{bidding}     = 'n';
 	$self->change_state('WAITING_FOR_PLAYERS');
 };
 

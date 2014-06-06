@@ -1,8 +1,14 @@
 package Gamed::Game::Rook::Declaring;
 
-use Gamed::Handler;
 use Gamed::Object;
+use Gamed::Handler;
 use parent 'Gamed::State';
+
+sub new {
+	my ($pkg, %opts) = @_;
+	die "$pkg => missing 'next'\n" unless $opts{next};
+	bless { name => 'Declaring', next => $opts{next} }, $pkg;
+}
 
 sub on_enter_state {
     my $self = shift;
@@ -13,29 +19,29 @@ sub on_enter_state {
 }
 
 on 'declare' => sub {
-    my ( $self, $player, $msg ) = @_;
+    my ( $self, $player, $msg, $player_data ) = @_;
 	my $game = $self->{game};
     if ( $player->{in_game_id} ne $game->{bidder} ) {
-        $player->{client}->err('Not your turn');
+        $player->err('Not your turn');
         return;
     }
 
-    my $cards = bag( $player->{cards} );
+    my $cards = bag( $player_data->{cards} );
     my $nest  = bag( $msg->{nest} );
     if ( $msg->{trump} !~ /^[RGBY]$/ ) {
-        $player->{client}->err( "'" . $msg->{trump} . "' is not a valid trump" );
+        $player->err( "'" . $msg->{trump} . "' is not a valid trump" );
     }
     elsif (!defined $msg->{nest}
         || @{ $msg->{nest} } != 5
         || !$nest->subset($cards) )
     {
-        $player->{client}->err('Invalid nest');
+        $player->err('Invalid nest');
     }
     else {
         $game->{trump} = $msg->{trump};
         $game->{nest}  = bag( $msg->{nest} );
         my $hand = $cards - $nest;
-        $player->{cards} = $hand;
+        $player_data->{cards} = $hand;
         $game->broadcast( trump => { trump => $game->{trump} } );
         $game->change_state( $self->{next} );
     }

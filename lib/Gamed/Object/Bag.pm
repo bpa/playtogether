@@ -8,10 +8,14 @@ sub new {
     return $self;
 }
 
+sub TO_JSON {
+    return { %{shift} };
+}
+
 sub add {
     my $self = shift;
     for my $v (@_) {
-		next unless defined $v;
+        next unless defined $v;
         my $ref = ref $v;
         if ( !$ref ) {
             $self->{$v}++;
@@ -30,7 +34,7 @@ sub add {
 sub remove {
     my $self = shift;
     for my $v (@_) {
-		next unless defined $v;
+        next unless defined $v;
         my $ref = ref $v;
         if ( !$ref ) {
             die "No element '$v' exists in bag\n" unless exists $self->{$v};
@@ -91,8 +95,8 @@ sub subset {
 }
 
 sub contains {
-	my ($self, $e) = @_;
-	return exists $self->{$e};
+    my ( $self, $e ) = @_;
+    return exists $self->{$e};
 }
 
 sub values {
@@ -101,11 +105,11 @@ sub values {
     while ( my ( $k, $v ) = each %$self ) {
         push( @values, $k ) for 1 .. $v;
     }
-	return @values;
+    return @values;
 }
 
 sub to_string {
-	return join(' ', sort(shift->values));
+    return join( ' ', sort( shift->values ) );
 }
 
 1;
