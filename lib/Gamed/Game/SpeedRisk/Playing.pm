@@ -2,6 +2,7 @@ package Gamed::Game::SpeedRisk::Playing;
 
 use AnyEvent;
 use Gamed::Handler;
+use Gamed::Game::SpeedRisk::Place;
 use parent 'Gamed::State';
 
 sub new {
@@ -57,6 +58,8 @@ sub generate_armies {
     }
 }
 
+on 'place' => \&Gamed::Game::SpeedRisk::Place::on_place;
+
 on 'move' => sub {
     my ( $self, $player, $message ) = @_;
 	my $game = $self->{game};
@@ -72,19 +75,19 @@ on 'move' => sub {
         || $t > $game->{countries}
         || !$game->{countries}[$f]{borders}[$t] )
     {
-        $player->{client}->err("Invalid destination");
+        $player->err("Invalid destination");
         return;
     }
 
     my $from = $game->{countries}[$f];
     my $to   = $game->{countries}[$t];
     if ( $from->{owner} != $player->{in_game_id} ) {
-        $player->{client}->err("Not owner");
+        $player->err("Not owner");
         return;
     }
 
     if ( !$a || $a >= $from->{armies} ) {
-        $player->{client}->err("Not enough armies");
+        $player->err("Not enough armies");
         return;
     }
 
@@ -149,9 +152,10 @@ sub do_attack {
 }
 
 on 'quit' => sub {
-    my ( $self, $player, $msg ) = @_;
+    my ( $self, $player, $msg, $player_data ) = @_;
 	my $game = $self->{game};
-    $player->{ready} = 1;
+    $player_data->{public}{ready} = 1;
+	delete $player_data->{client};
     my @remaining = grep { exists $_->{client} } values %{ $game->{players} };
     if ( @remaining == 1 ) {
         $game->broadcast( victory => { player => $remaining[0]->{in_game_id} } );
