@@ -15,15 +15,13 @@ my ( $game, $n, $e, $s ) = game(
         bidder  => 2,
         bid     => 135,
         trump   => 'R',
-        players => {
-            0 => { cards => bag(qw/1 5 13 14/) },
-            1 => { cards => bag(qw/2 9 11 15/) },
-            2 => { cards => bag(qw/4 8 12 16/) },
-        },
     },
 );
-
 is( $game->{state}{name}, 'PlayTricks' );
+$game->{players}{0}{cards} = bag(qw/1 5 13 14/);
+$game->{players}{1}{cards} = bag(qw/2 9 11 15/);
+$game->{players}{2}{cards} = bag(qw/4 8 12 16/);
+
 $n->game( { cmd => 'play', play => 1 }, { reason => 'Not your turn' } );
 $s->game( { cmd => 'play', play => 8 }, { reason => 'Invalid card' } );
 
