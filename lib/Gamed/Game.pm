@@ -16,8 +16,8 @@ Sets up the basic event handling, augment with before, on, or after
 =cut
 
 before 'join' => sub {
-	my ($game, $player, $msg) = @_;
-	die "Game full\n" if defined $game->{max_players} && keys(%{ $game->{players} }) >= $game->{max_players};
+    my ( $game, $player, $msg ) = @_;
+    die "Game full\n" if defined $game->{max_players} && keys( %{ $game->{players} } ) >= $game->{max_players};
 };
 
 on 'join' => sub {
@@ -35,7 +35,9 @@ on 'join' => sub {
             public     => {
                 id     => $player_id,
                 name   => $client->{name},
-                avatar => $client->{avatar} } };
+                avatar => $client->{avatar}
+            }
+        };
         $self->{players}{$player_id} = $player;
         $self->{ids}{ $client->{id} } = $player_id;
     }
@@ -60,10 +62,13 @@ after 'join' => sub {
 
 after 'quit' => sub {
     my ( $self, $client, $msg ) = @_;
-    delete $self->{players}{ $client->{in_game_id} }{client};
+    delete $self->{players}{ $client->{in_game_id} }{client}
+      if $self->{players}{ $client->{in_game_id} };
+	$client->{game} = Gamed::Lobby->new;
     $self->broadcast( quit => { player => $client->{in_game_id} } );
     eval {
-        if ( !keys %{ $self->{players} } ) {
+        if ( !keys %{ $self->{players} } )
+        {
             delete $Gamed::game_instances{ $self->{name} };
         }
     };
@@ -77,8 +82,8 @@ sub broadcast {
 }
 
 sub player {
-	my ($self, $client) = @_;
-	return $self->{players}{$client->{in_game_id}};
+    my ( $self, $client ) = @_;
+    return $self->{players}{ $client->{in_game_id} };
 }
 
 1;

@@ -61,8 +61,9 @@ sub join {
 sub quit {
     local $Test::Builder::Level = $Test::Builder::Level + 1;
     my $self = shift;
+	my $game = $self->{game};
     $self->handle( { cmd => 'quit' } );
-    Gamed::Test::broadcast( $self->{game}, { cmd => 'quit', player => $self->{in_game_id} }, 'Quit broadcast' );
+    Gamed::Test::broadcast( $game, { cmd => 'quit', player => $self->{in_game_id} }, 'Quit broadcast' );
 }
 
 sub game {

@@ -32,7 +32,7 @@ subtest 'start 2 player game' => sub {
 
     #Everyone is finally ready
     $p2->game( { cmd => 'ready' } );
-	broadcast( $risk, { cmd => 'ready', player => 1 } );
+    broadcast( $risk, { cmd => 'ready', player => 1 } );
     broadcast( $risk, { cmd => 'armies' } );
     broadcast( $risk, { state => 'Placing' } );
     is( $risk->{state}{name}, 'Placing' );
@@ -45,17 +45,23 @@ subtest 'drop/rejoin and start game' => sub {
     $p2->join('test');
     $p3->join('test');
     $p1->quit;
+	is(ref($p1->{game}), 'Gamed::Lobby');
+    playing( $risk, 2 );
     $p1->join('test');
+    playing( $risk, 3 );
     is( $p1->{in_game_id}, 3, "Re-joining players get a new id" );
     $p4->join('test');
-    is( $p4->{in_game_id}, 4 );
+    playing( $risk, 4 );
+    is( scalar( keys( %{ $risk->{players} } ) ), 4 );
 
     $p1->quit;
+    is( scalar( keys( %{ $risk->{players} } ) ), 3 );
     $p4->quit;
+    is( scalar( keys( %{ $risk->{players} } ) ), 2 );
     $p2->broadcast( { cmd => 'ready' } );
     $p3->game( { cmd => 'ready' } );
-	broadcast( $risk, { cmd => 'ready' } );
-    broadcast( $risk, { cmd => 'armies' } );
+    broadcast( $risk, { cmd   => 'ready' } );
+    broadcast( $risk, { cmd   => 'armies' } );
     broadcast( $risk, { state => 'Placing' } );
     is( $risk->{state}{name}, 'Placing' );
 
@@ -65,20 +71,17 @@ subtest 'drop/rejoin and start game' => sub {
 subtest 'dropping unready player can start game' => sub {
     my $risk = $p1->create( 'SpeedRisk', 'test', { board => 'Classic' } );
     $p2->join('test');
-    $p2->broadcast(
-        { cmd => 'ready' },
-        { cmd => 'ready', player => 1 },
-        'P2 is ready'
-    );
+    $p2->broadcast( { cmd => 'ready' }, { cmd => 'ready', player => 1 }, 'P2 is ready' );
     $p1->quit;
-    is( $risk->{state}{name} , 'WaitingForPlayers', 'Need enough players' );
+    is( $risk->{state}{name}, 'WaitingForPlayers', 'Need enough players' );
 
     $p1->join('test');
     $p3->join('test');
+	playing( $risk, 3);
     $p3->broadcast( { cmd => 'ready' }, { cmd => 'ready', player => 3 } );
     $p1->quit;
 
-    broadcast( $risk, { cmd => 'armies' } );
+    broadcast( $risk, { cmd   => 'armies' } );
     broadcast( $risk, { state => 'Placing' } );
     is( $risk->{state}{name}, 'Placing' );
 
@@ -91,7 +94,7 @@ subtest 'game starts automatically with enough players' => sub {
         my $player = Gamed::Test::Player->new($p);
         $player->join('test');
     }
-    broadcast( $risk, { cmd => 'armies' } );
+    broadcast( $risk, { cmd   => 'armies' } );
     broadcast( $risk, { state => 'Placing' } );
     is( $risk->{state}{name}, 'Placing' );
 
@@ -127,17 +130,23 @@ subtest 'set theme' => sub {
     $risk->{themes}{test} = ();
     $p1->game( { cmd => 'theme', theme => undef },  error => 'Invalid theme' );
     $p1->game( { cmd => 'theme', theme => "none" }, error => 'Invalid theme' );
-    $p1->broadcast( { cmd => 'theme', theme => "test" },
-        { cmd => 'theme', theme => 'test', player => 0 } );
+    $p1->broadcast( { cmd => 'theme', theme => "test" }, { cmd => 'theme', theme => 'test', player => 0 } );
     $p2->game( { cmd => 'theme', theme => "test" }, error => 'Invalid theme' );
 
     done();
 };
 
+sub playing {
+    local $Test::Builder::Level = $Test::Builder::Level + 1;
+    my ( $risk, $players ) = @_;
+    is( scalar( keys %{ $risk->{players} } ), $players );
+    is( scalar( keys %{ $risk->{ids} } ),     $players );
+}
+
 sub done {
     for my $p ( $p1, $p2, $p3, $p4 ) {
         $p->{sock}{packets} = ();
-        $p->{game} = Gamed::Lobby->new;;
+        $p->{game} = Gamed::Lobby->new;
     }
     delete $Gamed::instance{test};
     done_testing();

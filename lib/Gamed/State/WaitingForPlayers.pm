@@ -44,12 +44,6 @@ on 'ready' => sub {
     my ( $self, $client, $msg ) = @_;
     my $game = $self->{game};
     if ( keys %{ $game->{players} } >= $self->{min} ) {
-#		print "-"x20,"\n";
-#        for my $p ( values %{ $game->{players} } ) {
-#            my $c = delete $p->{client};
-#            print Dumper $p;
-#            $p->{client} = $c;
-#        }
         $game->{players}{ $client->{in_game_id} }{public}{ready} = 1;
         $game->broadcast( ready => { player => $client->{in_game_id} } );
         $game->change_state( $self->{next} )
@@ -69,8 +63,6 @@ on 'not ready' => sub {
 
 on 'quit' => sub {
     my ( $self, $player, $msg ) = @_;
-    my $g = delete $player->{game};
-    $player->{game} = $g;
     my $game = $self->{game};
 
     delete $game->{players}{ $player->{in_game_id} };
@@ -81,7 +73,7 @@ on 'quit' => sub {
 
     if ( keys %{ $game->{players} } >= $self->{min} ) {
         $game->change_state( $self->{next} )
-          unless grep { !$_->{ready} } values %{ $game->{players} };
+          unless grep { !$_->{public}{ready} } values %{ $game->{players} };
     }
 };
 
