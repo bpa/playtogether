@@ -32,9 +32,4 @@ on 'create' => sub {
 	$self->change_state('WAITING_FOR_PLAYERS');
 };
 
-on 'status' => sub {
-    my ($self, $player, $msg) = @_;
-	$player->send(status => { player => $player->{private}, status => $self->{public} } );
-};
-
 1;

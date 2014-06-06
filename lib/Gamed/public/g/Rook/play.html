@@ -1,14 +1,14 @@
 <div ng-controller="RookCtl">
-  <div id="waiting-tab" ng-show="state === 'waiting'">
+  <div id="waiting-tab" ng-show="state === 'WaitingForPlayers'">
     Waiting for players to join...<br>
     <button type="button" class="btn btn-danger" ng-click="start()">Start with current players</button>
   </div>
-  <div ng-show="state === 'bidding'">
+  <div ng-show="state === 'Bidding'">
     <label size="5" for="bid-spinner">Bid:</label>
     <input ngModel="bid.bid" min="bid.min" max="bid.max" ng-pattern="/\d+[05]/">
     <button type="button" class="btn btn-primary" ng-click="makeBid()">Bid</button>
   </div>
-  <div ng-show="state === 'choosing' || true">
+  <div ng-show="state === 'Declaring'">
     <div class="btn-group">
       <button class="btn btn-danger" ng-model="bid.suit" btn-radio="red">Red</button>
       <button class="btn btn-success" ng-model="bid.suit" btn-radio="green">Green</button>

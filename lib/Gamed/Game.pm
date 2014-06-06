@@ -56,7 +56,7 @@ after 'join' => sub {
 
     my %msg = ( players => \%players, player => $client->{in_game_id} );
     for my $p ( values %{ $self->{players} } ) {
-        $p->{client}->send( join => \%msg ) if defined $p->{client};
+        $p->{client}->send( join => { name => $msg->{name}, game => $self->{game}, player => $player->{in_game_id} } ) if defined $p->{client};
     }
 };
 
@@ -68,9 +68,18 @@ after 'quit' => sub {
     eval {
         if ( !keys %{ $self->{players} } )
         {
-            delete $Gamed::game_instances{ $self->{name} };
+            delete $Gamed::instance{ $self->{name} };
         }
     };
+};
+
+on 'status' => sub {
+    my ($self, $player, $msg) = @_;
+	my %players;
+	for my $p (values %{ $game->{players} }) {
+		$players{$p} = $p->{public};
+	}
+	$player->send(status => { private => $player->{private}, players => \%players, status => $self->{public}, state => $self->{state}{name} } );
 };
 
 sub broadcast {

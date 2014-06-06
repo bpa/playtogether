@@ -27,7 +27,7 @@ on 'login' => sub {
             $players{ $msg->{token} } = $player;
             $player->send( welcome => { token => $player->{id} } );
             if ( ref( $player->{game} ) ne 'Gamed::Lobby' ) {
-                $player->send( join => { game => $player->{game}{game} } );
+                $player->send( join => { game => $player->{game}{game}, name => $game->{name}, player => $player->{in_game_id} } );
             }
         }
         else {
@@ -53,3 +53,4 @@ sub login {
     }
 }
 
+1;
