@@ -26,6 +26,9 @@ on 'login' => sub {
             }
             $players{ $msg->{token} } = $player;
             $player->send( welcome => { token => $player->{id} } );
+            if ( ref( $player->{game} ) ne 'Gamed::Lobby' ) {
+                $player->send( join => { game => $player->{game}{game} } );
+            }
         }
         else {
             $player->err("Can't reconnect");

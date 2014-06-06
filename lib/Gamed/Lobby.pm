@@ -16,7 +16,7 @@ on 'games' => sub {
             status  => $v->{status}
           };
     }
-    $player->send( games => { games => [ sort keys %Gamed::games ], instances => \@inst } );
+    $player->send( games => { games => [ sort keys %Gamed::game ], instances => \@inst } );
 };
 
 on 'create' => sub {

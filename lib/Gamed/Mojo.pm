@@ -11,40 +11,34 @@ use AnyEvent;
 use Mojo::IOLoop;
 use File::Basename 'dirname';
 use File::Spec::Functions 'catdir';
+use Gamed;
 use Gamed::Player;
 
 get '/' => sub {
-	shift->render_static('index.html');
+    shift->render_static('index.html');
 };
 
 websocket '/websocket' => sub {
-	my $self = shift;
-	$self->app->log->debug('WebSocket connected.');
-	Mojo::IOLoop->stream( $self->tx->connection )->timeout(3600);
-	my $player = Gamed::Player->new($self);
-	if ($@) {
-		$self->send('{"cmd":"error","reason":"'.$@.'"}');
-		$self->finish;
-	}
-	else {
-		$self->send('{"cmd":"login"}');
-		$self->on(
-			message => sub {
-				my ( $self, $msg ) = @_;
-				eval {
-					$player->handle( $msg );
-				};
-				$player->err($@) if $@;
-			} );
+    my $self = shift;
+    my $player;
+    $self->app->log->debug('WebSocket connected.');
+    Mojo::IOLoop->stream( $self->tx->connection )->timeout(3600);
+    $player = Gamed::Player->new( { sock => $self } );
+    $self->send('{"cmd":"login"}');
+    $self->on(
+        message => sub {
+            my ( $self, $msg ) = @_;
+            eval { $player->handle($msg); };
+            $player->err($@) if $@;
+        } );
 
-		$self->on(
-			finish => sub {
-				my $self = shift;
-				$player->disconnected();
-				delete $player->{sock};
-				$self->app->log->debug('WebSocket disconnected.');
-			} );
-	}
+    $self->on(
+        finish => sub {
+            my $self = shift;
+            $player->disconnected();
+            delete $player->{sock};
+            $self->app->log->debug('WebSocket disconnected.');
+        } );
 };
 
 my $daemon = Mojo::Server::Daemon->new( app => app, listen => ['http://*:3000'] );
