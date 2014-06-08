@@ -11,8 +11,12 @@ use AnyEvent;
 use Mojo::IOLoop;
 use File::Basename 'dirname';
 use File::Spec::Functions 'catdir';
+use FindBin;
 use Gamed;
+use Gamed::Login;
 use Gamed::Player;
+use File::Slurp;
+
 
 get '/' => sub {
     shift->render_static('index.html');
@@ -41,8 +45,10 @@ websocket '/websocket' => sub {
         } );
 };
 
+$Gamed::Login::secret = read_file( catdir( dirname(__FILE__), '.secret' ) );
+#app->secrets( [ $gamed::Login::secret ] );
 my $daemon = Mojo::Server::Daemon->new( app => app, listen => ['http://*:3000'] );
-$daemon->app->home->parse( catdir( dirname(__FILE__), '..', 'Gamed' ), 'Gamed' );
+$daemon->app->home->parse( dirname(__FILE__), 'Gamed' );
 $daemon->app->static->paths->[0]   = $daemon->app->home->rel_dir('public');
 $daemon->app->renderer->paths->[0] = $daemon->app->home->rel_dir('public');
 $daemon->run;

@@ -15,15 +15,26 @@ unless (
 
 sub login {
     my $param = shift;
+	return unless $param->{username};
     my $user  = $dbh->selectall_arrayref(
-        "select * from users where username=?",
-        { Slice => {} },
+        "select name, avatar, username, passphrase from users where username=?",
+        { Slice => {}, RaiseError=>1 },
         $param->{username},
     );
     return unless @$user > 0;
     $user = $user->[0];
     my $ppr = Authen::Passphrase::SaltedDigest->from_rfc2307( delete $user->{passphrase} );
     return $ppr->match( $param->{passphrase} ) ? $user : ();
+}
+
+sub get_user {
+    my $username = shift;
+    my $user  = $dbh->selectall_arrayref(
+        "select name, avatar, username from users where username=?",
+        { Slice => {} },
+        $username,
+    );
+    return $user->[0];
 }
 
 sub create_user {

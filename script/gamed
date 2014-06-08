@@ -4,10 +4,20 @@ use strict;
 use warnings;
 
 use FindBin;
+use File::Slurp;
 use lib "$FindBin::Bin/../lib";
 
 BEGIN {
-    if (@ARGV > 0 && $ARGV[0] eq '-test') {
+    my $secret_file = "$FindBin::Bin/../lib/Gamed/.secret";
+    unless ( -r $secret_file && -s _ ) {
+        my @chars = ( 33 .. 126 );
+        my $str;
+        for ( 1 .. 64 ) {
+            $str .= chr( $chars[ rand @chars ] );
+        }
+        write_file( $secret_file, $str );
+    }
+    if ( @ARGV > 0 && $ARGV[0] eq '-test' ) {
         require Gamed;
         Gamed->import('Gamed::Test::Game');
     }
