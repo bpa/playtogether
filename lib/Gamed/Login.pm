@@ -25,11 +25,12 @@ on 'login' => sub {
                 $player->{$k} = $v;
             }
             $players{ $msg->{token} } = $player;
-            $player->send( welcome => { token => $player->{id}, username => $msg->{username} } );
             $player->{game}{players}{ $player->{in_game_id} }{client} = $player;
             if ( ref( $player->{game} ) ne 'Gamed::Lobby' ) {
-                $player->send(
-                    join => { game => $player->{game}{game}, name => $game->{name}, player => $player->{in_game_id} } );
+                $player->send( join => { game => $player->{game}{game}, name => $game->{name}, player => $player->{in_game_id} } );
+            }
+            else {
+                $player->send( welcome => { token => $player->{id}, username => $msg->{username} } );
             }
         }
         else {
