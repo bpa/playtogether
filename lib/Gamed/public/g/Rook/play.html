@@ -3,6 +3,12 @@
     Waiting for players to join...<br>
     <button type="button" class="btn btn-danger" ng-click="start()">Start with current players</button>
   </div>
+  <div ng-show="state === 'Dealing' && dealer==player_id">
+    <button type="button" class="btn btn-primary" ng-click="deal()">Deal</button>
+  </div>
+  <div ng-show="state === 'Dealing' && dealer!=player_id">
+    <span>Waiting for {{players[dealer].name}} to deal...</span>
+  </div>
   <div ng-show="state === 'Bidding'">
     <label size="5" for="bid-spinner">Bid:</label>
     <input ngModel="bid.bid" min="bid.min" max="bid.max" ng-pattern="/\d+[05]/">

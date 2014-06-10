@@ -8,11 +8,12 @@ use parent 'Gamed::State';
 
 sub new {
     my ( $pkg, %opts ) = @_;
-	my $self = bless \%opts, $pkg;
+    my $self = bless \%opts, $pkg;
 
-	$self->{name} ||= 'Dealing';
-	die "No next given\n" unless $self->{next};
-	die "No deck given\n" unless $self->{deck}->isa('Gamed::Object::Deck');
+    $self->{name} ||= 'Dealing';
+    $self->{dealer} = 0;
+    die "No next given\n" unless $self->{next};
+    die "No deck given\n" unless $self->{deck}->isa('Gamed::Object::Deck');
 
     if ( looks_like_number( $self->{deal} ) ) {
         $self->{deal} = { seat => $self->{deal} };
@@ -20,41 +21,41 @@ sub new {
     else {
         $self->{deal} = $opts{deal};
     }
-    $self->{dealer} = 0;
-	return $self;
+    return $self;
 }
 
 sub on_enter_state {
-    my $self = shift;
-    $self->{game}->broadcast( dealing => { dealer => $self->{dealer} } );
+    my ( $self, $game ) = @_;
+    $self->{seats} = $game->{seats} || [ 0 .. keys %{ $game->{players} } ];
+    $game->{public}{dealer} = $self->{seats}[ $self->{dealer} ];
+    $game->broadcast( dealing => { dealer => $self->{seats}[ $self->{dealer} ] } );
 }
 
 sub on_leave_state {
-    my $self = shift;
-	my $game = $self->{game};
+    my ( $self, $game ) = @_;
 
     $self->{deck}->reset->shuffle;
 
     while ( my ( $k, $num ) = each( %{ $self->{deal} } ) ) {
         if ( $k eq 'seat' ) {
-            my $seats = scalar( keys %{ $game->{players} }) - 1;
-            for my $s ( 0 .. $seats ) {
+            for my $s ( keys %{ $game->{players} } ) {
                 my $cards = bag( $self->{deck}->deal($num) );
                 $game->{players}{$s}{cards} = $cards;
-                $game->{players}{$s}{client}->send( deal => { action => 'deal', hand => [ $cards->values ] });
+                $game->{players}{$s}{client}->send( deal => { action => 'deal', hand => [ $cards->values ] } );
             }
         }
         else {
             $game->{$k} = bag( $self->{deck}->deal($num) );
         }
     }
-    $self->{dealer} = ($self->{dealer} + 1) % keys %{ $game->{players} };
+    my $seats = $game->{seats} ? $game->{seats} : [ keys %{ $game->{players} } ];
+    $self->{dealer} = ++$self->{dealer} % @{ $self->{seats} };
     $game->{leader} = $self->{dealer};
 }
 
 on 'deal' => sub {
     my ( $self, $player, $msg ) = @_;
-    if ( $player->{in_game_id} eq $self->{dealer} ) {
+    if ( $player->{in_game_id} eq $self->{seats}[ $self->{dealer} ] ) {
         $self->{game}->change_state( $self->{next} );
     }
     else {

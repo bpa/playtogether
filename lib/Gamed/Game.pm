@@ -32,12 +32,7 @@ on 'join' => sub {
         $player_id = $self->{next_player_id}++;
         $player    = {
             in_game_id => $player_id,
-            public     => {
-                id     => $player_id,
-                name   => $client->{name},
-                avatar => $client->{avatar}
-            }
-        };
+            public     => { %{ $client->{user} }, id => $player_id } };
         $self->{players}{$player_id} = $player;
         $self->{ids}{ $client->{id} } = $player_id;
     }
@@ -49,37 +44,42 @@ on 'join' => sub {
 
 after 'join' => sub {
     my ( $self, $client, $msg ) = @_;
+    my $player = $self->{players}{ $client->{in_game_id} };
     my %players;
     for my $p ( values %{ $self->{players} } ) {
         $players{ $p->{in_game_id} } = $p->{public};
     }
 
-    my %msg = ( players => \%players, player => $client->{in_game_id} );
-    for my $p ( values %{ $self->{players} } ) {
-        $p->{client}->send( join => { name => $msg->{name}, game => $self->{game}, player => $player->{in_game_id} } ) if defined $p->{client};
-    }
+    $self->broadcast(
+        join => { name => $msg->{name}, game => $self->{game}, players => \%players, player => $client->{in_game_id} }
+    );
 };
 
 after 'quit' => sub {
     my ( $self, $client, $msg, $player_data ) = @_;
     delete $player_data->{client};
-	$client->{game} = Gamed::Lobby->new;
+    $client->{game} = Gamed::Lobby->new;
     $self->broadcast( quit => { player => $client->{in_game_id} } );
     eval {
-        if ( !keys %{ $self->{players} } )
-        {
+        if ( !keys %{ $self->{players} } ) {
             delete $Gamed::instance{ $self->{name} };
         }
     };
 };
 
 on 'status' => sub {
-    my ($self, $player, $msg) = @_;
-	my %players;
-	for my $p (values %{ $game->{players} }) {
-		$players{$p} = $p->{public};
-	}
-	$player->send(status => { private => $player->{private}, players => \%players, status => $self->{public}, state => $self->{state}{name} } );
+    my ( $self, $client, $msg, $player ) = @_;
+    my %players;
+    for my $p ( values %{ $game->{players} } ) {
+        $players{ $p->{in_game_id} } = $p->{public};
+    }
+    $client->send(
+        status => {
+            id      => $client->{in_game_id},
+            private => $player->{private},
+            players => \%players,
+            status  => $self->{public},
+            state   => $self->{state}{name} } );
 };
 
 sub broadcast {

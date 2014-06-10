@@ -106,7 +106,7 @@ subtest 'game destroyed when all players leave' => sub {
     is( ~~ keys %{ $risk->{players} }, 1 );
     $p1->quit;
     is( ~~ @{ $p1->{sock}{packets} }, 0, "No one to talk to" );
-    ok( !defined $Gamed::game_instances{test}, "Game was deleted" );
+    ok( !defined $Gamed::instance{test}, "Game was deleted" );
 
     done();
 };

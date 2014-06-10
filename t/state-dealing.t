@@ -38,28 +38,44 @@ $e->game( { cmd => 'deal' } );
 check_deal( $french, 13 );
 is( scalar( $game->{dummy}->values ), 13, "13 cards to dummy" );
 
+delete $Gamed::instance{test};
+( $game, $n, $e, $s, $w ) = game( [qw/n e s w/], { game => 'Dealing', seats => [qw/n e s w/] } );
+broadcast_one( $game, { cmd => 'dealing', dealer => 'n' }, 'North is dealing' );
+deal_in( $game, $n, 'e' );
+deal_in( $game, $e, 's' );
+deal_in( $game, $s, 'w' );
+deal_in( $game, $w, 'n' );
+deal_in( $game, $n, 'e' );
+
+sub deal_in {
+	my ($game, $player, $dealer) = @_;
+	$player->handle( { cmd => 'deal' } );
+	broadcast($game, { cmd => 'deal' } );
+	change_state( $game, 'dealing', { dealer => $dealer } );
+}
+
 sub check_deal {
     local $Test::Builder::Level = $Test::Builder::Level + 1;
     my ( $re, $cards ) = @_;
     broadcast_one(
         $game,
-        {
-            hand => sub { grep( /$re/, @{ $_[0] } ) == $cards }
+        {   hand => sub { grep( /$re/, @{ $_[0] } ) == $cards }
         },
         'Hand Dealt'
     );
     for my $s ( values %{ $game->{players} } ) {
         is( scalar( $s->{cards}->values ), $cards, "Game kept record of cards dealt to player" );
     }
-    is( $game->{leader}, $game->{states}{dealing}{dealer}, 'leader set' );
-    is( ref( $game->{state} ), 'Gamed::State::GameOver', "Finished dealing" );
+    is( $game->{leader},       $game->{states}{dealing}{dealer}, 'leader set' );
+    is( ref( $game->{state} ), 'Gamed::State::GameOver',         "Finished dealing" );
 }
 
 sub change_state {
-    my ( $game, $state ) = @_;
+    my ( $game, $state, $test ) = @_;
+    $test ||= {};
     $game->change_state($state);
     $game->handle( $n, { cmd => 'change_state' } );
-    broadcast_one($game);
+    broadcast_one( $game, $test );
 }
 
 done_testing;

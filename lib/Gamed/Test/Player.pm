@@ -50,7 +50,7 @@ sub join {
         $self->{game},
         {
             cmd     => 'join',
-            players => \%players,
+            #players => \%players,
             player  => $self->{in_game_id},
         },
         "Got join"

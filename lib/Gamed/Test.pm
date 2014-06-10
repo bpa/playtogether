@@ -4,10 +4,13 @@ use strict;
 use warnings;
 use Gamed::Test::DB;
 use Gamed 'Gamed::Test::Game';
+use Gamed::Login;
 use Exporter 'import';
 use JSON;
+use Mojo::Util;
 our @EXPORT = qw/json text game broadcast broadcasted broadcast_one error/;
 
+$Gamed::Login::secret = "testing";
 Module::Pluggable::Object->new(
     search_path => 'Gamed::Test',
     require     => 1,

@@ -7,12 +7,12 @@ use Gamed::Handler;
 use parent 'Gamed::State';
 
 sub on_enter_state {
-    my ($self, $game) = @_;
+    my ( $self, $game ) = @_;
     if ( defined $game->{seats} ) {
-        $self->{available} = $game->{seats};
+        $self->{available} = [ @{ $game->{seats} } ];
     }
-    $self->{min} = $game->{min_players} || ($game->{seats} ? scalar( @{ $game->{seats} } ) : 1);
-    $self->{max} = $game->{max_players} || ($game->{seats} ? scalar( @{ $game->{seats} } ) : 1000);
+    $self->{min} = $game->{min_players} || ( $game->{seats} ? scalar( @{ $game->{seats} } ) : 1 );
+    $self->{max} = $game->{max_players} || ( $game->{seats} ? scalar( @{ $game->{seats} } ) : 1000 );
 }
 
 on 'join' => sub {
