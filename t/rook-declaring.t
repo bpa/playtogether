@@ -20,6 +20,7 @@ $game->{players}{1}{cards} = bag(qw/5G 6G 7G 8G 9G 5R 6R 7R 8R 9R/);
 $game->{state}{bidder} = 1;
 $game->change_state('declaring');
 $n->game( { cmd => 'whatever' } );
+broadcast( $game, { cmd => 'bidding' } );
 broadcast( $game, { cmd => 'bid' } );
 is( $game->{state}{name}, 'Declaring', 'Ready to start test' );
 

@@ -105,6 +105,7 @@ sub send {
 sub err {
     my ( $self, $reason ) = @_;
     chomp($reason);
+	#print (($self->{user} ? $self->{user}{name} : '?'), " ERR: $reason\n");
     $self->{sock}->send( { cmd => 'error', reason => $reason } );
 }
 

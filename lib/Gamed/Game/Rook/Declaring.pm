@@ -13,15 +13,15 @@ sub new {
 sub on_enter_state {
     my $self = shift;
 	my $game = $self->{game};
-    $game->{players}{ $game->{bidder} }{client}->send( 'nest', { nest => $game->{nest} } );
-    $game->{players}{ $game->{bidder} }{cards}->add( $game->{nest} );
+    $game->{players}{ $game->{public}{bidder} }{client}->send( 'nest', { nest => $game->{nest} } );
+    $game->{players}{ $game->{public}{bidder} }{cards}->add( $game->{nest} );
     delete $game->{nest};
 }
 
 on 'declare' => sub {
     my ( $self, $player, $msg, $player_data ) = @_;
 	my $game = $self->{game};
-    if ( $player->{in_game_id} ne $game->{bidder} ) {
+    if ( $player->{in_game_id} ne $game->{public}{bidder} ) {
         $player->err('Not your turn');
         return;
     }

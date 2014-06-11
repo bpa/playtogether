@@ -64,7 +64,7 @@ sub check_deal {
         'Hand Dealt'
     );
     for my $s ( values %{ $game->{players} } ) {
-        is( scalar( $s->{cards}->values ), $cards, "Game kept record of cards dealt to player" );
+        is( scalar( $s->{private}{cards}->values ), $cards, "Game kept record of cards dealt to player" );
     }
     is( $game->{leader},       $game->{states}{dealing}{dealer}, 'leader set' );
     is( ref( $game->{state} ), 'Gamed::State::GameOver',         "Finished dealing" );

@@ -9,10 +9,13 @@
   <div ng-show="state === 'Dealing' && dealer!=player_id">
     <span>Waiting for {{players[dealer].name}} to deal...</span>
   </div>
-  <div ng-show="state === 'Bidding'">
+  <div ng-show="state === 'Bidding' && bidder==player_id">
     <label size="5" for="bid-spinner">Bid:</label>
-    <input ngModel="bid.bid" min="bid.min" max="bid.max" ng-pattern="/\d+[05]/">
+    <input ngModel="bid.next_bid" min="bid.min" max="bid.max" ng-pattern="/\d+[05]/">
     <button type="button" class="btn btn-primary" ng-click="makeBid()">Bid</button>
+  </div>
+  <div ng-show="state === 'Bidding' && bidder!=player_id">
+    <span>Waiting for {{players[bidder].name}} to bid...</span>
   </div>
   <div ng-show="state === 'Declaring'">
     <div class="btn-group">

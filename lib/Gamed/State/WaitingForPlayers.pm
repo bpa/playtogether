@@ -16,14 +16,15 @@ sub on_enter_state {
 }
 
 on 'join' => sub {
-    my ( $self, $player, $msg, $player_data ) = @_;
+    my ( $self, $player, $msg ) = @_;
     my $game = $self->{game};
 
     if ( defined $self->{available} ) {
         my $id = shift @{ $self->{available} };
-        $game->{ids}{ $player->{id} } = $id;
-        $game->{players}{$id}         = delete $game->{players}{ $player->{in_game_id} };
-        $player->{in_game_id}         = $id;
+        $game->{ids}{ $player->{id} }     = $id;
+        $game->{players}{$id}             = delete $game->{players}{ $player->{in_game_id} };
+        $player->{in_game_id}             = $id;
+        $game->{players}{$id}{in_game_id} = $id;
     }
 
     my $players = grep { defined $_->{client} } values %{ $game->{players} };

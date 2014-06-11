@@ -8,75 +8,76 @@ use parent 'Gamed::State';
 sub new {
     my ( $pkg, %opts ) = @_;
     my $self = bless \%opts, $pkg;
-    $self->{starting_player} = 0;
+    $self->{bidder} = 0;
     $self->{name} ||= 'Bidding';
     die "Missing next\n"  unless $self->{next};
     die "Missing min\n"   unless looks_like_number( $self->{min} );
     die "Missing max\n"   unless looks_like_number( $self->{max} );
     die "Missing valid\n" unless ref( $self->{valid} ) eq 'CODE';
-	return $self;
+    return $self;
 }
 
 sub on_enter_state {
     my ( $self, $game ) = @_;
-    $self->{bidder} = $self->{starting_player};
-    $self->{starting_player}++;
+    $self->{seats}          = $game->{seats} || [ 0 .. scalar( keys %{ $game->{players} } ) - 1 ];
+    $self->{bidder}         = ++$self->{bidder} % @{ $self->{seats} };
+	$self->{current_bidder} = $self->{bidder};
+    $game->{public}{bid}    = 0;
+    $game->{public}{bidder} = $self->{seats}[ $self->{bidder} ];
+    $game->broadcast( bidding => { bidder => $game->{public}{bidder}, min => $self->{min} } );
 }
 
 sub on_leave_state {
     my ( $self, $game ) = @_;
     for ( values %{ $game->{players} } ) {
-        delete $_->{bid};
-        delete $_->{pass};
+        delete $_->{public}{pass};
     }
-    $game->{bidder} = delete $self->{bidder};
-    $game->{bid}    = delete $self->{bid};
-    $game->broadcast( bid => { bid => $game->{bid}, bidder => $game->{bidder} } );
+    $game->broadcast( bid => { bid => $game->{public}{bid}, bidder => $game->{public}{bidder} } );
 }
 
 on 'bid' => sub {
-    my ( $self, $player, $msg ) = @_;
+    my ( $self, $client, $msg, $player ) = @_;
     my $game = $self->{game};
-    if ( $player->{in_game_id} ne $self->{bidder} ) {
-        $player->err('Not your turn');
+    if ( $client->{in_game_id} ne $game->{public}{bidder} ) {
+        $client->err('Not your turn');
         return;
     }
 
     if ( $msg->{bid} eq 'pass' ) {
-        $game->{players}{$player->{in_game_id}}{pass} = 1;
-        $game->broadcast( bid => { bid => 'pass', player => $self->{bidder} } );
+        $player->{public}{pass} = 1;
         $self->next_bidder($game);
+        $game->broadcast( bid => { bid => 'pass', player => $client->{in_game_id}, bidder => $game->{public}{bidder} } );
     }
     elsif ( !looks_like_number( $msg->{bid} ) ) {
-        $player->err('Invalid bid');
+        $client->err('Invalid bid');
     }
     elsif ( defined $self->{min} && $msg->{bid} < $self->{min} ) {
-        $player->err( 'Bidding starts at ' . $self->{min} );
+        $client->err( 'Bidding starts at ' . $self->{min} );
     }
     elsif ( defined $self->{max} && $msg->{bid} > $self->{max} ) {
-        $player->err( 'Max bid is ' . $self->{max} );
+        $client->err( 'Max bid is ' . $self->{max} );
     }
     elsif ( defined $self->{valid} && !$self->{valid}( $msg->{bid} ) ) {
-        $player->err('Invalid bid');
+        $client->err('Invalid bid');
     }
-    elsif ( defined $self->{bid} && $self->{bid} >= $msg->{bid} ) {
-        $player->err('You must bid up or pass');
+    elsif ( defined $game->{public}{bid} && $game->{public}{bid} >= $msg->{bid} ) {
+        $client->err('You must bid up or pass');
     }
     else {
-        $self->{bid} = $msg->{bid};
-        $game->broadcast( bid => { bid => $msg->{bid}, player => $self->{bidder} } );
+        $game->{public}{bid} = $msg->{bid};
         $self->next_bidder($game);
+        $game->broadcast( bid => { bid => $game->{public}{bid}, player => $client->{in_game_id}, bidder => $game->{public}{bidder} } );
     }
 };
 
 sub next_bidder {
     my ( $self, $game ) = @_;
     do {
-        $self->{bidder}++;
-        $self->{bidder} = 0 if $self->{bidder} == keys %{ $game->{players} };
-    } while defined $game->{players}{ $self->{bidder} }{pass};
+        $self->{current_bidder} = ++$self->{current_bidder} % @{ $self->{seats} };
+    } while defined $game->{players}{ $self->{seats}[$self->{current_bidder}] }{public}{pass};
+    $game->{public}{bidder} = $self->{seats}[ $self->{current_bidder} ];
 
-    if ( grep( !exists $_->{pass}, values %{ $game->{players} } ) == 1 ) {
+    if ( grep( !exists $_->{public}{pass}, values %{ $game->{players} } ) == 1 ) {
         $game->change_state( $self->{next} );
     }
 }
