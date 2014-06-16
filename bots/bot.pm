@@ -84,6 +84,10 @@ my %cmd = (
             print "Joining ", $games[0]{name}, "\n";
             send_cmd join => { name => $games[0]{name} };
         }
+        else {
+			#TODO: make this an option
+            send_cmd create => { name => $bot, game => $game };
+        }
     },
     create => sub {
         my $msg = shift;
@@ -101,7 +105,7 @@ sub play {
     die "Usage: $0 host config" unless @ARGV == 2;
     my $host = $ARGV[0];
     $bot = $ARGV[1];
-    my $session = read_file(".$bot.session", err_mode => 'quiet');
+    my $session = read_file( ".$bot.session", err_mode => 'quiet' );
     if ($session) {
         ( $token, $username ) = @{ decode_json $session};
     }

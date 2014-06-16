@@ -45,13 +45,8 @@ on 'join' => sub {
 after 'join' => sub {
     my ( $self, $client, $msg ) = @_;
     my $player = $self->{players}{ $client->{in_game_id} };
-    my %players;
-    for my $p ( values %{ $self->{players} } ) {
-        $players{ $p->{in_game_id} } = $p->{public};
-    }
-
     $self->broadcast(
-        join => { name => $msg->{name}, game => $self->{game}, players => \%players, player => $client->{in_game_id} }
+        join => { name => $msg->{name}, game => $self->{game}, player => $client->{in_game_id} }
     );
 };
 
@@ -78,7 +73,8 @@ on 'status' => sub {
             id      => $client->{in_game_id},
             private => $player->{private},
             players => \%players,
-            status  => $self->{public},
+            status  => $self->{status},
+            public  => $self->{public},
             state   => $self->{state}{name} } );
 };
 

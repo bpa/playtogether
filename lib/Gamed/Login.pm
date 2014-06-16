@@ -27,7 +27,7 @@ on 'login' => sub {
             }
             $players{ $msg->{token} } = $player;
             $player->{game}{players}{ $player->{in_game_id} }{client} = $player;
-            $player->send( join => { game => $player->{game}{game}, name => $game->{name}, player => $player->{in_game_id} } );
+            $player->send( join => { game => $player->{game}{game}, name => $player->{game}{name}, player => $player->{in_game_id} } );
         }
         else {
             login( $player, Gamed::DB::get_user($username) );

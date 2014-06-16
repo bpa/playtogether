@@ -5,9 +5,36 @@ use lib "$FindBin::Bin";
 use bot 'Rook';
 use Data::Dumper;
 
+my %status;
 our $| = 1;
-on 'join' => sub {
-	print Dumper shift;
+on join => sub {
+	my $msg = shift;
+	if ($status{id}) {
+		$status{players}{$msg->{player}} = $msg;
+	}
+	else {
+print Dumper \%status;
+		cmd 'status';
+	}
+};
+
+on status => sub {
+	my $msg = shift;
+		print Dumper $msg;
+	%status = %{ $msg };
+	if ($status{state} eq 'Dealing' && $status{public}{dealer} eq $status{id}) {
+		cmd 'deal';
+	}
+	else {
+		print Dumper $msg;
+	}
+};
+
+on dealing => sub {
+	my $msg = shift;
+	if ($msg->{dealer} eq $status{id}) {
+		cmd 'deal';
+	}
 };
 
 play;
