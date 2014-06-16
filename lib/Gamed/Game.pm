@@ -70,7 +70,7 @@ after 'quit' => sub {
 on 'status' => sub {
     my ( $self, $client, $msg, $player ) = @_;
     my %players;
-    for my $p ( values %{ $game->{players} } ) {
+    for my $p ( values %{ $self->{players} } ) {
         $players{ $p->{in_game_id} } = $p->{public};
     }
     $client->send(

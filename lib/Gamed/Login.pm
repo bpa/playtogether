@@ -20,18 +20,14 @@ on 'create_user' => sub {
 on 'login' => sub {
     my ( $game, $player, $msg ) = @_;
     if ( my $username = signed_value( $msg->{username} ) ) {
-        if ( my $p = defined $msg->{token} ? $players{ $msg->{token} } : undef ) {
+        my $p = defined $msg->{token} ? $players{ $msg->{token} } : undef;
+        if ( $p && ref( $p->{game} ) ne 'Gamed::Lobby' ) {
             while ( my ( $k, $v ) = each(%$p) ) {
                 $player->{$k} = $v;
             }
             $players{ $msg->{token} } = $player;
             $player->{game}{players}{ $player->{in_game_id} }{client} = $player;
-            if ( ref( $player->{game} ) ne 'Gamed::Lobby' ) {
-                $player->send( join => { game => $player->{game}{game}, name => $game->{name}, player => $player->{in_game_id} } );
-            }
-            else {
-                $player->send( welcome => { token => $player->{id}, username => $msg->{username} } );
-            }
+            $player->send( join => { game => $player->{game}{game}, name => $game->{name}, player => $player->{in_game_id} } );
         }
         else {
             login( $player, Gamed::DB::get_user($username) );
@@ -64,8 +60,7 @@ sub login {
         $player->send(
             welcome => {
                 token    => $player->{id},
-                username => $auth = $user->{username} . "--" . Mojo::Util::hmac_sha1_sum( $user->{username}, $secret ) }
-        );
+                username => $user->{username} . "--" . Mojo::Util::hmac_sha1_sum( $user->{username}, $secret ) } );
     }
     else {
         $player->err("Login failed");

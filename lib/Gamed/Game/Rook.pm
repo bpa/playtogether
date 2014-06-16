@@ -32,4 +32,9 @@ on 'create' => sub {
 	$self->change_state('WAITING_FOR_PLAYERS');
 };
 
+before 'join' => sub {
+    my ($self, $player, $msg) = @_;
+	die "Game in progress\n" unless $self->{state}{name} eq 'WaitingForPlayers';
+};
+
 1;

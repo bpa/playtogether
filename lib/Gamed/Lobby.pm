@@ -1,5 +1,6 @@
 package Gamed::Lobby;
 
+use Gamed;
 use Gamed::Handler;
 
 sub new { bless {}, shift; }
@@ -12,8 +13,8 @@ on 'games' => sub {
           {
             name    => $k,
             game    => $v->{game},
-            players => [ map { $_->{name} } $v->{players} ],
-            status  => $v->{status}
+            players => [ map { $_->{public} } values %{ $v->{players} } ],
+            status  => $v->{status} || $v->{state}{name},
           };
     }
     $player->send( games => { games => [ sort keys %Gamed::game ], instances => \@inst } );

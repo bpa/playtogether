@@ -1,7 +1,15 @@
 package Gamed::Handler;
 
-use Exporter 'import';
-our @EXPORT = qw/before on after handle/;
+sub import {
+	my $caller = caller(0);
+	*{"$caller\::before"} = \&before;
+	*{"$caller\::on"} = \&on;
+	*{"$caller\::after"} = \&after;
+	*{"$caller\::handle"} = \&handle;
+	strict->import;
+	warnings->import;
+}
+
 our %handler;
 
 sub before {

@@ -40,8 +40,8 @@ on 'join' => sub {
 
 on 'theme' => sub {
 	my ($self, $player, $msg) = @_;
-	if ( exists $self->{themes}{ $msg->{theme} } ) {
-		$self->{themes}{ $game->{players}{$player->{in_game_id}}{public}{theme} } = ();
+	if ( $msg->{theme} && exists $self->{themes}{ $msg->{theme} } ) {
+		$self->{themes}{ $self->{players}{$player->{in_game_id}}{public}{theme} } = ();
 		$self->{players}{$player->{in_game_id}}{public}{theme} = $msg->{theme};
 		delete $self->{themes}{ $msg->{theme} };
 		$self->broadcast( theme => { theme => $msg->{theme}, player => $player->{in_game_id} } );

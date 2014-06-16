@@ -1,0 +1,13 @@
+#! /usr/bin/perl
+
+use FindBin;
+use lib "$FindBin::Bin";
+use bot 'Rook';
+use Data::Dumper;
+
+our $| = 1;
+on 'join' => sub {
+	print Dumper shift;
+};
+
+play;
