@@ -392,23 +392,23 @@ subtest 'place' => sub {
     my $risk = setup();
 
     #Don't have armies to place
-    $risk->{players}{0}{armies} = 0;
+    $risk->{players}{0}{private}{armies} = 0;
     $p1->game( { cmd => 'place', country => 0, armies => 0 }, { cmd => 'error', reason => 'Not enough armies' } );
 
     #Try to place more than you have
-    $risk->{players}{0}{armies} = 10;
+    $risk->{players}{0}{private}{armies} = 10;
     $p1->game( { cmd => 'place', country => 0, armies => 16 }, { cmd => 'error', reason => 'Not enough armies' } );
 
     #Normal placement
     $p1->game( { cmd => 'place', country => 0, armies => 1 } );
     $p1->got( { cmd => 'armies', armies => 9 } );
     broadcast( $risk, { cmd => 'country', country => { armies => 2, owner => 0 } } );
-    is( $risk->{players}{0}{armies}, 9 );
+    is( $risk->{players}{0}{private}{armies}, 9 );
 
     $p1->game( { cmd => 'place', country => 0, armies => 5 } );
     $p1->got( { cmd => 'armies', armies => 4 } );
     broadcast( $risk, { cmd => 'country', country => { armies => 7, owner => 0 } } );
-    is( $risk->{players}{0}{armies}, 4 );
+    is( $risk->{players}{0}{private}{armies}, 4 );
 
     #Negative armies
     $p1->game( { cmd => 'place', country => 0, armies => -1 }, { cmd => 'error', reason => 'Not enough armies' } );

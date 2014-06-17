@@ -24,7 +24,7 @@ on 'join' => sub {
         $game->{ids}{ $player->{id} }     = $id;
         $game->{players}{$id}             = delete $game->{players}{ $player->{in_game_id} };
         $player->{in_game_id}             = $id;
-        $game->{players}{$id}{in_game_id} = $id;
+        $game->{players}{$id}{public}{id} = $id;
     }
 
     my $players = grep { defined $_->{client} } values %{ $game->{players} };

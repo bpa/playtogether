@@ -10,17 +10,15 @@ our $| = 1;
 on join => sub {
 	my $msg = shift;
 	if ($status{id}) {
-		$status{players}{$msg->{player}} = $msg;
+		$status{players}{$msg->{player}{id}} = $msg->{player};
 	}
 	else {
-print Dumper \%status;
 		cmd 'status';
 	}
 };
 
 on status => sub {
 	my $msg = shift;
-		print Dumper $msg;
 	%status = %{ $msg };
 	if ($status{state} eq 'Dealing' && $status{public}{dealer} eq $status{id}) {
 		cmd 'deal';
@@ -32,9 +30,15 @@ on status => sub {
 
 on dealing => sub {
 	my $msg = shift;
+	$status{state} = 'Dealing';
 	if ($msg->{dealer} eq $status{id}) {
 		cmd 'deal';
 	}
+};
+
+on deal => sub {
+	my $msg = shift;
+	$status{private}{hand} = $msg->{hand};
 };
 
 play;

@@ -46,7 +46,7 @@ sub generate_armies {
             while (my ($name, $c) = each %{ $game->{board}{continents} } ) {
                 my $holds_region = 1;
                 for my $t ( @{ $c->{territories} } ) {
-                    if ( $t->{owner} != $p->{in_game_id} ) {
+                    if ( $t->{owner} != $p->{public}{id} ) {
                         $holds_region = 0;
                         last;
                     }
@@ -143,10 +143,10 @@ sub do_attack {
     send_update( $game, $from, $to, 'attack' );
 
     unless ( $defender->{countries} ) {
-        $game->broadcast( defeated => { player => $defender->{in_game_id} } );
+        $game->broadcast( defeated => { player => $defender->{public}{id} } );
     }
     if ( $attacker->{countries} == @{ $game->{countries} } ) {
-        $game->broadcast( 'Game Over' => { victor => $attacker->{in_game_id} } );
+        $game->broadcast( 'Game Over' => { victor => $attacker->{public}{id} } );
 	$game->change_state('GAME_OVER');
     }
 }
@@ -158,7 +158,7 @@ on 'quit' => sub {
 	delete $player_data->{client};
     my @remaining = grep { exists $_->{client} } values %{ $game->{players} };
     if ( @remaining == 1 ) {
-        $game->broadcast( victory => { player => $remaining[0]->{in_game_id} } );
+        $game->broadcast( victory => { player => $remaining[0]->{public}{id} } );
         $game->change_state('GAME_OVER');
     }
 };

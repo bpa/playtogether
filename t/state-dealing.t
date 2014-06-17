@@ -59,7 +59,7 @@ sub check_deal {
     my ( $re, $cards ) = @_;
     broadcast_one(
         $game,
-        {   hand => sub { grep( /$re/, @{ $_[0] } ) == $cards }
+        {   cards => sub { grep( /$re/, @{ $_[0] } ) == $cards }
         },
         'Hand Dealt'
     );

@@ -42,16 +42,11 @@ sub join {
     local $Test::Builder::Level = $Test::Builder::Level + 1;
     my ( $self, $name ) = @_;
     $self->handle( { cmd => 'join', name => $name } );
-    my %players;
-    for my $p ( values %{ $self->{game}{players} } ) {
-        $players{ $p->{in_game_id} } = $p->{public};
-    }
     Gamed::Test::broadcast(
         $self->{game},
         {
             cmd     => 'join',
-            #players => \%players,
-            player  => $self->{in_game_id},
+            player  => sub { $_[0]->{id} eq $self->{in_game_id} },
         },
         "Got join"
     );

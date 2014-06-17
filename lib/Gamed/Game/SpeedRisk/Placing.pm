@@ -21,7 +21,7 @@ sub on_enter_state {
 
     my $dummy;
     if ( keys %{ $game->{players} } == 2 ) {
-        $dummy = { in_game_id => 'd', client => Gamed::NullPlayer->new };
+        $dummy = { public => { id => 'd' }, client => Gamed::NullPlayer->new };
         $game->{players}{d} = $dummy;
     }
 
@@ -30,9 +30,9 @@ sub on_enter_state {
     $armies++ unless $countries % @players == 0;
 
     for my $p (@players) {
-        $p->{public}{ready} = 0;
-        $p->{armies}        = $armies;
-        $p->{countries}     = 0;
+        $p->{public}{ready}   = 0;
+        $p->{private}{armies} = $armies;
+        $p->{countries}       = 0;
     }
 
     #Give out countries in a random, but equal way
@@ -41,28 +41,28 @@ sub on_enter_state {
     for my $i (@indexes) {
         my $p = $players[$player_ind];
         $game->{countries}[$i]{armies} = 1;
-        $game->{countries}[$i]{owner}  = $p->{in_game_id};
-        $p->{armies}--;
+        $game->{countries}[$i]{owner}  = $p->{public}{id};
+        $p->{private}{armies}--;
         $p->{countries}++;
         $player_ind = ++$player_ind % @players;
     }
 
     #For those who didn't get as many countries, start with 2 more armies
     for my $p (@players) {
-        $p->{armies} *= 2;
-        $p->{armies} += $game->{board}{starting_armies}[$#players];
-        $p->{client}->send( armies => { armies => $p->{armies} } );
+        $p->{private}{armies} *= 2;
+        $p->{private}{armies} += $game->{board}{starting_armies}[$#players];
+        $p->{client}->send( armies => { armies => $p->{private}{armies} } );
     }
 
     #Spread out the dummy player's armies so the countries aren't effectively free
     if ( defined $dummy ) {
         $dummy->{ready} = 1;
-        while ( $dummy->{armies} ) {
+        while ( $dummy->{private}{armies} ) {
             for my $c ( @{ $game->{countries} } ) {
                 if ( $c->{owner} eq 'd' ) {
-                    $dummy->{armies}--;
+                    $dummy->{private}{armies}--;
                     $c->{armies}++;
-                    last unless $dummy->{armies};
+                    last unless $dummy->{private}{armies};
                 }
             }
         }
@@ -86,11 +86,11 @@ on 'place' => \&Gamed::Game::SpeedRisk::Place::on_place;
 on 'quit' => sub {
     my ( $self, $player, $msg, $player_data ) = @_;
     my $game = $self->{game};
-	delete $player_data->{client};
-    $game->{players}{$player->{in_game_id}}{public}{ready} = 1;
+    delete $player_data->{client};
+    $game->{players}{ $player->{in_game_id} }{public}{ready} = 1;
     my @remaining = grep { exists $_->{client} } values %{ $game->{players} };
     if ( @remaining == 1 ) {
-        $game->broadcast( victory => { player => $remaining[0]->{in_game_id} } );
+        $game->broadcast( victory => { player => $remaining[0]->{public}{id} } );
         $game->change_state('GAME_OVER');
     }
     else {

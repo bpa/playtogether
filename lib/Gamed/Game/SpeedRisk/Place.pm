@@ -21,12 +21,12 @@ sub on_place {
     $player->err("Invalid armies") && return
       unless looks_like_number($armies);
     $player->err("Not enough armies") && return
-      unless 0 < $armies && $armies <= $player_data->{armies};
+      unless 0 < $armies && $armies <= $player_data->{private}{armies};
 
     $country->{armies} += $armies;
-    $player_data->{armies} -= $armies;
+    $player_data->{private}{armies} -= $armies;
 
-    $player->send( armies => { armies => $player_data->{armies} } );
+    $player->send( armies => { armies => $player_data->{private}{armies} } );
     $game->broadcast( country => { country => { armies => $country->{armies}, owner => $country->{owner} } } );
 };
 

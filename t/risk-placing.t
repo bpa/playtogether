@@ -37,9 +37,9 @@ subtest 'two players' => sub {
         is( $risk->{players}{$p}{countries},
             14, "Game says each player has 14 countries" );
     }
-    is( $risk->{players}{0}{armies}, 26, "Player 1 has 26 armies to place" );
-    is( $risk->{players}{1}{armies}, 26, "Player 2 has 26 armies to place" );
-    is( $risk->{players}{d}{armies}, 0,  "Dummy player placed all armies" );
+    is( $risk->{players}{0}{private}{armies}, 26, "Player 1 has 26 armies to place" );
+    is( $risk->{players}{1}{private}{armies}, 26, "Player 2 has 26 armies to place" );
+    is( $risk->{players}{d}{private}{armies}, 0,  "Dummy player placed all armies" );
 
     done();
 };
@@ -112,12 +112,12 @@ subtest 'place' => sub {
     $p1->game( { cmd => 'place', country => 0, armies => 1 } );
     $p1->got( { cmd => 'armies', armies => 25 } );
     broadcast( $risk, { cmd => 'country', country => { armies => 2, owner => 0 } } );
-    is( $risk->{players}{0}{armies}, 25 );
+    is( $risk->{players}{0}{private}{armies}, 25 );
 
     $p1->game( { cmd => 'place', country => 0, armies => 5 } );
     $p1->got( { cmd => 'armies', armies => 20 } );
     broadcast( $risk, { cmd => 'country', country => { armies => 7, owner => 0 } } );
-    is( $risk->{players}{0}{armies}, 20 );
+    is( $risk->{players}{0}{private}{armies}, 20 );
 
     $p1->game(
         { cmd => 'place', country => 0, armies => -1 },
