@@ -14,11 +14,12 @@ use Data::Dumper;
 $Data::Dumper::Terse = 1;
 
 our $| = 1;
-my ( $config, $socket, $token, $username, %f, $game, $bot );
+my ( $config, $socket, $token, $username, %f, $game, $bot, $timeout );
 
 sub import {
-    my ( $pkg, $game_name ) = @_;
+    my ( $pkg, $game_name, $timeout_sec ) = @_;
     $game = $game_name;
+	$timeout = $timeout_sec || 30;
     strict->import;
     warnings->import;
     my $caller = caller(0);
@@ -59,6 +60,7 @@ my %cmd = (
     },
     error => sub {
         my $msg = shift;
+		print Dumper $msg;
         if ( $msg->{reason} eq 'Login failed' ) {
             $socket->send(
                 encode_json {
@@ -124,7 +126,7 @@ sub play {
     my $buf;
     my $json = JSON::XS->new;
     while (1) {
-        my @ready = $select->can_read(30);
+        my @ready = $select->can_read($timeout);
         if (@ready) {
             $socket->recv( $buf, 4096 );
             my @messages = $json->incr_parse($buf);
@@ -133,6 +135,9 @@ sub play {
                 $func->($msg);
             }
         }
+		else {
+			my $func = $f{tick} || \&unhandled;
+		}
     }
 }
 

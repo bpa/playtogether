@@ -8,37 +8,85 @@ use Data::Dumper;
 my %status;
 our $| = 1;
 on join => sub {
-	my $msg = shift;
-	if ($status{id}) {
-		$status{players}{$msg->{player}{id}} = $msg->{player};
-	}
-	else {
-		cmd 'status';
-	}
+    my $msg = shift;
+    if ( $status{id} ) {
+        $status{players}{ $msg->{player}{id} } = $msg->{player};
+    }
+    else {
+		$status{id} = -1;
+        cmd 'status';
+    }
 };
 
+my %state_action = (
+    WaitingForPlayers => sub { },
+    Dealing           => sub {
+        if ( $status{state} eq 'Dealing' && $status{public}{dealer} eq $status{id} ) {
+            cmd 'deal';
+        }
+    },
+    Bidding   => \&make_bid,
+    Declaring => \&declare,
+);
+
 on status => sub {
-	my $msg = shift;
-	%status = %{ $msg };
-	if ($status{state} eq 'Dealing' && $status{public}{dealer} eq $status{id}) {
-		cmd 'deal';
-	}
-	else {
-		print Dumper $msg;
-	}
+    my $msg = shift;
+    %status = %{$msg};
+    my $f = $state_action{ $msg->{state} } || sub { print Dumper $msg };
+    $f->();
+};
+
+sub make_bid {
+    return unless $status{public}{bidder} eq $status{id};
+    $status{public}{bid} ||= 95;
+    if ( $status{public}{bid} < 145 ) {
+        cmd bid => $status{public}{bid} + 5;
+    }
+    else {
+        cmd bid => 'pass';
+    }
+}
+
+on bidding => sub {
+    my $msg = shift;
+    $status{state} = 'Bidding';
+    $status{public}{bidder} = $msg->{bidder};
+    make_bid();
+};
+
+on bid => sub {
+    my $msg = shift;
+    $status{public}{bidder} = $msg->{bidder};
+    if ( $msg->{bid} ne 'pass' ) {
+        $status{public}{bid} = $msg->{bid};
+    }
+    make_bid();
 };
 
 on dealing => sub {
-	my $msg = shift;
-	$status{state} = 'Dealing';
-	if ($msg->{dealer} eq $status{id}) {
-		cmd 'deal';
-	}
+    my $msg = shift;
+    $status{state} = 'Dealing';
+    if ( $msg->{dealer} eq $status{id} ) {
+        cmd 'deal';
+    }
 };
 
 on deal => sub {
-	my $msg = shift;
-	$status{private}{hand} = $msg->{hand};
+    my $msg = shift;
+    $status{private}{cards} = $msg->{cards};
+};
+
+sub declare {
+    print Dumper $status{private}{cards};
+}
+
+on nest => sub {
+    my $msg = shift;
+	print Dumper $msg;
+    $status{state} = 'Declaring';
+	print Dumper $status{private}{cards};
+    push @{ $status{private}{cards} }, @{ $msg->{nest} };
+    declare();
 };
 
 play;

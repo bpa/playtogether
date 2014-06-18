@@ -19,6 +19,7 @@ use Gamed::States {
 
 on 'create' => sub {
     my ( $self, $player, $msg ) = @_;
+	$msg->{board} ||= 'Classic';
     $self->{board}       = Gamed::Game::SpeedRisk::Board->new( $msg->{board} );
     $self->{countries}   = $self->{board}{territories};
     $self->{min_players} = 2;

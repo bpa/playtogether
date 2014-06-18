@@ -9,7 +9,7 @@ sub new {
 }
 
 sub TO_JSON {
-    return { %{shift} };
+    return [ shift->values() ];
 }
 
 sub add {

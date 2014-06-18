@@ -4,6 +4,8 @@ use JSON::XS;
 use Gamed::Login;
 
 my $json = JSON::XS->new;
+$json->allow_blessed;
+$json->convert_blessed;
 
 sub new {
     my $pkg = shift;
