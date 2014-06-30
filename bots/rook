@@ -6,6 +6,12 @@ use bot 'Rook';
 use Data::Dumper;
 
 my %status;
+my @order = qw/_ 5 6 7 8 9 10 11 12 13 14 1/;
+my %order;
+for my $i (0 .. $#order) {
+	$order{$order[$i]} = $i;
+}
+
 our $| = 1;
 on join => sub {
     my $msg = shift;
@@ -77,14 +83,22 @@ on deal => sub {
 };
 
 sub declare {
-    print Dumper $status{private}{cards};
+	my %suit;
+	for my $c (@{ $status{private}{cards} } ) {
+		my ($value, $s) = $c =~ /(.*)(.)/;
+		next if $s eq '_';
+		$suit{$s}{s} = $s;
+		$suit{$s}{count}++;
+		$suit{$s}{str} += $order{$value};
+	}
+	my @suit = values %suit;
+	@suit = sort { $b->{count} <=> $a->{count} or $b->{str} <=> $a->{str} } @suit;
+    cmd declare => { trump => $suit[0]{s} };
 }
 
 on nest => sub {
     my $msg = shift;
-	print Dumper $msg;
     $status{state} = 'Declaring';
-	print Dumper $status{private}{cards};
     push @{ $status{private}{cards} }, @{ $msg->{nest} };
     declare();
 };
