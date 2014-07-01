@@ -70,9 +70,9 @@ tcp_server 0, 3001, sub {
 sub on_disconnect {
     my ( $self, $player ) = @_;
     $self->destroy() if $self->can('destroy');
-    $player->disconnected();
     delete $player->{sock};
 	delete $socket{$self};
+   	$player->{game}->handle($player, { cmd => 'disconnected' } );
 }
 
 $Gamed::Login::secret = read_file( catdir( dirname(__FILE__), '.secret' ) );

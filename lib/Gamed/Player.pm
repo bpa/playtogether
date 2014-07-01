@@ -30,9 +30,6 @@ sub send {
     $self->{sock}->send( $json->encode($msg) );
 }
 
-sub disconnected {
-}
-
 sub err {
     my ( $self, $reason ) = @_;
     chomp $reason;

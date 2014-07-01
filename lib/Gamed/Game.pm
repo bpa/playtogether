@@ -54,12 +54,23 @@ after 'quit' => sub {
     delete $player_data->{client};
     $client->{game} = Gamed::Lobby->new;
     $self->broadcast( quit => { player => $client->{in_game_id} } );
+	delete_game_if_empty( $self, $client );
+};
+
+sub delete_game_if_empty {
+    my $self = shift;
     eval {
-        if ( !keys %{ $self->{players} } ) {
+        unless ( grep { defined $_->{client}{sock} } values %{ $self->{players} } ) {
+			for my $c (values %{ $self->{players} }) {
+				$c->{client}{game} = Gamed::Lobby->new;
+			}
             delete $Gamed::instance{ $self->{name} };
         }
     };
+	print $@ if $@;
 };
+
+after 'disconnected' => \&delete_game_if_empty;
 
 on 'status' => sub {
     my ( $self, $client, $msg, $player ) = @_;
