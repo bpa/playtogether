@@ -28,7 +28,6 @@ on 'create' => sub {
     my ($self, $player, $msg) = @_;
     $self->{points}      = [ 0, 0 ];
     $self->{seats}       = [qw/n e s w/];
-	$self->{bidding}     = 'n';
 	$self->change_state('WAITING_FOR_PLAYERS');
 };
 

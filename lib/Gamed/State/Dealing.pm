@@ -38,10 +38,10 @@ sub on_leave_state {
 
     while ( my ( $k, $num ) = each( %{ $self->{deal} } ) ) {
         if ( $k eq 'seat' ) {
-            for my $s ( keys %{ $game->{players} } ) {
+            for my $p ( values %{ $game->{players} } ) {
                 my $cards = bag( $self->{deck}->deal($num) );
-                $game->{players}{$s}{private}{cards} = $cards;
-                $game->{players}{$s}{client}->send( deal => { cards => [ $cards->values ] } );
+                $p->{private}{cards} = $cards;
+                $p->{client}->send( deal => { cards => [ $cards->values ] } ) if $p->{client};
             }
         }
         else {

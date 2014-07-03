@@ -3,21 +3,27 @@ package Gamed::Game::Rook::PlayLogic;
 sub new { bless {}, shift; }
 
 sub is_valid_play {
-    my ( $self, $card, $trick, $hand ) = @_;
+    my ( $self, $card, $trick, $hand, $game ) = @_;
     return unless $hand->contains($card);
 
     if ( @$trick == 0 ) {
         return 1;
     }
 
-    my $lead = substr $trick->[0], -1;
-    return 1 if substr( $card, -1 ) eq $lead;
+    my $trump = $game->{public}{trump};
+    my $lead = suit( $lead, $trump );
+    return 1 if suit( $card, $trump ) eq $lead;
 
     for ( $hand->values ) {
-        return if substr( $_, -1 ) eq $lead;
+        return if suit( $card, $trump ) eq $lead;
     }
 
     return 1;
+}
+
+sub suit {
+    my $s = substr( $_[0], -1 );
+    return $s eq '_' ? $_[1] : $s;
 }
 
 sub trick_winner {
@@ -49,12 +55,16 @@ my %point_value = (
 
 sub on_round_end {
     my ( $self, $game ) = @_;
-    my @points = (0,0);
-    my @cards_taken = (0,0);
-    my $team = $game->{bidder} % 2;
+    my @points      = ( 0, 0 );
+    my @cards_taken = ( 0, 0 );
+    my $team;
+	for my $s ( 0 .. $#{$game->{seats}} ) {
+		$team = $s % 2 if $game->{seats}[$s] eq $game->{public}{bidder};
+	}
     for my $s ( 0 .. 3 ) {
         my $t = $s % 2;
-        for ( @{ $game->{seat}[$s]{taken} } ) {
+		my $seat = $game->{seats}[$s];
+        for ( @{ $game->{players}{$seat}{taken} } ) {
             my ($v) = /(\d+).$/;
             $points[$t] += $point_value{$v};
             $cards_taken[$t]++;
@@ -62,12 +72,19 @@ sub on_round_end {
     }
     my $bonus = $cards_taken[0] == $cards_taken[1] ? $team : $cards_taken[0] > $cards_taken[1] ? 0 : 1;
     $points[$bonus] += 20;
-    if ( $points[$team] < $game->{bid} ) {
-        $points[$team] = -1 * $game->{bid};
+	print $game->{public}{bidder}, " bid ", $game->{public}{bid}, " in ", $game->{public}{trump}, " and got ", $points[$team], "\n";
+	printf("NS: %4i EW: %4i\n", $points[0], $points[1]);
+    if ( $points[$team] < $game->{public}{bid} ) {
+        $points[$team] = -1 * $game->{public}{bid};
     }
-    $game->{points}[0] += $points[0];
-    $game->{points}[1] += $points[1];
-    if ( $game->{points}[0] != $game->{points}[1] && ( $game->{points}[0] >= 500 || $game->{points}[1] >= 500 ) ) {
+    $game->{public}{points}[0] += $points[0];
+    $game->{public}{points}[1] += $points[1];
+	print "Currently ", $game->{public}{points}[0], " to ", $game->{public}{points}[1], "\n";
+    if ( $game->{public}{points}[0] != $game->{public}{points}[1]
+        && ( $game->{public}{points}[0] >= 500 || $game->{public}{points}[1] >= 500 ) )
+    {
+		my $final = $game->{public}{points};
+		$game->broadcast( final => { winner => $final->[0] > $final->[1] ? 'NS' : 'EW' } );
         $game->change_state('GAME_OVER');
     }
     else {

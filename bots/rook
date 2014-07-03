@@ -16,7 +16,7 @@ on join => sub {
         $status{players}{ $msg->{player}{id} } = $msg->{player};
     }
     else {
-		$status{id} = -1;
+        $status{id} = -1;
         cmd 'status';
     }
 };
@@ -28,15 +28,16 @@ my %state_action = (
             cmd 'deal';
         }
     },
-    Bidding   => \&make_bid,
-    Declaring => \&declare,
+    Bidding    => \&make_bid,
+    Declaring  => \&declare,
+    PlayTricks => \&play_card,
 );
 
 on status => sub {
     my $msg = shift;
     %status = %{$msg};
-	$status{cards} = cards($status{cards}) if defined $status{cards};
-	my $f = $state_action{ $msg->{state} } || sub { print Dumper $msg };
+    $status{private}{cards} = cards( $status{private}{cards} ) if defined $status{private}{cards};
+    my $f = $state_action{ $msg->{state} } || sub { print Dumper $msg };
     $f->();
 };
 
@@ -61,6 +62,7 @@ on bidding => sub {
 on bid => sub {
     my $msg = shift;
     $status{public}{bidder} = $msg->{bidder};
+    $status{public}{player} = $msg->{bidder};
     if ( $msg->{bid} ne 'pass' ) {
         $status{public}{bid} = $msg->{bid};
     }
@@ -77,35 +79,91 @@ on dealing => sub {
 
 on deal => sub {
     my $msg = shift;
-    $status{private}{cards} = cards($msg->{cards});
+    $status{private}{cards} = cards( $msg->{cards} );
+    $status{public}{bid} = 95;
 };
 
 sub declare {
-	my %suit;
-	for my $c (@{ $status{private}{cards} } ) {
-		my $s = $c->s('_');
-		next if $s eq '_';
-		$suit{$s}{s} = $s;
-		$suit{$s}{count}++;
-		$suit{$s}{str} += $c->o;
-	}
-	my @suit = values %suit;
-	@suit = sort { $b->{count} <=> $a->{count} or $b->{str} <=> $a->{str} } @suit;
-	for my $i (0 .. $#suit) { $suit[$i]{i} = $i }
-	$status{private}{cards} = [sort { $suit{$a->s}{i} <=> $suit{$b->s}{i} || $b->o <=> $a->o } @{ $status{private}{cards} }];
-	my @nest = splice @{$status{private}{cards}}, 10, 5;
+    my %suit;
+    for my $c ( @{ $status{private}{cards} } ) {
+        my $s = $c->s('_');
+        next if $s eq '_';
+        $suit{$s}{s} = $s;
+        $suit{$s}{count}++;
+        $suit{$s}{str} += $c->o;
+    }
+    my @suit = values %suit;
+    @suit = sort { $b->{count} <=> $a->{count} or $b->{str} <=> $a->{str} } @suit;
+    for my $i ( 0 .. $#suit ) { $suit[$i]{i} = $i }
+    my $s = $suit[0]{s};
+    $status{private}{cards} =
+      [ sort { $suit{ $a->s($s) }{i} <=> $suit{ $b->s($s) }{i} || $b->o <=> $a->o } @{ $status{private}{cards} } ];
+    my @nest = splice @{ $status{private}{cards} }, 10, 5;
     cmd declare => { trump => $suit[0]{s}, nest => \@nest };
+    $status{public}{trick} = [];
+    play_card();
 }
 
 on nest => sub {
     my $msg = shift;
     $status{state} = 'Declaring';
-    push @{ $status{private}{cards} }, @{ cards($msg->{nest}) };
+    push @{ $status{private}{cards} }, @{ cards( $msg->{nest} ) };
     declare();
 };
 
-sub cards {
-	[ map { Card->new($_) } @{$_[0]} ];
+on trump => sub {
+    my $msg = shift;
+    $status{public}{trump} = $msg->{trump};
+};
+
+on play => sub {
+    my $msg = shift;
+    $status{public}{player} = $msg->{next};
+	push @{ $status{public}{trick} }, Card->new($msg->{card});
+    play_card();
+};
+
+sub play_card {
+    return unless $status{public}{player} eq $status{id};
+
+    my %hand = ( R => [], G => [], B => [], Y => [] );
+    for my $c ( @{ $status{private}{cards} } ) {
+        push @{ $hand{ $c->s( $status{public}{trump} ) } }, $c;
+    }
+
+    if ( @{ $status{public}{trick} } && @{ $hand{ $status{public}{trick}[0]->s($status{public}{trump}) } } ) {
+        my $lead = $hand{ $status{public}{trick}[0]->s($status{public}{trump}) };
+        my $card = $lead->[ int( rand(@$lead) ) ];
+        cmd play => { card => $card };
+        for my $i ( 0 .. $#{ $status{private}{cards} } ) {
+            splice( @{ $status{private}{cards} }, $i, 1 ) && last if $status{private}{cards}[$i] eq $card;
+        }
+    }
+    else {
+        my $card = splice( @{ $status{private}{cards} }, int( rand( @{ $status{private}{cards} } ) ), 1 );
+        cmd play => { card => $card };
+    }
 }
+
+sub cards {
+    [ map { Card->new($_) } @{ $_[0] } ];
+}
+
+on trick => sub {
+	my $msg = shift;
+	$status{public}{player} = $msg->{winner};
+	$status{public}{trick} = [];
+	play_card() if @{ $status{private}{cards} };
+};
+
+on final => sub {
+	cmd 'quit';
+	exit;
+};
+
+on quit => sub {
+	cmd 'quit';
+	exit;
+};
 
 play;

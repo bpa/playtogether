@@ -32,6 +32,8 @@ sub on_leave_state {
     for ( values %{ $game->{players} } ) {
         delete $_->{public}{pass};
     }
+	$game->{public}{bid} = $self->{min} if $game->{public}{bid} < $self->{min};
+	$game->{public}{player} = $game->{public}{bidder};
     $game->broadcast( bid => { bid => $game->{public}{bid}, bidder => $game->{public}{bidder} } );
 }
 
