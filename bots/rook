@@ -1,17 +1,14 @@
 #! /usr/bin/perl
 
+use strict;
+use warnings;
 use FindBin;
 use lib "$FindBin::Bin";
 use bot 'Rook';
+use Card;
 use Data::Dumper;
 
 my %status;
-my @order = qw/_ 5 6 7 8 9 10 11 12 13 14 1/;
-my %order;
-for my $i (0 .. $#order) {
-	$order{$order[$i]} = $i;
-}
-
 our $| = 1;
 on join => sub {
     my $msg = shift;
@@ -38,7 +35,8 @@ my %state_action = (
 on status => sub {
     my $msg = shift;
     %status = %{$msg};
-    my $f = $state_action{ $msg->{state} } || sub { print Dumper $msg };
+	$status{cards} = cards($status{cards}) if defined $status{cards};
+	my $f = $state_action{ $msg->{state} } || sub { print Dumper $msg };
     $f->();
 };
 
@@ -79,28 +77,35 @@ on dealing => sub {
 
 on deal => sub {
     my $msg = shift;
-    $status{private}{cards} = $msg->{cards};
+    $status{private}{cards} = cards($msg->{cards});
 };
 
 sub declare {
 	my %suit;
 	for my $c (@{ $status{private}{cards} } ) {
-		my ($value, $s) = $c =~ /(.*)(.)/;
+		my $s = $c->s('_');
 		next if $s eq '_';
 		$suit{$s}{s} = $s;
 		$suit{$s}{count}++;
-		$suit{$s}{str} += $order{$value};
+		$suit{$s}{str} += $c->o;
 	}
 	my @suit = values %suit;
 	@suit = sort { $b->{count} <=> $a->{count} or $b->{str} <=> $a->{str} } @suit;
-    cmd declare => { trump => $suit[0]{s} };
+	for my $i (0 .. $#suit) { $suit[$i]{i} = $i }
+	$status{private}{cards} = [sort { $suit{$a->s}{i} <=> $suit{$b->s}{i} || $b->o <=> $a->o } @{ $status{private}{cards} }];
+	my @nest = splice @{$status{private}{cards}}, 10, 5;
+    cmd declare => { trump => $suit[0]{s}, nest => \@nest };
 }
 
 on nest => sub {
     my $msg = shift;
     $status{state} = 'Declaring';
-    push @{ $status{private}{cards} }, @{ $msg->{nest} };
+    push @{ $status{private}{cards} }, @{ cards($msg->{nest}) };
     declare();
 };
+
+sub cards {
+	[ map { Card->new($_) } @{$_[0]} ];
+}
 
 play;

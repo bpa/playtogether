@@ -1,0 +1,21 @@
+package Card;
+
+use overload '""' => \&TO_JSON;
+
+my @order = qw/0 5 6 7 8 9 10 11 12 13 14 1/;
+my %order;
+for my $i (0 .. $#order) {
+	$order{$order[$i]} = $i;
+}
+
+sub new {
+	my ($pkg,$c) = @_;
+	my ($v,$s) = $c =~ /(.*)(.)$/;
+	bless { v => $v, s => $s, o => $order{$v} }, $pkg;
+}
+
+sub TO_JSON { $_[0]->{v} . $_[0]->{s} }
+sub o { $_[0]->{o} }
+sub s { $_[0]->{s} eq '_' ? $_[1] : $_[0]->{s} }
+
+1;

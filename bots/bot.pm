@@ -12,6 +12,8 @@ use FindBin;
 use Getopt::Long;
 use Data::Dumper;
 $Data::Dumper::Terse = 1;
+my $json = JSON::XS->new;
+$json->convert_blessed(1);
 
 our $| = 1;
 my ( $config, $socket, $token, $username, %f, $game, $bot, $timeout );
@@ -19,7 +21,7 @@ my ( $config, $socket, $token, $username, %f, $game, $bot, $timeout );
 sub import {
     my ( $pkg, $game_name, $timeout_sec ) = @_;
     $game = $game_name;
-	$timeout = $timeout_sec || 30;
+    $timeout = $timeout_sec || 30;
     strict->import;
     warnings->import;
     my $caller = caller(0);
@@ -44,30 +46,30 @@ sub send_cmd {
     $msg ||= {};
     $msg = { $cmd => $msg } unless ref($msg) eq 'HASH';
     $msg->{cmd} = $cmd;
-    $socket->send( encode_json $msg);
+    $socket->send( $json->encode($msg) );
 }
 
 my %cmd = (
     login => sub {
         my $msg = shift;
         $socket->send(
-            encode_json {
-                cmd        => 'login',
-                username   => $username || $config->{username},
-                passphrase => $config->{passphrase},
-                token      => $token,
-            } );
+            $json->encode( {
+                    cmd        => 'login',
+                    username   => $username || $config->{username},
+                    passphrase => $config->{passphrase},
+                    token      => $token,
+                } ) );
     },
     error => sub {
         my $msg = shift;
-		print Dumper $msg;
+        print Dumper $msg;
         if ( $msg->{reason} eq 'Login failed' ) {
             $socket->send(
-                encode_json {
-                    cmd        => 'create_user',
-                    username   => $config->{username},
-                    passphrase => $config->{passphrase},
-                    name       => $config->{name} } );
+                $json->encode( {
+                        cmd        => 'create_user',
+                        username   => $config->{username},
+                        passphrase => $config->{passphrase},
+                        name       => $config->{name} } ) );
         }
     },
     welcome => sub {
@@ -75,7 +77,7 @@ my %cmd = (
         print "Connected\n";
         $token    = $msg->{token};
         $username = $msg->{username};
-        write_file( ".$bot.session", encode_json( [ $token, $username ] ) );
+        write_file( ".$bot.session", $json->encode( [ $token, $username ] ) );
         send_cmd 'games';
     },
     games => sub {
@@ -87,7 +89,8 @@ my %cmd = (
             send_cmd join => { name => $games[0]{name} };
         }
         else {
-			#TODO: make this an option
+
+            #TODO: make this an option
             send_cmd create => { name => $bot, game => $game };
         }
     },
@@ -124,7 +127,6 @@ sub play {
     my $select = IO::Select->new($socket);
 
     my $buf;
-    my $json = JSON::XS->new;
     while (1) {
         my @ready = $select->can_read($timeout);
         if (@ready) {
@@ -135,9 +137,9 @@ sub play {
                 $func->($msg);
             }
         }
-		else {
-			my $func = $f{tick} || \&unhandled;
-		}
+        else {
+            my $func = $f{tick} || \&unhandled;
+        }
     }
 }
 
