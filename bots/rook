@@ -1,48 +1,27 @@
 #! /usr/bin/perl
 
-use strict;
-use warnings;
 use FindBin;
 use lib "$FindBin::Bin";
 use bot 'Rook';
 use Card;
 use Data::Dumper;
 
-my %status;
 our $| = 1;
-on join => sub {
-    my $msg = shift;
-    if ( $status{id} ) {
-        $status{players}{ $msg->{player}{id} } = $msg->{player};
-    }
-    else {
-        $status{id} = -1;
-        cmd 'status';
-    }
+
+on state_Dealing => sub {
+    cmd 'deal' if $status{public}{dealer} eq $status{id};
 };
 
-my %state_action = (
-    WaitingForPlayers => sub { },
-    Dealing           => sub {
-        if ( $status{state} eq 'Dealing' && $status{public}{dealer} eq $status{id} ) {
-            cmd 'deal';
-        }
-    },
-    Bidding    => \&make_bid,
-    Declaring  => \&declare,
-    PlayTricks => \&play_card,
-);
+on state_Bidding    => \&make_bid;
+on state_Declaring  => \&declare;
+on state_PlayTricks => \&play_card;
 
 on status => sub {
-    my $msg = shift;
-    %status = %{$msg};
     $status{private}{cards} = cards( $status{private}{cards} ) if defined $status{private}{cards};
-    my $f = $state_action{ $msg->{state} } || sub { print Dumper $msg };
-    $f->();
 };
 
 sub make_bid {
-    return unless $status{public}{bidder} eq $status{id};
+    return unless defined $status{id} && $status{public}{bidder} eq $status{id};
     $status{public}{bid} ||= 95;
     if ( $status{public}{bid} < 145 ) {
         cmd bid => $status{public}{bid} + 5;
@@ -72,7 +51,7 @@ on bid => sub {
 on dealing => sub {
     my $msg = shift;
     $status{state} = 'Dealing';
-    if ( $msg->{dealer} eq $status{id} ) {
+    if ( defined $status{id} && $msg->{dealer} eq $status{id} ) {
         cmd 'deal';
     }
 };
@@ -80,7 +59,7 @@ on dealing => sub {
 on deal => sub {
     my $msg = shift;
     $status{private}{cards} = cards( $msg->{cards} );
-    $status{public}{bid} = 95;
+    $status{public}{bid}    = 95;
 };
 
 sub declare {
@@ -119,7 +98,7 @@ on trump => sub {
 on play => sub {
     my $msg = shift;
     $status{public}{player} = $msg->{next};
-	push @{ $status{public}{trick} }, Card->new($msg->{card});
+    push @{ $status{public}{trick} }, Card->new( $msg->{card} );
     play_card();
 };
 
@@ -131,8 +110,8 @@ sub play_card {
         push @{ $hand{ $c->s( $status{public}{trump} ) } }, $c;
     }
 
-    if ( @{ $status{public}{trick} } && @{ $hand{ $status{public}{trick}[0]->s($status{public}{trump}) } } ) {
-        my $lead = $hand{ $status{public}{trick}[0]->s($status{public}{trump}) };
+    if ( @{ $status{public}{trick} } && @{ $hand{ $status{public}{trick}[0]->s( $status{public}{trump} ) } } ) {
+        my $lead = $hand{ $status{public}{trick}[0]->s( $status{public}{trump} ) };
         my $card = $lead->[ int( rand(@$lead) ) ];
         cmd play => { card => $card };
         for my $i ( 0 .. $#{ $status{private}{cards} } ) {
@@ -150,20 +129,20 @@ sub cards {
 }
 
 on trick => sub {
-	my $msg = shift;
-	$status{public}{player} = $msg->{winner};
-	$status{public}{trick} = [];
-	play_card() if @{ $status{private}{cards} };
+    my $msg = shift;
+    $status{public}{player} = $msg->{winner};
+    $status{public}{trick}  = [];
+    play_card() if @{ $status{private}{cards} };
 };
 
 on final => sub {
-	cmd 'quit';
-	exit;
+    cmd 'quit';
+    exit;
 };
 
 on quit => sub {
-	cmd 'quit';
-	exit;
+    cmd 'quit';
+    exit;
 };
 
 play;

@@ -16,7 +16,7 @@ my $json = JSON::XS->new;
 $json->convert_blessed(1);
 
 our $| = 1;
-my ( $config, $socket, $token, $username, %f, $game, $bot, $timeout );
+my ( $config, $socket, $token, $username, %f, $game, $bot, $timeout, %status, @call_stack );
 
 sub import {
     my ( $pkg, $game_name, $timeout_sec ) = @_;
@@ -30,6 +30,7 @@ sub import {
     *{"$caller\::config"} = \&config;
     *{"$caller\::cmd"}    = \&send_cmd;
     *{"$caller\::play"}   = \&play;
+    *{"$caller\::status"} = \%status;
 }
 
 sub register_callback {
@@ -49,6 +50,8 @@ sub send_cmd {
     $socket->send( $json->encode($msg) );
 }
 
+sub call ($$);
+
 my %cmd = (
     login => sub {
         my $msg = shift;
@@ -60,6 +63,21 @@ my %cmd = (
                     token      => $token,
                 } ) );
     },
+	join => sub {
+		my $msg = shift;
+		if ( defined $status{id} ) {
+			$status{players}{ $msg->{player}{id} } = $msg->{player};
+		}
+		else {
+			send_cmd 'status';
+		}
+	},
+	status => sub {
+		my $msg = shift;
+		%status = %{$msg};
+		call 'state_' . $status{state}, $msg;
+	},
+	state_WaitingForPlayers => sub {},
     error => sub {
         my $msg = shift;
         print Dumper $msg;
@@ -103,7 +121,21 @@ my %cmd = (
     } );
 
 sub unhandled {
-    print 'Unhandled message: ', Data::Dumper->Dump( [shift], [''] );
+	my ($cmd, $msg) = @_;
+    print "Unhandled message: $cmd => ", Data::Dumper->Dump( [$msg], [''] );
+}
+
+sub call ($$) {
+	push @call_stack, \@_;
+	return if @call_stack > 1;
+	while (@call_stack) {
+		my ($cmd, $msg) = @{shift @call_stack};
+		my $p_func = $cmd{$cmd};
+		$p_func->($msg) if $p_func;
+		my $c_func = $f{$cmd};
+		$c_func->($msg) if $c_func;
+		unhandled($cmd, $msg) unless $p_func || $c_func;
+	}
 }
 
 sub play {
@@ -133,12 +165,11 @@ sub play {
             $socket->recv( $buf, 4096 );
             my @messages = $json->incr_parse($buf);
             for my $msg (@messages) {
-                my $func = $f{ $msg->{cmd} } || $cmd{ $msg->{cmd} } || \&unhandled;
-                $func->($msg);
+				call $msg->{cmd}, $msg;
             }
         }
         else {
-            my $func = $f{tick} || \&unhandled;
+			call 'tick', {};
         }
     }
 }
