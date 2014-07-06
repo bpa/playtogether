@@ -31,7 +31,8 @@ on 'join' => sub {
     else {
         $player_id = $self->{next_player_id}++;
         $player    = {
-            public     => { %{ $client->{user} }, id => $player_id } };
+            public  => { %{ $client->{user} }, id => $player_id },
+            private => {} };
         $self->{players}{$player_id} = $player;
         $self->{ids}{ $client->{id} } = $player_id;
     }

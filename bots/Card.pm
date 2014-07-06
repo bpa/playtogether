@@ -15,7 +15,6 @@ sub new {
     bless { v => $v, s => $s, o => $order{$v} }, $pkg;
 }
 
-use Data::Dumper;
 sub TO_JSON { $_[0]->{v} . $_[0]->{s} }
 sub o       { $_[0]->{o} }
 sub s       { $_[0]->{s} eq '_' ? $_[1] : $_[0]->{s} }

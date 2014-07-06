@@ -1,4 +1,4 @@
-<div ng-controller="RookCtl">
+<div id="table" ng-controller="RookCtl">
   <div id="waiting-tab" ng-show="state === 'WaitingForPlayers'">
     Waiting for players to join...<br>
     <button type="button" class="btn btn-danger" ng-click="start()">Start with current players</button>
@@ -11,18 +11,31 @@
   </div>
   <div ng-show="state === 'Bidding' && bidder==player_id">
     <label size="5" for="bid-spinner">Bid:</label>
-    <input ngModel="bid.next_bid" min="bid.min" max="bid.max" ng-pattern="/\d+[05]/">
+    <input ng-model="bid.bid" min="bid_min" max="bid_max" ng-pattern="/\d+[05]/">
     <button type="button" class="btn btn-primary" ng-click="makeBid()">Bid</button>
   </div>
   <div ng-show="state === 'Bidding' && bidder!=player_id">
     <span>Waiting for {{players[bidder].name}} to bid...</span>
   </div>
-  <div ng-show="state === 'Declaring'">
-    <div class="btn-group">
-      <button class="btn btn-danger" ng-model="bid.suit" btn-radio="red">Red</button>
-      <button class="btn btn-success" ng-model="bid.suit" btn-radio="green">Green</button>
-      <button class="btn btn-warning" ng-model="bid.suit" btn-radio="yellow">Yellow</button>
-      <button class="btn btn-primary" ng-model="bid.suit" btn-radio="blue">Blue</button>
+  <div ng-show="state === 'Declaring' && bidder == player_id">
+    <div class="btn-group btn-group-vertical" style="float: left; margin-top: 3em">
+      <button class="btn btn-danger" ng-model="bid.suit" btn-radio="'R'">Red</button>
+      <button class="btn btn-success" ng-model="bid.suit" btn-radio="'G'">Green</button>
+      <button class="btn btn-warning" ng-model="bid.suit" btn-radio="'Y'">Yellow</button>
+      <button class="btn btn-primary" ng-model="bid.suit" btn-radio="'B'">Blue</button>
     </div>
+    <div class="nest">
+      Choose cards to return to nest<br>
+      <div class="card"></div>
+      <div class="card"></div>
+      <div class="card"></div>
+      <div class="card"></div>
+      <div class="card"></div>
+    </div>
+    <br clear="all">
+    <br clear="all">
+  </div>
+  <div class="card suit_{{c.suit()}}" ng-repeat="c in hand.cards">
+    <span>{{c.str}}</span>
   </div>
 </div>

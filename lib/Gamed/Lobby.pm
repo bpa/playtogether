@@ -30,7 +30,7 @@ on 'create' => sub {
     }
     if ( exists $Gamed::game{ $msg->{game} } ) {
         eval {
-            my $game = bless {}, $Gamed::game{ $msg->{game} };
+            my $game = bless { public => {} }, $Gamed::game{ $msg->{game} };
             $game->{name}                   = $msg->{name};
             $game->{game}                   = $msg->{game};
             $Gamed::instance{ $msg->{name} } = $game;
