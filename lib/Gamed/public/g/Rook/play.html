@@ -3,39 +3,58 @@
     Waiting for players to join...<br>
     <button type="button" class="btn btn-danger" ng-click="start()">Start with current players</button>
   </div>
-  <div ng-show="state === 'Dealing' && dealer==player_id">
+  <div ng-show="state === 'Dealing' && public.dealer==id">
     <button type="button" class="btn btn-primary" ng-click="deal()">Deal</button>
   </div>
-  <div ng-show="state === 'Dealing' && dealer!=player_id">
+  <div ng-show="state === 'Dealing' && public.dealer!=id">
     <span>Waiting for {{players[dealer].name}} to deal...</span>
   </div>
-  <div ng-show="state === 'Bidding' && bidder==player_id">
+  <div ng-show="state === 'Bidding' && public.bidder==id">
     <label size="5" for="bid-spinner">Bid:</label>
     <input ng-model="bid.bid" min="bid_min" max="bid_max" ng-pattern="/\d+[05]/">
     <button type="button" class="btn btn-primary" ng-click="makeBid()">Bid</button>
+    <button type="button" class="btn btn-danger" ng-click="pass()">Pass</button>
   </div>
-  <div ng-show="state === 'Bidding' && bidder!=player_id">
+  <div ng-show="state === 'Bidding' && public.bidder!=id">
     <span>Waiting for {{players[bidder].name}} to bid...</span>
   </div>
-  <div ng-show="state === 'Declaring' && bidder == player_id">
+  <div ng-show="state === 'Declaring' && public.bidder == id">
     <div class="btn-group btn-group-vertical" style="float: left; margin-top: 3em">
-      <button class="btn btn-danger" ng-model="bid.suit" btn-radio="'R'">Red</button>
-      <button class="btn btn-success" ng-model="bid.suit" btn-radio="'G'">Green</button>
-      <button class="btn btn-warning" ng-model="bid.suit" btn-radio="'Y'">Yellow</button>
-      <button class="btn btn-primary" ng-model="bid.suit" btn-radio="'B'">Blue</button>
+      <button class="btn btn-danger" ng-model="bid.trump" btn-radio="'R'">Red</button>
+      <button class="btn btn-success" ng-model="bid.trump" btn-radio="'G'">Green</button>
+      <button class="btn btn-warning" ng-model="bid.trump" btn-radio="'Y'">Yellow</button>
+      <button class="btn btn-primary" ng-model="bid.trump" btn-radio="'B'">Blue</button>
     </div>
     <div class="nest">
       Choose cards to return to nest<br>
-      <div class="card"></div>
-      <div class="card"></div>
-      <div class="card"></div>
-      <div class="card"></div>
-      <div class="card"></div>
+      <div class="card suit_{{c.suit()}}" ng-repeat="c in bid.nest" ng-click="remove()">
+        <span>{{c.str}}</span>
+      </div>
+    </div>
+    <button type="button" class="btn btn-default" ng-click="declare()">Declare</button>
+    <br clear="all">
+    <br clear="all">
+  </div>
+  <div ng-show="state === 'PlayTricks'">
+    <div class="nest">
+      Trump is <span class="suit_{{public.trump}}">{{color[public.trump]}}</span><br>
+      <div class="card suit_{{c.suit()}}" ng-repeat="c in public.trick.cards">
+        <span>{{c.str}}</span>
+      </div>
+      <div class="card suit_{{c.suit()}}" ng-repeat="c in range(4 - public.trick.cards.length) track by $index"></div>
+    </div>
+    <div class="nest">
+      Last trick winner: {{winner}}<br>
+      <div class="card suit_{{c.suit()}}" ng-repeat="c in lasttrick.cards">
+        <span>{{c.str}}</span>
+      </div>
     </div>
     <br clear="all">
     <br clear="all">
   </div>
-  <div class="card suit_{{c.suit()}}" ng-repeat="c in hand.cards">
-    <span>{{c.str}}</span>
+  <div id="hand">
+    <div class="card suit_{{c.suit()}}" ng-repeat="c in private.cards.cards" ng-click="clicked()">
+      <span>{{c.str}}</span>
+    </div>
   </div>
 </div>
