@@ -86,8 +86,8 @@ on 'place' => \&Gamed::Game::SpeedRisk::Place::on_place;
 on 'quit' => sub {
     my ( $self, $player, $msg, $player_data ) = @_;
     my $game = $self->{game};
-    delete $player_data->{client};
-    $game->{players}{ $player->{in_game_id} }{public}{ready} = 1;
+	delete $player_data->{client};
+    $player_data->{public}{ready} = 1;
     my @remaining = grep { exists $_->{client} } values %{ $game->{players} };
     if ( @remaining == 1 ) {
         $game->broadcast( victory => { player => $remaining[0]->{public}{id} } );

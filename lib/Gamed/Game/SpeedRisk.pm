@@ -53,8 +53,8 @@ on 'theme' => sub {
 };
 
 on 'quit' => sub {
-	my ($self, $player, $msg) = @_;
-    $self->{themes}{ delete $self->{players}{$player->{in_game_id}}{public}{theme} } = ();
+	my ($self, $client, $msg, $player) = @_;
+    $self->{themes}{ delete $player->{public}{theme} } = ();
 };
 
 1;

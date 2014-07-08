@@ -45,9 +45,7 @@ on 'join' => sub {
 after 'join' => sub {
     my ( $self, $client, $msg ) = @_;
     my $player = $self->{players}{ $client->{in_game_id} };
-    $self->broadcast(
-        join => { name => $msg->{name}, game => $self->{game}, player => $player->{public} }
-    );
+    $self->broadcast( join => { name => $msg->{name}, game => $self->{game}, player => $player->{public} } );
 };
 
 after 'quit' => sub {
@@ -55,21 +53,21 @@ after 'quit' => sub {
     delete $player_data->{client};
     $client->{game} = Gamed::Lobby->new;
     $self->broadcast( quit => { player => $client->{in_game_id} } );
-	delete_game_if_empty( $self, $client );
+    delete_game_if_empty( $self, $client );
 };
 
 sub delete_game_if_empty {
     my $self = shift;
     eval {
-        unless ( grep { defined $_->{client}{sock} } values %{ $self->{players} } ) {
-			for my $c (values %{ $self->{players} }) {
-				$c->{client}{game} = Gamed::Lobby->new;
-			}
+        unless ( grep { defined $_->{client} && defined $_->{client}{sock} } values %{ $self->{players} } ) {
+            for my $c ( values %{ $self->{players} } ) {
+                $c->{client}{game} = Gamed::Lobby->new;
+            }
             delete $Gamed::instance{ $self->{name} };
         }
     };
-	print $@ if $@;
-};
+    print $@ if $@;
+}
 
 after 'disconnected' => \&delete_game_if_empty;
 
