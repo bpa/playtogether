@@ -46,7 +46,6 @@ on 'play' => sub {
             push @{ $game->{players}{ $game->{public}{player} }{taken} }, @{ $game->{public}{trick} };
             $game->{public}{trick} = [];
             if ( grep ( scalar( $_->{private}{cards}->values ), values %{ $game->{players} } ) == 0 ) {
-                push @{ $game->{players}{ $game->{public}{player} }{taken} }, $game->{nest}->values;
                 $self->{logic}->on_round_end($game);
             }
         }

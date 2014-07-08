@@ -1,5 +1,8 @@
 package Gamed::Game::Rook::PlayLogic;
 
+use strict;
+use warnings;
+
 sub new { bless {}, shift; }
 
 sub is_valid_play {
@@ -11,11 +14,11 @@ sub is_valid_play {
     }
 
     my $trump = $game->{public}{trump};
-    my $lead = suit( $lead, $trump );
+    my $lead = suit( $trick->[0], $trump );
     return 1 if suit( $card, $trump ) eq $lead;
 
     for ( $hand->values ) {
-        return if suit( $card, $trump ) eq $lead;
+        return if suit( $_, $trump ) eq $lead;
     }
 
     return 1;
@@ -33,10 +36,10 @@ sub trick_winner {
     my $winning_value = 0;
     for my $p ( 0 .. $#$trick ) {
         my ( $value, $suit ) = $trick->[$p] =~ /(\d+)(.)$/;
-        $suit = $game->{trump} if $suit eq '_';
-        $value = 0 unless $suit eq $lead || $suit eq $game->{trump};
+        $suit = $game->{public}{trump} if $suit eq '_';
+        $value = 0 unless $suit eq $lead || $suit eq $game->{public}{trump};
         $value = 15 if $value == 1;
-        $value += 20 if $suit eq $game->{trump};
+        $value += 20 if $suit eq $game->{public}{trump};
         if ( $value > $winning_value ) {
             $winning_seat  = $p;
             $winning_value = $value;
@@ -55,6 +58,7 @@ my %point_value = (
 
 sub on_round_end {
     my ( $self, $game ) = @_;
+    push @{ $game->{players}{ $game->{public}{player} }{taken} }, $game->{nest}->values;
     my @points      = ( 0, 0 );
     my @cards_taken = ( 0, 0 );
     my $team;
@@ -66,7 +70,7 @@ sub on_round_end {
 		my $seat = $game->{seats}[$s];
         for ( @{ $game->{players}{$seat}{taken} } ) {
             my ($v) = /(\d+).$/;
-            $points[$t] += $point_value{$v};
+            $points[$t] += $point_value{$v} || 0;
             $cards_taken[$t]++;
         }
     }

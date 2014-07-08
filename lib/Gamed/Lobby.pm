@@ -10,8 +10,7 @@ on 'games' => sub {
     my @inst;
     while ( my ( $k, $v ) = each %Gamed::instance ) {
         push @inst,
-          {
-            name    => $k,
+          { name    => $k,
             game    => $v->{game},
             players => [ map { $_->{public} } values %{ $v->{players} } ],
             status  => $v->{status} || $v->{state}{name},
@@ -30,15 +29,15 @@ on 'create' => sub {
     }
     if ( exists $Gamed::game{ $msg->{game} } ) {
         eval {
-            my $game = bless { public => {} }, $Gamed::game{ $msg->{game} };
-            $game->{name}                   = $msg->{name};
-            $game->{game}                   = $msg->{game};
+            my $game = bless { public => {}, players => {} }, $Gamed::game{ $msg->{game} };
+            $game->{name}                    = $msg->{name};
+            $game->{game}                    = $msg->{game};
             $Gamed::instance{ $msg->{name} } = $game;
 
-			$game->handle( $player, $msg );
+            $game->handle( $player, $msg );
             for my $p ( values %Gamed::Login::players ) {
                 $p->send( create => { name => $msg->{name}, game => $msg->{game} } )
-                  if ref($p->{game}) eq 'Gamed::Lobby';;
+                  if ref( $p->{game} ) eq 'Gamed::Lobby';
             }
         };
         if ($@) {
