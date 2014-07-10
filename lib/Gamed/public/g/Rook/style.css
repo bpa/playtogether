@@ -49,3 +49,11 @@
 .suit_G { color: Green; }
 .suit_B { color: blue; }
 .suit_Y { color: yellow; }
+
+.playing {
+  background-color: #9A0;
+}
+
+.lead {
+  border: thin solid black;
+}
