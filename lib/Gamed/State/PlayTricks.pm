@@ -56,7 +56,7 @@ on 'play' => sub {
         }
     }
     else {
-        $client->err('Invalid card');
+        $client->send( invalid_card => { card => $msg->{card} });
     }
 };
 

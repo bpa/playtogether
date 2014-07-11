@@ -21,18 +21,18 @@ sub on_enter_state {
     my ( $self, $game ) = @_;
     $self->{seats}          = $game->{seats} || [ 0 .. scalar( keys %{ $game->{players} } ) - 1 ];
     $self->{bidder}         = ++$self->{bidder} % @{ $self->{seats} };
-	$self->{current_bidder} = $self->{bidder};
+    $self->{current_bidder} = $self->{bidder};
     $game->{public}{bid}    = 0;
     $game->{public}{bidder} = $self->{seats}[ $self->{bidder} ];
+    for ( values %{ $game->{players} } ) {
+        delete $_->{public}{pass};
+        delete $_->{public}{bid};
+    }
     $game->broadcast( bidding => { bidder => $game->{public}{bidder}, min => $self->{min} } );
 }
 
 sub on_leave_state {
     my ( $self, $game ) = @_;
-    for ( values %{ $game->{players} } ) {
-        delete $_->{public}{pass};
-        delete $_->{public}{bid};
-    }
 	$game->{public}{bid} = $self->{min} if $game->{public}{bid} < $self->{min};
 	$game->{public}{player} = $game->{public}{bidder};
     $game->broadcast( bid => { bid => $game->{public}{bid}, bidder => $game->{public}{bidder} } );

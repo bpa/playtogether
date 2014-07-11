@@ -14,12 +14,6 @@ html, body {
   background-repeat: no-repeat;
 }
 
-.player {
-  width: 100px;
-  margin-left: auto;
-  margin-right: auto;
-}
-
 .player .player-name {
   text-align: center;
 }

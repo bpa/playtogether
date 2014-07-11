@@ -76,14 +76,14 @@ sub on_round_end {
     }
     my $bonus = $cards_taken[0] == $cards_taken[1] ? $team : $cards_taken[0] > $cards_taken[1] ? 0 : 1;
     $points[$bonus] += 20;
-	print $game->{public}{bidder}, " bid ", $game->{public}{bid}, " in ", $game->{public}{trump}, " and got ", $points[$team], "\n";
-	printf("NS: %4i EW: %4i\n", $points[0], $points[1]);
+    delete $game->{public}{trump};
+    my @pre = @points;
     if ( $points[$team] < $game->{public}{bid} ) {
         $points[$team] = -1 * $game->{public}{bid};
     }
     $game->{public}{points}[0] += $points[0];
     $game->{public}{points}[1] += $points[1];
-	print "Currently ", $game->{public}{points}[0], " to ", $game->{public}{points}[1], "\n";
+    $game->broadcast( round => { bidder => $game->{public}{bidder}, bid => $game->{public}{bid}, made => $pre[$team], points => $game->{public}{points} });
     if ( $game->{public}{points}[0] != $game->{public}{points}[1]
         && ( $game->{public}{points}[0] >= 500 || $game->{public}{points}[1] >= 500 ) )
     {

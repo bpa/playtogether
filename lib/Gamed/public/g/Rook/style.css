@@ -6,11 +6,15 @@
   -moz-box-shadow: 0 0 5px rgba(0,0,0,0.5);
   -webkit-box-shadow: 0 0 5px rgba(0,0,0,0.5);
   box-shadow: 0 0 5px rgba(0,0,0,0.5);
-  float: left;
+  display: inline-block;
   width: 8em;
   height: 11.2em;
   margin: 0 .6em .6em 0;
   position: relative;
+  text-shadow: black 0.1em 0.1em 0.2em;
+}
+
+.shadow {
   text-shadow: black 0.1em 0.1em 0.2em;
 }
 
@@ -54,6 +58,11 @@
   background-color: #9A0;
 }
 
-.lead {
+.lead_card {
   border: thin solid black;
+}
+
+.player {
+  height: 15em;
+  text-align: center;
 }
