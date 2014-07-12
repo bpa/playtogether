@@ -64,6 +64,10 @@ sub delete_game_if_empty {
                 $c->{client}{game} = Gamed::Lobby->new;
             }
             delete $Gamed::instance{ $self->{name} };
+            for my $p ( values %Gamed::Login::players ) {
+                $p->send( delete => { name => $self->{name}, game => $self->{game} } )
+                  if ref( $p->{game} ) eq 'Gamed::Lobby';
+            }
         }
     };
     print $@ if $@;

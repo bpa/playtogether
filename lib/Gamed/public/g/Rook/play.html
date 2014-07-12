@@ -15,8 +15,8 @@
   </div>
   <div class="container" ng-hide="state === 'WaitingForPlayers'">
     <div class="row">
-      <div class="col-xs-2 col-xs-offset-4" ng-class="{shadow: 'ns'.indexOf(public.bidder) != -1}">{{players.n.name}}/{{players.s.name}}: {{public.points[0]}}</div>
-      <div class="col-xs-2" ng-class="{shadow: 'ew'.indexOf(public.bidder) != -1}">{{players.e.name}}/{{players.w.name}}: {{public.points[1]}}</div>
+      <div class="col-xs-2 col-xs-offset-4" ng-class="{shadow: 'ns'.indexOf(public.bidder) != -1 && state !== 'Bidding'}">{{players.n.name}}/{{players.s.name}}: {{public.points[0]}}</div>
+      <div class="col-xs-2" ng-class="{shadow: 'ew'.indexOf(public.bidder) != -1 && state !== 'Bidding'}">{{players.e.name}}/{{players.w.name}}: {{public.points[1]}}</div>
     </div>
   </div>
   <div id="waiting-tab" ng-show="state === 'WaitingForPlayers'">
@@ -64,7 +64,7 @@
   </div>
   <br clear="all">
   <br clear="all">
-  <div id="hand" class="center-block">
+  <div id="hand">
     <span ng-show="public.trump">Trump is <span class="shadow suit_{{public.trump}}">{{color[public.trump]}}</span><br></span>
     <div class="card suit_{{c.suit()}}" ng-repeat="c in private.cards.cards" ng-click="clicked()">
       <span>{{c.str}}</span>

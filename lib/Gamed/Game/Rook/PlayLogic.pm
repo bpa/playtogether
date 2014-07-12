@@ -77,6 +77,7 @@ sub on_round_end {
     my $bonus = $cards_taken[0] == $cards_taken[1] ? $team : $cards_taken[0] > $cards_taken[1] ? 0 : 1;
     $points[$bonus] += 20;
     delete $game->{public}{trump};
+    delete $game->{public}{leader};
     my @pre = @points;
     if ( $points[$team] < $game->{public}{bid} ) {
         $points[$team] = -1 * $game->{public}{bid};
