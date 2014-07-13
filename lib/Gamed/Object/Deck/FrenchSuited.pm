@@ -3,9 +3,10 @@ package Gamed::Object::Deck::FrenchSuited;
 use parent 'Gamed::Object::Deck';
 
 my %TYPE = (
-    normal => [ 2 .. 10, qw/J Q K A/ ],
-    full   => [ 2 .. 10, qw/J Q K A/ ],
-    piquet => [ 6 .. 10, qw/J Q K A/ ],
+    normal  => [ 2 .. 10, qw/J Q K A/ ],
+    full    => [ 2 .. 10, qw/J Q K A/ ],
+    piquet  => [ 6 .. 10, qw/J Q K A/ ],
+    spitzer => [ 7 .. 10, qw/J Q K A/ ],
 );
 
 sub build {
