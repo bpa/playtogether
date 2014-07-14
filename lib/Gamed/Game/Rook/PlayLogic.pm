@@ -14,19 +14,19 @@ sub is_valid_play {
     }
 
     my $trump = $game->{public}{trump};
-    my $lead = suit( $trick->[0], $trump );
-    return 1 if suit( $card, $trump ) eq $lead;
+    my $lead = $self->suit( $trick->[0], $trump );
+    return 1 if $self->suit( $card, $trump ) eq $lead;
 
     for ( $hand->values ) {
-        return if suit( $_, $trump ) eq $lead;
+        return if $self->suit( $_, $trump ) eq $lead;
     }
 
     return 1;
 }
 
 sub suit {
-    my $s = substr( $_[0], -1 );
-    return $s eq '_' ? $_[1] : $s;
+    my $s = substr( $_[1], -1 );
+    return $s eq '_' ? $_[2] : $s;
 }
 
 sub trick_winner {

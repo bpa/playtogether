@@ -33,21 +33,28 @@ on 'play' => sub {
         return;
     }
     if ( $self->{logic}->is_valid_play( $msg->{card}, $game->{public}{trick}, $player->{private}{cards}, $game ) ) {
-	$game->{public}{leader} = $client->{in_game_id} unless @{ $game->{public}{trick} };
+        $game->{public}{leader} = $client->{in_game_id} unless @{ $game->{public}{trick} };
+		$game->{suits_led}{$self->{logic}->suit($msg->{card})}++ unless @{ $game->{public}{trick} };
         push @{ $game->{public}{trick} }, $msg->{card};
         $player->{private}{cards}->remove( $msg->{card} );
         $self->{active_player} = ++$self->{active_player} % keys %{ $game->{players} };
         $game->{public}{player} = $game->{seats}[ $self->{active_player} ];
         if ( @{ $game->{public}{trick} } == keys %{ $game->{players} } ) {
-            $self->{active_player} = $self->{logic}->trick_winner( $game->{public}{trick}, $game ) + $self->{active_player};
+            $self->{active_player} =
+              $self->{logic}->trick_winner( $game->{public}{trick}, $game ) + $self->{active_player};
             $self->{active_player} %= keys %{ $game->{players} };
             $game->{public}{player} = $game->{seats}[ $self->{active_player} ];
-            $game->broadcast( trick => { trick => $game->{public}{trick}, winner => $game->{public}{player}, leader => $game->{public}{leader} } );
+            $game->broadcast(
+                trick => {
+                    trick  => $game->{public}{trick},
+                    winner => $game->{public}{player},
+                    leader => $game->{public}{leader} } );
             push @{ $game->{players}{ $game->{public}{player} }{taken} }, @{ $game->{public}{trick} };
-            $game->{public}{trick} = [];
+            $game->{public}{trick}  = [];
             $game->{public}{leader} = [];
             if ( grep ( scalar( $_->{private}{cards}->values ), values %{ $game->{players} } ) == 0 ) {
                 $self->{logic}->on_round_end($game);
+				delete $self->{suits_led};
             }
         }
         else {
@@ -56,7 +63,7 @@ on 'play' => sub {
         }
     }
     else {
-        $client->send( invalid_card => { card => $msg->{card} });
+        $client->send( 'Invalid card' => { card => $msg->{card} } );
     }
 };
 

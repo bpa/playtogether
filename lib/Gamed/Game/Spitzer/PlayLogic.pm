@@ -14,62 +14,74 @@ sub is_valid_play {
         return 1;
     }
 
-    # Holding called ace
+    my $lead = $self->suit( $trick->[0] );
+
+    # Holding called ace rules
+    if ( $game->{called} && $hand->contains( $game->{called} ) ) {
+        return    # Must play if suit led
+          if $card ne $game->{called}
+              && $self->suit( $game->{called} ) eq $lead
+              && !exists $game->{state}{suits_led}{$lead};
+
+        return    # Can't slough
+          if $card eq $game->{called}
+              && $self->suit( $game->{called} ) ne $lead
+              && $hand->values > 1;
+    }
 
     # Following suit
-    my $lead = suit( $trick->[0], $trump );
-    return 1 if suit( $card, $trump ) eq $lead;
+    return 1 if $self->suit($card) eq $lead;
 
     # Sort cards into suits
     my %suit;
     for ( $hand->values ) {
-        push @{ $suit{ suit($_) } }, $_;
+        push @{ $suit{ $self->suit($_) } }, $_;
     }
 
     # Must follow suit if held
-    return if @{ $suit{$lead} };
+    return if defined $suit{$lead};
 
     # Must play trump if not following suit
-    return if @{ $suit{D} };
+    return if $self->suit($card) ne 'D' && defined $suit{D};
 
     # Don't have led suit or trump
     return 1;
 }
 
 sub suit {
-    my ( $value, $suit ) = $_[0] =~ /(\d+)(\D)/;
-    return 'D' if $value == 11 || $value == 12;    #J and Q are trump
+    my ( $value, $suit ) = $_[1] =~ /(.+)(.)$/;
+    return 'D' if $value eq 'J' || $value eq 'Q';    #J and Q are trump
     return $suit;
 }
 
 my %rank = (
-    '12C' => 33,
-    '7D'  => 32,
-    '12S' => 31,
-    '12H' => 30,
-    '12D' => 29,
-    '11C' => 28,
-    '11S' => 27,
-    '11H' => 26,
-    '11D' => 25,
-    1     => 5,
-    10    => 4,
-    13    => 3,
-    9     => 2,
-    8     => 1,
-    7     => 0,
+    'QC' => 33,
+    '7D' => 32,
+    'QS' => 31,
+    'QH' => 30,
+    'QD' => 29,
+    'JC' => 28,
+    'JS' => 27,
+    'JH' => 26,
+    'JD' => 25,
+    A    => 5,
+    10   => 4,
+    K    => 3,
+    9    => 2,
+    8    => 1,
+    7    => 0,
 );
 
 sub trick_winner {
     my ( $self, $trick, $game ) = @_;
-    my $lead          = suit( $trick->[0] );
+    my $lead          = $self->suit( $trick->[0] );
     my $winning_seat  = 0;
     my $winning_value = 0;
     for my $p ( 0 .. $#$trick ) {
         my ( $value, $suit );
-        $value = $rank{$p};
+        $value = $rank{ $trick->[$p] };
         if ( !$value ) {
-            ( $value, $suit ) = $trick->[$p] =~ /(\d+)(.)$/;
+            ( $value, $suit ) = $trick->[$p] =~ /(.+)(.)$/;
             $value = $rank{$value};
             if ( $suit eq 'D' ) {
                 $value += 20;
@@ -87,17 +99,17 @@ sub trick_winner {
 }
 
 my %point_value = (
-    1  => 11,
+    A  => 11,
     10 => 10,
-    13 => 4,
-    12 => 3,
-    11 => 2,
+    K  => 4,
+    Q  => 3,
+    J  => 2,
 );
 
 my %score = (
     normal                    => [ -42, -9,  -6,  3,   6,   9 ],
     schneider                 => [ -18, -15, -12, -9,  9,   12 ],
-    stealer                   => [ -42, -9,  -6,  9,   12,  15 ],
+    sneaker                   => [ -42, -9,  -6,  9,   12,  15 ],
     zola                      => [ -15, -12, -9,  18,  27,  36 ],
     'zola schneider'          => [ -42, -36, -24, -18, 36,  39 ],
     'zola schneider schwartz' => [ -42, -42, -39, -33, -27, 42 ],
@@ -107,17 +119,17 @@ sub on_round_end {
     my ( $self, $game ) = @_;
     delete $game->{public}{leader};
 
-    my %taken;
-    while ( my ( $id, $p ) = each %{ $game->{players} } ) {
-        if ( exists $game->{calling_team}{$id} ) {
-            for ( @{ $p->{taken} } ) {
-                my ($v) = /(\d+).$/;
-                $taken{cards}++;
-                $taken{value} += $point_value{$v} || 0;
-            }
+    my %taken = ( cards => 0, value => 0 );
+    for my $id ( @{ $game->{calling_team} } ) {
+        for ( @{ $game->{players}{$id}{taken} } ) {
+            my ($v) = /(.+).$/;
+            $taken{cards}++;
+            $taken{value} += $point_value{$v} || 0;
         }
+    }
+
+    for my $p ( values %{ $game->{players} } ) {
         delete $p->{taken};
-        delete $p->{announcement};
     }
 
     my $result =
@@ -130,23 +142,27 @@ sub on_round_end {
 
     my %msg;
     while ( my ( $id, $p ) = each %{ $game->{players} } ) {
-        my $r = exists( $game->{calling_team}{$id} ) ? $result : -$result;
-        $p->{public}{points} += $r;
-        $msg->{$id}{change} = $r;
-        $msg->{$id}{points} = $p->{public}{points};
+        if ( grep( $_ eq $id, @{ $game->{calling_team} } ) && $result > 0 ) {
+            $p->{public}{points} += $result;
+            $msg{$id}{change} = $result;
+        }
+        elsif ( !grep( $_ eq $id, @{ $game->{calling_team} } ) && $result < 0 ) {
+            $p->{public}{points} -= $result;
+            $msg{$id}{change} = -$result;
+        }
+        $msg{$id}{points} = $p->{public}{points};
     }
 
     delete $game->{calling_team};
     $game->broadcast( round => \%msg );
 
-    my @players = sort { $a->{public}{points} <=> $b->{public}{points} } values %{ $game->{players} };
+    my @players = sort { $b->{public}{points} <=> $a->{public}{points} } values %{ $game->{players} };
     if ( $players[0]{public}{points} >= 42 && $players[1]{public}{points} < $players[0]{public}{points} ) {
-        $game->broadcast(
-            final => { winner => $players[0]{id} );
-              $game->change_state('GAME_OVER');
-            } else {
-            $game->change_state('DEALING');
-        }
+        $game->broadcast( final => { winner => $players[0]{id} } );
+        $game->change_state('GAME_OVER');
+    }
+    else {
+        $game->change_state('DEALING');
     }
 }
 

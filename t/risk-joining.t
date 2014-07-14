@@ -105,7 +105,7 @@ subtest 'game destroyed when all players leave' => sub {
     my $risk = $p1->create( 'SpeedRisk', 'test', { board => 'Classic' } );
     is( ~~ keys %{ $risk->{players} }, 1 );
     $p1->quit;
-    is( ~~ @{ $p1->{sock}{packets} }, 0, "No one to talk to" );
+    is_deeply( $p1->{sock}{packets}, [ { cmd => 'delete', name => 'test', game => 'SpeedRisk' } ], "One message for delete" );
     ok( !defined $Gamed::instance{test}, "Game was deleted" );
 
     done();

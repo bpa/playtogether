@@ -27,6 +27,8 @@ sub trick_winner {
     return $winning_seat;
 }
 
+sub suit { return 1 }
+
 sub on_round_end {
     my ( $self, $game ) = @_;
 	$game->change_state('end');
