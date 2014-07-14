@@ -11,12 +11,46 @@ sub new {
 
 sub on_enter_state {
     my ( $self, $game ) = @_;
-    $game->{players}{ $game->{public}{bidder} }{client}->send( 'nest', { nest => $game->{nest} } );
-    $game->{players}{ $game->{public}{bidder} }{private}{cards}->add( $game->{nest} );
-    delete $game->{nest};
+    $self->{announced}    = 0;
+    $game->{calling_team} = [];
+    delete $game->{public}{caller};
+    delete $game->{public}{announcement};
 }
 
-on 'declare' => sub {
+sub solo {
+    my ( $self, $player, $msg, $player_data ) = @_;
+    my $game = $self->{game};
+    $game->{type}                 = $msg->{announcement};
+    $game->{calling_team}         = [ $player->{in_game_id} ];
+    $game->{public}{announcement} = $msg->{announcement};
+    $game->{public}{caller}       = $player->{in_game_id};
+    $game->broadcast( announce => { announcement => $msg->{announcement}, caller => $player->{in_game_id} } );
+    $game->change_state('PLAYING');
+}
+
+my %action = (
+    none => sub {
+        my ( $self, $player, $msg, $player_data ) = @_;
+        my $game = $self->{game};
+        if ( ++$self->{announced} >= 4 ) {
+            for my $p ( values %{ $game->{players} } ) {
+                push @{ $game->{calling_team} }, $p->{id} if $p->{cards}->contains('QC') || $p->{cards}->contains('QS');
+            }
+            $game->{type} = @{ $game->{calling_team} } == 1 ? 'sneaker' : 'normal';
+            $game->broadcast('announce');
+            $game->change_state('PLAYING');
+        }
+    },
+    call => sub {
+    },
+    schneider => sub {
+    },
+    zola                      => \&solo,
+    'zola schneider'          => \&solo,
+    'zola schneider schwartz' => \&solo,
+);
+
+on 'announce' => sub {
     my ( $self, $player, $msg, $player_data ) = @_;
     my $game = $self->{game};
     if ( $player->{in_game_id} ne $game->{public}{bidder} ) {
@@ -24,26 +58,13 @@ on 'declare' => sub {
         return;
     }
 
-    my $cards = bag( $player_data->{private}{cards} );
-    my $nest  = bag( $msg->{nest} );
-    if ( $msg->{trump} !~ /^[RGBY]$/ ) {
-        $player->err( "'" . $msg->{trump} . "' is not a valid trump" );
-    }
-    elsif (!defined $msg->{nest}
-        || @{ $msg->{nest} } != 5
-        || !$nest->subset($cards) )
-    {
-        $player->err('Invalid nest');
+    my $f = $action{ $msg->{announcement} };
+    if ($f) {
+        $f->( $self, $player, $msg, $player_data );
     }
     else {
-        $game->{public}{trump} = $msg->{trump};
-        $game->{nest}  = bag( $msg->{nest} );
-        my $hand = $cards - $nest;
-        $player_data->{private}{cards} = $hand;
-        $game->broadcast( trump => { trump => $game->{public}{trump} } );
-        $game->change_state( $self->{next} );
+        $player->err('Invalid announcement');
     }
 };
 
-1;
 1;

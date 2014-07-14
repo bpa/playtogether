@@ -154,6 +154,9 @@ sub on_round_end {
     }
 
     delete $game->{calling_team};
+	for my $p ( values %{ $game->{players} } ) {
+		delete $p->{announcement};
+	}
     $game->broadcast( round => \%msg );
 
     my @players = sort { $b->{public}{points} <=> $a->{public}{points} } values %{ $game->{players} };
