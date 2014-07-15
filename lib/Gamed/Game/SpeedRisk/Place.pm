@@ -27,7 +27,7 @@ sub on_place {
     $player_data->{private}{armies} -= $armies;
 
     $player->send( armies => { armies => $player_data->{private}{armies} } );
-    $game->broadcast( country => { country => { armies => $country->{armies}, owner => $country->{owner} } } );
+    $game->broadcast( country => { country => $c, armies => $country->{armies}, owner => $country->{owner} } } );
 };
 
 1;
