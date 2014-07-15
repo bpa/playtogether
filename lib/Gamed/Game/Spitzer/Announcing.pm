@@ -3,6 +3,7 @@ package Gamed::Game::Spitzer::Announcing;
 use Gamed::Object;
 use Gamed::Handler;
 use parent 'Gamed::State';
+use Gamed::Game::Spitzer::PlayLogic;
 
 sub new {
     my ( $pkg, %opts ) = @_;
@@ -42,8 +43,43 @@ my %action = (
         }
     },
     call => sub {
+        my ( $self, $player, $msg, $player_data ) = @_;
+		my $game = $self->{game};
+		my $call = $msg->{call};
+		$game->{calling_team} = [ $player->{in_game_id} ];
+		if ($call ne 'first') {
+			my $hand = $player_data->{private}{cards};
+			my %suit = map { $_ => Gamed::Object::Bag()->new() } qw/C H S D/;
+			for my $c ($hand->{values}) {
+				push @{$suit{Gamed::Game::Spitzer::PlayLogic->suit($c)}}, $c;
+			}
+			my ($number, $suit) = $call =~ /(.*)(.)$/;
+			if ($number ne 'A' || $hand->contains($call) || ) {
+				$player->err("Invalid call");
+				return;
+			}
+		}
+		$game->{type} = 'call';
+    	$game->{public}{announcement} = $msg->{call};
+    	$game->{public}{caller}       = $player->{in_game_id};
+		$game->broadcast('announce' => { announcement => 'call', call => $call, caller => $player->{in_game_id} } );
+		$game->change_state('PLAYING');
     },
     schneider => sub {
+        my ( $self, $player, $msg, $player_data ) = @_;
+		my $game = $self->{game};
+		my (@calling_team, $callers_team);
+		for my $p ( values %{ $game->{players} } ) {
+			my $team = ($p->{cards}->contains('QC') || $p->{cards}->contains('QS')) ? 1 : 0;
+			push @{$calling_team[$team]}, $p->{id};
+			$callers_team = $team if $p->{id} eq $player->{in_game_id};
+		}
+		$game->{type}                 = 'schneider';
+		$game->{calling_team} = $calling_team[$callers_team];
+		$game->{public}{announcement} = 'schneider';
+		$game->{public}{caller}       = $player->{in_game_id};
+		$game->broadcast( announce => { announcement => 'schneider', caller => $player->{in_game_id} } );
+		$game->change_state('PLAYING');
     },
     zola                      => \&solo,
     'zola schneider'          => \&solo,
