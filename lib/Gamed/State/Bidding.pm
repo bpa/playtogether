@@ -28,6 +28,7 @@ sub on_enter_state {
         delete $_->{public}{pass};
         delete $_->{public}{bid};
     }
+    delete $game->{public}{player};
     $game->broadcast( bidding => { bidder => $game->{public}{bidder}, min => $self->{min} } );
 }
 

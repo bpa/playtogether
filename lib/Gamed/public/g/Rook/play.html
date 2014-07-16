@@ -44,10 +44,10 @@
   </div>
   <div ng-show="state === 'Declaring' && public.bidder == id">
     <div class="btn-group btn-group-vertical" style="float: left; margin-top: 3em">
-      <button class="btn btn-danger" ng-model="bid.trump" btn-radio="'R'">Red</button>
-      <button class="btn btn-success" ng-model="bid.trump" btn-radio="'G'">Green</button>
-      <button class="btn btn-warning" ng-model="bid.trump" btn-radio="'Y'">Yellow</button>
-      <button class="btn btn-primary" ng-model="bid.trump" btn-radio="'B'">Blue</button>
+      <button ng-change="private.cards.sort()" class="btn btn-danger" ng-model="public.trump" btn-radio="'R'">Red</button>
+      <button ng-change="private.cards.sort()" class="btn btn-success" ng-model="public.trump" btn-radio="'G'">Green</button>
+      <button ng-change="private.cards.sort()" class="btn btn-warning" ng-model="public.trump" btn-radio="'Y'">Yellow</button>
+      <button ng-change="private.cards.sort()" class="btn btn-primary" ng-model="public.trump" btn-radio="'B'">Blue</button>
     </div>
     <div class="nest">
       Choose cards to return to nest<br>
@@ -69,5 +69,8 @@
     <div class="card suit_{{c.suit()}}" ng-repeat="c in private.cards.cards" ng-click="clicked()">
       <span>{{c.str}}</span>
     </div>
+  </div>
+  <div class="footer" style="right: 0">
+    <button type="button" class="btn btn-normal" ng-click="quit()">Quit</button>
   </div>
 </div>

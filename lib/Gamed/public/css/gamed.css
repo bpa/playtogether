@@ -17,3 +17,8 @@ html, body {
 .player .player-name {
   text-align: center;
 }
+
+.footer {
+  position: absolute;
+  bottom: 0;
+}

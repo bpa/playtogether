@@ -402,12 +402,12 @@ subtest 'place' => sub {
     #Normal placement
     $p1->game( { cmd => 'place', country => 0, armies => 1 } );
     $p1->got( { cmd => 'armies', armies => 9 } );
-    broadcast( $risk, { cmd => 'country', country => { armies => 2, owner => 0 } } );
+    broadcast( $risk, { cmd => 'country', country => { id => 0, armies => 2, owner => 0 } } );
     is( $risk->{players}{0}{private}{armies}, 9 );
 
     $p1->game( { cmd => 'place', country => 0, armies => 5 } );
     $p1->got( { cmd => 'armies', armies => 4 } );
-    broadcast( $risk, { cmd => 'country', country => { armies => 7, owner => 0 } } );
+    broadcast( $risk, { cmd => 'country', country => { id => 0, armies => 7, owner => 0 } } );
     is( $risk->{players}{0}{private}{armies}, 4 );
 
     #Negative armies
@@ -548,7 +548,7 @@ subtest 'win game' => sub {
     );
 
     broadcast( $risk, { cmd => 'defeated',  player => 1 } );
-    broadcast( $risk, { cmd => 'Game Over', victor => 0 } );
+    broadcast( $risk, { cmd => 'victory', player => 0 } );
     is( $risk->{state}{name}, 'GameOver' );
 
     done();

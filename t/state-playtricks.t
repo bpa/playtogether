@@ -25,7 +25,7 @@ $game->{players}{1}{private}{cards} = bag(qw/2 9 11 15/);
 $game->{players}{2}{private}{cards} = bag(qw/4 8 12 16/);
 
 $n->game( { cmd => 'play', card => 1 }, { reason => 'Not your turn' } );
-$s->game( { cmd => 'play', card => 8 }, { reason => 'Invalid card' } );
+$s->game( { cmd => 'play', card => 8 }, { cmd => 'invalid_card', card => 8 } );
 
 $s->game( { cmd => 'play', card => 4 } );
 broadcast_one( $game, { player => 2, card => 4 }, 'Card played was sent to everyone' );
