@@ -146,7 +146,7 @@ sub do_attack {
         $game->broadcast( defeated => { player => $defender->{public}{id} } );
     }
     if ( $attacker->{countries} == @{ $game->{countries} } ) {
-        $game->broadcast( 'Game Over' => { victor => $attacker->{public}{id} } );
+        $game->broadcast( victory => { player => $attacker->{public}{id} } );
 	$game->change_state('GAME_OVER');
     }
 }
@@ -154,7 +154,6 @@ sub do_attack {
 on 'quit' => sub {
     my ( $self, $player, $msg, $player_data ) = @_;
 	my $game = $self->{game};
-    $player_data->{public}{ready} = 1;
 	delete $player_data->{client};
     my @remaining = grep { exists $_->{client} } values %{ $game->{players} };
     if ( @remaining == 1 ) {

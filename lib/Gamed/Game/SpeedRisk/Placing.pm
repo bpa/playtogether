@@ -81,6 +81,13 @@ on 'ready' => sub {
       unless grep { !$_->{public}{ready} } values %{ $game->{players} };
 };
 
+on 'not ready' => sub {
+    my ( $self, $player, $message, $player_data ) = @_;
+    my $game = $self->{game};
+    $player_data->{public}{ready} = 0;
+    $game->broadcast( 'not ready' => { player => $player->{in_game_id} } );
+};
+
 on 'place' => \&Gamed::Game::SpeedRisk::Place::on_place;
 
 on 'quit' => sub {
