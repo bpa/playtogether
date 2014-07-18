@@ -47,11 +47,31 @@ my %action = (
 		my $game = $self->{game};
 		my $call = $msg->{call};
 		$game->{calling_team} = [ $player->{in_game_id} ];
-		if ($call ne 'first') {
-			my $hand = $player_data->{private}{cards};
-			my %suit = map { $_ => Gamed::Object::Bag()->new() } qw/C H S D/;
-			for my $c ($hand->{values}) {
-				push @{$suit{Gamed::Game::Spitzer::PlayLogic->suit($c)}}, $c;
+		my $hand = $player_data->{private}{cards};
+		my ($aces, %fail);
+		for my $c ($hand->{values}) {
+			if ($
+			push @{$suit{Gamed::Game::Spitzer::PlayLogic->suit($c)}}, $c;
+		}
+		for my $s (qw/C H S/) {
+			my $bag = Gamed::Object::Bag->new(@{$suit{$s}});
+			my $normal = exists $suit{$s} && !$bag->contains("A$s");
+			$fail{$s} = $normal;
+			$renounced = $renounced && !$normal;
+		}
+		if ($call eq 'first') {
+			if ((grep { $hand->contains($_) } qw/AC AH AS/) < 3) {
+				$player->err("Invalid call");
+				return;
+			}
+		}
+		else {
+			my ($renounced, %fail, %suit) = 1;
+			for my $s (qw/C H S/) {
+				my $bag = Gamed::Object::Bag->new(@{$suit{$s}});
+				my $normal = exists $suit{$s} && !$bag->contains("A$s");
+				$fail{$s} = $normal;
+				$renounced = $renounced && !$normal;
 			}
 			my ($number, $suit) = $call =~ /(.*)(.)$/;
 			if ($number ne 'A' || $hand->contains($call) || ) {
