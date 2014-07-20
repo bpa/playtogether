@@ -10,10 +10,9 @@ sub new {
     bless { name => 'Declaring', next => $opts{next} }, $pkg;
 }
 
-use Data::Dumper;
-
 sub on_enter_state {
     my ( $self, $game ) = @_;
+    $game->broadcast( declaring => { player => $game->{public}{bidder} } );
     $game->{players}{ $game->{public}{bidder} }{client}->send( 'nest', { nest => $game->{nest} } );
     $game->{players}{ $game->{public}{bidder} }{private}{cards}->add( $game->{nest} );
     delete $game->{nest};
