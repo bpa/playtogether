@@ -48,33 +48,24 @@ my %action = (
 		my $call = $msg->{call};
 		$game->{calling_team} = [ $player->{in_game_id} ];
 		my $hand = $player_data->{private}{cards};
-		my ($aces, %fail);
+		my ($all_fail, %suit, %fail) = 1;
 		for my $c ($hand->{values}) {
-			if ($
 			push @{$suit{Gamed::Game::Spitzer::PlayLogic->suit($c)}}, $c;
 		}
 		for my $s (qw/C H S/) {
-			my $bag = Gamed::Object::Bag->new(@{$suit{$s}});
-			my $normal = exists $suit{$s} && !$bag->contains("A$s");
-			$fail{$s} = $normal;
-			$renounced = $renounced && !$normal;
+			my $have_ace = $hand->contains("A$s");
+			$all_fail = 0 unless $have_ace;
+			$fail{$s} = exists $suit{$s} && !$have_ace;
 		}
 		if ($call eq 'first') {
-			if ((grep { $hand->contains($_) } qw/AC AH AS/) < 3) {
+			if (!$all_fail) {
 				$player->err("Invalid call");
 				return;
 			}
 		}
 		else {
-			my ($renounced, %fail, %suit) = 1;
-			for my $s (qw/C H S/) {
-				my $bag = Gamed::Object::Bag->new(@{$suit{$s}});
-				my $normal = exists $suit{$s} && !$bag->contains("A$s");
-				$fail{$s} = $normal;
-				$renounced = $renounced && !$normal;
-			}
 			my ($number, $suit) = $call =~ /(.*)(.)$/;
-			if ($number ne 'A' || $hand->contains($call) || ) {
+			if ($number ne 'A' || $hand->contains($call)) {
 				$player->err("Invalid call");
 				return;
 			}
