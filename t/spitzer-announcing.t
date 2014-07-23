@@ -7,44 +7,68 @@ use Gamed::Test;
 use Gamed::Object;
 use Data::Dumper;
 
-my %hand = (
-	n => bag(qw/QC AC 7D 10C 9D/),
-	e => bag(qw/QS JC 8D 11C 10D/),
-	s => bag(qw/AD KC 7D 10C 9D/),
-	w => bag(qw/AS 7C 7D 10C 9D/),
-);
+my ( $spitzer, $n, $e, $s, $w ) = game( [qw/n e s w/], { game => 'Spitzer' } );
 
-accepted( 'n', 'none', '', 'Normal pass' );
-rejected( 'n', 'call', 'AH', "Can't call if you don't have both queens");
+$spitzer->{players}{n}{private}{cards} = bag(qw/QC AC 7D 10C 9D/);
+$spitzer->{players}{e}{private}{cards} = bag(qw/QS JC 8D 11C 10D/);
+$spitzer->{players}{s}{private}{cards} = bag(qw/AD KC 7D 10C 9D/);
+$spitzer->{players}{w}{private}{cards} = bag(qw/AS 7C 7D 10C 9D/);
+
+accepted( $n, announcement => 'none', name => 'Normal pass', state => 'Announcing' );
+accepted( $e, announcement => 'none', name => 'Normal pass', state => 'Announcing' );
+accepted( $s, announcement => 'none', name => 'Normal pass', state => 'Announcing' );
+accepted( $w, announcement => 'none', name => 'Normal pass', type => 'normal', team => ['n', 'e'] );
+rejected( $n, announcement => 'call', call => 'AH', name => "Can't call if you don't have both queens" );
 
 done_testing;
 
-sub rejected {
-    local $Test::Builder::Level = $Test::Builder::Level + 1;
-}
-
 sub accepted {
     local $Test::Builder::Level = $Test::Builder::Level + 1;
-    my %opts = @_;
-    my $game = bless {
-        states => {
-            GAME_OVER => bless( { name => 'Game Over' }, 'Gamed::State' ),
-        },
-        state        => bless( { name => 'start' }, 'Gamed::State' ),
-        seats        => [qw/n e s w/],
-        type         => $opts{type},
-        calling_team => $opts{calling_team},
-        players      => {
-            n => { private => { cards => $hand{n} } },
-            e => { private => { cards => $hand{e} } },
-            s => { private => { cards => $hand{s} } },
-            w => { private => { cards => $hand{w} } },
-        },
-      },
-      'Gamed::Game::Spitzer';
+    my ( $p, @args) = @_;
+    setup( pass => 1, player => $p, @args);
+}
 
-    $logic->on_round_end($game);
-    Gamed::States::after_star($game);
+sub rejected {
+    local $Test::Builder::Level = $Test::Builder::Level + 1;
+    my ( $p, @args ) = @_;
+    setup( pass => 0, player => $p, state => 'Announcing', @args);
+}
+
+sub setup {
+    local $Test::Builder::Level = $Test::Builder::Level + 1;
+    my %opts   = @_;
+    my $player = delete $opts{player};
+	$opts{state} ||= 'PlayTricks';
+    $spitzer->{states}{ANNOUNCING}{starting_player} = 3;
+    $spitzer->change_state('ANNOUNCING');
+    Gamed::States::after_star($spitzer);
+    for my $p ( values %{ $spitzer->{players} } ) {
+        splice( @{ $p->{client}{sock}{packets} }, 0, $#{ $p->{client}{sock}{packets} } );
+    }
+
+    broadcast( $spitzer, { cmd => 'announcing', player => 'n' } );
+    for my $p ( $n, $e, $s, $w ) {
+        if ( $p->{in_game_id} ne $player->{in_game_id} ) {
+            $p->broadcast( { cmd => 'announce', announcement => 'none' }, { cmd => 'announcing' } );
+        }
+        else {
+            last;
+        }
+    }
+
+    $player->game( { cmd => 'announce', announcement => $opts{announcement}, call => $opts{call} } );
+    if ( !$opts{pass} ) {
+        $player->got_one( { cmd => 'error' } );
+        return;
+    }
+
+	if ($opts{type}) {
+		broadcast( $spitzer, { cmd => 'announcement', announcement => $opts{announcement}, call => $opts{call}, caller => $opts{caller} } );
+		is ( $spitzer->{type}, $opts{type} );
+	}
+	else {
+		broadcast( $spitzer, { cmd => 'announcing' } );
+	}
     my $name = $opts{name};
-    is( $game->{state}{name}, $opts{state}, "$name - state" );
+    is( $spitzer->{state}{name}, $opts{state}, "$name - state" );
 }
