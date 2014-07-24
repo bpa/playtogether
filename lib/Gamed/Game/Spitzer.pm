@@ -22,6 +22,7 @@ on 'create' => sub {
     my ( $self, $player, $msg ) = @_;
     $self->{public}{rules}{reztips}         = 1 if $msg->{reztips};
     $self->{public}{rules}{allow_schneider} = 1 if $msg->{allow_schneider};
+    $self->{seats}       = [qw/n e s w/];
     $self->change_state('WAITING_FOR_PLAYERS');
 };
 
