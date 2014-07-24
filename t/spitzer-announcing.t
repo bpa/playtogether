@@ -9,6 +9,12 @@ use Data::Dumper;
 
 my ( $spitzer, $n, $e, $s, $w ) = game( [qw/n e s w/], { game => 'Spitzer' } );
 
+for my $p ($n, $e, $s, $w) {
+	for my $z ('zola', 'zola schneider', 'zola schneider schwartz') {
+		accepted( $p, announcement => $z, name => "Anyone can call $z", type => $z, team => [$p->{in_game_id}], caller => $p->{in_game_id} );
+	}
+}
+
 $spitzer->{players}{n}{private}{cards} = bag(qw/QC AC 7D 10C 9D/);
 $spitzer->{players}{e}{private}{cards} = bag(qw/QS JC 8D 11C 10D/);
 $spitzer->{players}{s}{private}{cards} = bag(qw/AD KC 7D 10C 9D/);
@@ -18,7 +24,25 @@ accepted( $n, announcement => 'none', name => 'Normal pass', state => 'Announcin
 accepted( $e, announcement => 'none', name => 'Normal pass', state => 'Announcing' );
 accepted( $s, announcement => 'none', name => 'Normal pass', state => 'Announcing' );
 accepted( $w, announcement => 'none', name => 'Normal pass', type => 'normal', team => ['n', 'e'] );
+accepted( $e, announcement => 'schneider', name => 'Schneider', type => 'schneider', team => ['n', 'e'] );
+accepted( $s, announcement => 'schneider', name => 'Schneider no queens', type => 'schneider', team => ['s', 'w'] );
 rejected( $n, announcement => 'call', call => 'AH', name => "Can't call if you don't have both queens" );
+
+$spitzer->{players}{n}{private}{cards} = bag(qw/QC QS 7D 10C 9D/);
+$spitzer->{players}{e}{private}{cards} = bag(qw/AC JC 8D 11C 10D/);
+
+accepted( $w, announcement => 'none', name => 'Sneaker', type => 'sneaker', team => ['n'] );
+accepted( $n, announcement => 'call', call => 'AC', name => 'Call for ace', type => 'call', team => ['n', 'e'] );
+accepted( $n, announcement => 'schneider', name => 'Schneider solo', type => 'schneider', team => ['n'] );
+rejected( $w, announcement => 'call', call => 'AC', name => 'Must have both queens');
+rejected( $n, announcement => 'call', call => 'AS', name => "Have fail clubs, can't call for spades with no fail");
+rejected( $n, announcement => 'call', call => 'AD', name => "Can't call for trump ace");
+rejected( $n, announcement => 'first', name => "Can't call for first winner without all fail aces");
+
+$spitzer->{players}{n}{private}{cards} = bag(qw/QC QS 8D AC 9C AH 7H AS/);
+
+accepted( $n, announcement => 'call', call => 'first', name => "Call for first", team => ['n'], type => 'call' );
+rejected( $w, announcement => 'call', call => 'AC', name => "Have all the queens, can't call for one");
 
 done_testing;
 
@@ -38,6 +62,7 @@ sub setup {
     local $Test::Builder::Level = $Test::Builder::Level + 1;
     my %opts   = @_;
     my $player = delete $opts{player};
+	$opts{caller} = $player->{in_game_id} if $opts{announcement} ne 'none';
 	$opts{state} ||= 'PlayTricks';
     $spitzer->{states}{ANNOUNCING}{starting_player} = 3;
     $spitzer->change_state('ANNOUNCING');
