@@ -98,7 +98,7 @@ on trump => sub {
 on play => sub {
     my $msg = shift;
     $status{public}{player} = $msg->{next};
-    push @{ $status{public}{trick} }, Card->new( $msg->{card} );
+    push @{ $status{public}{trick} }, RookCard->new( $msg->{card} );
     play_card();
 };
 
@@ -125,7 +125,7 @@ sub play_card {
 }
 
 sub cards {
-    [ map { Card->new($_) } @{ $_[0] } ];
+    [ map { RookCard->new($_) } @{ $_[0] } ];
 }
 
 on trick => sub {

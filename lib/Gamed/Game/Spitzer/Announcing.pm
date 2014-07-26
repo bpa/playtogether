@@ -30,7 +30,8 @@ sub on_leave_state {
         announcement => {
             announcement => $game->{public}{announcement},
             caller       => $game->{public}{caller},
-            call         => $game->{public}{call} } );
+            call         => $game->{public}{call},
+            player       => $game->{public}{player} } );
 }
 
 sub solo {

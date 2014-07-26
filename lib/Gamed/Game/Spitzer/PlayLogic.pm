@@ -142,6 +142,7 @@ sub on_round_end {
 
     my %msg;
     while ( my ( $id, $p ) = each %{ $game->{players} } ) {
+		$p->{public}{points} = 0 unless $p->{public}{points};
         if ( grep( $_ eq $id, @{ $game->{calling_team} } ) && $result > 0 ) {
             $p->{public}{points} += $result;
             $msg{$id}{change} = $result;
@@ -161,7 +162,7 @@ sub on_round_end {
 
     my @players = sort { $b->{public}{points} <=> $a->{public}{points} } values %{ $game->{players} };
     if ( $players[0]{public}{points} >= 42 && $players[1]{public}{points} < $players[0]{public}{points} ) {
-        $game->broadcast( final => { winner => $players[0]{id} } );
+        $game->broadcast( final => { winner => $players[0]{public}{id} } );
         $game->change_state('GAME_OVER');
     }
     else {

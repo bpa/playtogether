@@ -1,0 +1,107 @@
+#! /usr/bin/perl
+
+use FindBin;
+use lib "$FindBin::Bin";
+use bot 'Spitzer';
+use Card;
+use Data::Dumper;
+
+our $| = 1;
+
+on state_Dealing => sub {
+    cmd 'deal' if $status{public}{dealer} eq $status{id};
+};
+
+on state_Announcing => \&announce;
+on state_PlayTricks => \&play_card;
+
+on status => sub {
+    $status{private}{cards} = cards( $status{private}{cards} ) if defined $status{private}{cards};
+};
+
+sub announce {
+    return unless $status{public}{player} eq $status{id};
+	cmd announce => { announcement => 'none' };
+}
+
+on announcing => sub {
+    my $msg = shift;
+    $status{state} = 'Announcing';
+    $status{public}{player} = $msg->{player};
+    announce();
+};
+
+on announcement => sub {
+    my $msg = shift;
+    $status{state} = 'PlayTricks';
+    $status{public}{player} = $msg->{player};
+    $status{public}{trick}  = [];
+	play_card();
+};
+
+on dealing => sub {
+    my $msg = shift;
+    $status{state} = 'Dealing';
+    if ( defined $status{id} && $msg->{dealer} eq $status{id} ) {
+        cmd 'deal';
+    }
+};
+
+on deal => sub {
+    my $msg = shift;
+    $status{private}{cards} = cards( $msg->{cards} );
+};
+
+on play => sub {
+    my $msg = shift;
+    $status{public}{player} = $msg->{next};
+    push @{ $status{public}{trick} }, SpitzerCard->new( $msg->{card} );
+    play_card();
+};
+
+sub play_card {
+    return unless $status{public}{player} eq $status{id};
+
+    my %hand = ( C => [], D => [], S => [], H => [] );
+    my $lead_suit = @{ $status{public}{trick} } ? $status{public}{trick}[0]->s : 'D';
+    for my $c ( @{ $status{private}{cards} } ) {
+        push @{ $hand{ $c->s($lead_suit) } }, $c;
+    }
+
+    $lead_suit = 'D' unless @{ $hand{$lead_suit} };
+    if ( @{ $status{public}{trick} } && @{ $hand{$lead_suit} } ) {
+        my $lead = $hand{$lead_suit};
+        my $card = $lead->[ int( rand(@$lead) ) ];
+        cmd play => { card => $card };
+        for my $i ( 0 .. $#{ $status{private}{cards} } ) {
+            splice( @{ $status{private}{cards} }, $i, 1 ) && last if $status{private}{cards}[$i] eq $card;
+        }
+    }
+    else {
+        my $card = splice( @{ $status{private}{cards} }, int( rand( @{ $status{private}{cards} } ) ), 1 );
+        cmd play => { card => $card };
+    }
+}
+
+sub cards {
+    [ map { SpitzerCard->new($_) } @{ $_[0] } ];
+}
+
+on trick => sub {
+    my $msg = shift;
+    $status{public}{player} = $msg->{winner};
+    $status{public}{trick}  = [];
+    play_card() if @{ $status{private}{cards} };
+};
+
+on final => sub {
+    cmd 'quit';
+    exit;
+};
+
+on quit => sub {
+    cmd 'quit';
+    exit;
+};
+
+play;
