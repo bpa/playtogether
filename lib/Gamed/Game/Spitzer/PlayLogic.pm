@@ -161,7 +161,7 @@ sub on_round_end {
     $game->broadcast( round => \%msg );
 
     my @players = sort { $b->{public}{points} <=> $a->{public}{points} } values %{ $game->{players} };
-    if ( $players[0]{public}{points} >= 42 && $players[1]{public}{points} < $players[0]{public}{points} ) {
+    if ( $players[0]{public}{points} >= $game->{public}{rules}{play_to} && $players[1]{public}{points} < $players[0]{public}{points} ) {
         $game->broadcast( final => { winner => $players[0]{public}{id} } );
         $game->change_state('GAME_OVER');
     }

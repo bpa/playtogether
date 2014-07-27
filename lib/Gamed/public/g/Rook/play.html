@@ -1,7 +1,7 @@
-<div ng-controller="RookCtl">
+<div class="table" ng-controller="RookCtl">
   <div class="container-fluid">
     <div class="row">
-      <div class="col-xs-3 player" ng-class="{playing: p === public.player || state === 'Bidding' && p === public.bidder}" ng-repeat="p in ['n','e','s','w']">
+      <div class="col-xs-3 player well" ng-class="{active: p === public.player || state === 'Bidding' && p === public.bidder}" ng-repeat="p in ['n','e','s','w']">
         <div style="align:center">{{players[p].name}}
           <span ng-show="players[p].pass">Pass</span>
           <span ng-hide="players[p].pass">{{players[p].bid}}</span>
@@ -29,6 +29,9 @@
   <div ng-show="state === 'Dealing' && public.dealer!=id">
     <span>Waiting for {{players[public.dealer].name}} to deal...</span>
   </div>
+  <div ng-show="state === 'Bidding' && public.bidder!=id">
+    <span>Waiting for {{players[public.bidder].name}} to bid...</span>
+  </div>
   <div ng-show="state === 'Bidding' && public.bidder==id" class="container">
     <div class="row">
       <div class="col-xs-4 col-xs-offset-4">
@@ -39,15 +42,15 @@
       </div>
     </div>
   </div>
-  <div ng-show="state === 'Bidding' && public.bidder!=id">
-    <span>Waiting for {{players[public.bidder].name}} to bid...</span>
+  <div ng-show="state === 'Declaring' && public.player!=id">
+    <span>Waiting for {{players[public.bidder].name}} to declare...</span>
   </div>
   <div ng-show="state === 'Declaring' && public.bidder == id">
     <div class="btn-group btn-group-vertical" style="float: left; margin-top: 3em">
-      <button class="btn btn-danger" ng-model="bid.trump" btn-radio="'R'">Red</button>
-      <button class="btn btn-success" ng-model="bid.trump" btn-radio="'G'">Green</button>
-      <button class="btn btn-warning" ng-model="bid.trump" btn-radio="'Y'">Yellow</button>
-      <button class="btn btn-primary" ng-model="bid.trump" btn-radio="'B'">Blue</button>
+      <button ng-change="private.cards.sort()" class="btn btn-danger" ng-model="public.trump" btn-radio="'R'">Red</button>
+      <button ng-change="private.cards.sort()" class="btn btn-success" ng-model="public.trump" btn-radio="'G'">Green</button>
+      <button ng-change="private.cards.sort()" class="btn btn-warning" ng-model="public.trump" btn-radio="'Y'">Yellow</button>
+      <button ng-change="private.cards.sort()" class="btn btn-primary" ng-model="public.trump" btn-radio="'B'">Blue</button>
     </div>
     <div class="nest">
       Choose cards to return to nest<br>
@@ -66,8 +69,11 @@
   <br clear="all">
   <div id="hand">
     <span ng-show="public.trump">Trump is <span class="shadow suit_{{public.trump}}">{{color[public.trump]}}</span><br></span>
-    <div class="card suit_{{c.suit()}}" ng-repeat="c in private.cards.cards" ng-click="clicked()">
+    <div class="card suit_{{c.suit()}}" ng-repeat="c in private.cards.cards" ng-class="{inactive: !c.playable()}" ng-click="clicked()">
       <span>{{c.str}}</span>
     </div>
+  </div>
+  <div class="footer" style="right: 0">
+    <button type="button" class="btn btn-normal" ng-click="quit()">Quit</button>
   </div>
 </div>

@@ -6,7 +6,6 @@
   <div class="btn-group-vertical form-inline">
     <button ng-repeat="g in games" class="btn btn-success" ng-model="config.game" btn-radio="g" uncheckable>{{g}}</button>
   </div>
-  </ul>
   <div class="form-inline">
     <input ng-model="config.name" class="form-control" placeholder="Game name">
     <div ng-include="getCreateUrl()"></div>
