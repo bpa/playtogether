@@ -24,8 +24,9 @@ accepted( $n, announcement => 'none', name => 'Normal pass', state => 'Announcin
 accepted( $e, announcement => 'none', name => 'Normal pass', state => 'Announcing' );
 accepted( $s, announcement => 'none', name => 'Normal pass', state => 'Announcing' );
 accepted( $w, announcement => 'none', name => 'Normal pass', type => 'normal', team => ['n', 'e'] );
-accepted( $e, announcement => 'schneider', name => 'Schneider', type => 'schneider', team => ['n', 'e'] );
-accepted( $s, announcement => 'schneider', name => 'Schneider no queens', type => 'schneider', team => ['s', 'w'] );
+accepted( $e, announcement => 'schneider', name => 'Schneider', type => 'schneider', team => ['n', 'e'], rules => { allow_schneider => 1 } );
+rejected( $e, announcement => 'schneider', name => 'Schneider banned', rules => { allow_schneider => 0 });
+accepted( $s, announcement => 'schneider', name => 'Schneider no queens', type => 'schneider', team => ['s', 'w'], rules => { allow_schneider => 1} );
 rejected( $n, announcement => 'call', call => 'AH', name => "Can't call if you don't have both queens" );
 
 $spitzer->{players}{n}{private}{cards} = bag(qw/QC QS 7D 10C 9D/);
@@ -33,7 +34,7 @@ $spitzer->{players}{e}{private}{cards} = bag(qw/AC JC 8D 11C 10D/);
 
 accepted( $w, announcement => 'none', name => 'Sneaker', type => 'sneaker', team => ['n'] );
 accepted( $n, announcement => 'call', call => 'AC', name => 'Call for ace', type => 'call', team => ['n', 'e'] );
-accepted( $n, announcement => 'schneider', name => 'Schneider solo', type => 'schneider', team => ['n'] );
+accepted( $n, announcement => 'schneider', name => 'Schneider solo', type => 'schneider', team => ['n'], rules => { allow_schneider => 1 } );
 rejected( $w, announcement => 'call', call => 'AC', name => 'Must have both queens');
 rejected( $n, announcement => 'call', call => 'AS', name => "Have fail clubs, can't call for spades with no fail");
 rejected( $n, announcement => 'call', call => 'AD', name => "Can't call for trump ace");
@@ -65,6 +66,7 @@ sub setup {
 	$opts{caller} = $player->{in_game_id} if $opts{announcement} ne 'none';
 	$opts{state} ||= 'PlayTricks';
     $spitzer->{states}{ANNOUNCING}{starting_player} = 3;
+    $spitzer->{public}{rules} = $opts{rules} || {};
     $spitzer->change_state('ANNOUNCING');
     Gamed::States::after_star($spitzer);
     for my $p ( values %{ $spitzer->{players} } ) {

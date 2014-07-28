@@ -113,6 +113,10 @@ my %action = (
     schneider => sub {
         my ( $self, $player, $msg, $player_data ) = @_;
         my $game = $self->{game};
+		if (!$game->{public}{rules}{allow_schneider}) {
+        	$player->err('Invalid announcement');
+			return;
+		}
         my ( @calling_team, $callers_team );
         for my $p ( values %{ $game->{players} } ) {
             my $team = ( $p->{private}{cards}->contains('QC') || $p->{private}{cards}->contains('QS') ) ? 1 : 0;
