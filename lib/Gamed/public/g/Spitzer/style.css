@@ -1,0 +1,41 @@
+.card {
+  background-color: #fff;
+  -moz-border-radius: 0.4em;
+  -webkit-border-radius: 0.4em;
+  border-radius: 0.4em;
+  -moz-box-shadow: 0 0 5px rgba(0,0,0,0.5);
+  -webkit-box-shadow: 0 0 5px rgba(0,0,0,0.5);
+  box-shadow: 0 0 5px rgba(0,0,0,0.5);
+  display: inline-block;
+  width: 8em;
+  height: 11.2em;
+  margin: 0 .6em .6em 0;
+  position: relative;
+  text-shadow: black 0.1em 0.1em 0.2em;
+}
+
+.shadow {
+  text-shadow: black 0.1em 0.1em 0.2em;
+}
+
+.card span {
+  font-size: 150%;
+}
+
+.suit_C { color: black; }
+.suit_S { color: black; }
+.suit_H { color: red; }
+.suit_D { color: red; }
+
+.playing {
+  background-color: #9A0;
+}
+
+.lead_card {
+  border: thin solid black;
+}
+
+.player {
+  height: 15em;
+  text-align: center;
+}

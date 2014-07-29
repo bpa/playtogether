@@ -1,0 +1,101 @@
+<div ng-controller="SpitzerCtl">
+  <div class="container-fluid">
+    <div class="row">
+      <div class="col-xs-3 player" ng-class="{playing: p === public.player || state === 'Bidding' && p === public.bidder}" ng-repeat="p in ['n','e','s','w']">
+        <div style="align:center">{{players[p].name}}
+          <span ng-show="players[p].announcement">{{player[p].announcement}}</span>
+        </div>
+        <div ng-class="{lead_card: p === last.leader, winner: p === last.winner}" class="shadow suit_{{last[p].suit_str}}" ng-bind-html="last[p].d"></div>
+        <div ng-show="public.trick[p]" class="card suit_{{public.trick[p].suit_str}}">
+          <span ng-bind-html="public.trick[p].d"></span>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div id="waiting-tab" ng-show="state === 'WaitingForPlayers'">
+    Waiting for players to join...<br>
+    <button type="button" class="btn btn-danger" ng-click="start()">Start with current players</button>
+  </div>
+  <div ng-show="state === 'Dealing' && public.dealer==id">
+    <button type="button" class="btn btn-primary" ng-click="deal()">Deal</button>
+  </div>
+  <div ng-show="state === 'Dealing' && public.dealer!=id">
+    <span>Waiting for {{players[public.dealer].name}} to deal...</span>
+  </div>
+  <div ng-show="state === 'Announcing' && public.player==id" class="container">
+    <div class="row">
+      <div class="col-xs-6 col-xs-offset-3">
+        <table class="table table-condensed table-hover">
+          <tr ng-hide="ann.queens" ng-click="ann.type='none'">
+            <td><input type="radio" ng-model="ann.type" value="none"></td>
+            <td>None</td>
+            <td>Normal play</td>
+          </tr>
+          <tr ng-show="ann.queens" ng-click="ann.type='sneaker'">
+            <td><input type="radio" ng-model="ann.type" value="sneaker"></td>
+            <td>Sneaker</td>
+            <td>Take 60pts <b>on your own</b> but don't tell anyone</td>
+          </tr>
+          <tr ng-show="ann.queens && ann.clubs" ng-click="ann.type='clubs'">
+            <td><input type="radio" ng-model="ann.type" value="clubs"></td>
+            <td>A&clubs;</td>
+            <td>Partner with the holder of the Ace of Clubs</td>
+          </tr>
+          <tr ng-show="ann.queens && ann.hearts" ng-click="ann.type='hearts'">
+            <td><input type="radio" ng-model="ann.type" value="hearts"></td>
+            <td style="color: red">A&hearts;</td>
+            <td>Partner with the holder of the Ace of Hearts</td>
+          </tr>
+          <tr ng-show="ann.queens && ann.spades" ng-click="ann.type='spades'">
+            <td><input type="radio" ng-model="ann.type" value="spades"</td>
+            <td>A&spades;</td>
+            <td>Partner with the holder of the Ace of Spades</td>
+          </tr>
+          <tr ng-show="ann.queens && ann.aces === 3" ng-click="ann.type='first'">
+            <td><input type="radio" ng-model="ann.type" value="first"></td>
+            <td>First trick</td>
+            <td>Partner with the first person to take a trick from you</td>
+          </tr>
+          <tr ng-click="ann.type='zola'">
+            <td><input type="radio" ng-model="ann.type" value="zola"></td>
+            <td>Zola</td>
+            <td>Commit to make 60pts <b>on your own</b></td>
+          </tr>
+          <tr ng-click="ann.type='zola schneider'">
+            <td><input type="radio" ng-model="ann.type" value="zola schneider"></td>
+            <td>Zola Schneider</td>
+            <td>Commit to make 90pts <b>on your own</b></td>
+          </tr>
+          <tr ng-click="ann.type='zola schneider schwartz'">
+            <td><input type="radio" ng-model="ann.type" value="zola schneider schwartz"></td>
+            <td>Zola Schneider Schwartz</td>
+            <td>Commit to take <b><i>ALL</i></b> tricks <b>on your own</b></td>
+          </tr>
+          <tr ng-show="public.rules.allow_schneider" ng-click="ann.type='schneider'">
+            <td><input type="radio" ng-model="ann.type" value="schneider"></td>
+            <td>Schneider</td>
+            <td>You and your partner commit to take 90pts</td>
+          </tr>
+        </table>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-xs-2 col-xs-offset-5">
+        <button class="btn btn-primary" ng-click="announce()">Announce</button>
+      </div>
+    </div>
+  </div>
+  <div ng-show="state === 'Announcing' && public.player!=id">
+    <span>Waiting for {{players[public.bidder].name}} to announce...</span>
+  </div>
+  <div ng-show="state === 'GameOver'">
+    <span>Game Over!</span>
+  </div>
+  <br clear="all">
+  <br clear="all">
+  <div id="hand">
+    <div class="card suit_{{c.suit_str}}" ng-repeat="c in private.cards.cards" ng-click="clicked()">
+      <div ng-bind-html="c.d"></div>
+    </div>
+  </div>
+</div>

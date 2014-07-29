@@ -20,7 +20,7 @@ use Gamed::States {
 
 on 'create' => sub {
     my ( $self, $player, $msg ) = @_;
-    $self->{public}{rules}{play_to}         = int($msg->{points}) || 42;
+    $self->{public}{rules}{play_to}         = $msg->{points} ? int($msg->{points}) : 42;
     $self->{public}{rules}{reztips}         = 1 if $msg->{reztips};
     $self->{public}{rules}{allow_schneider} = 1 if $msg->{allow_schneider};
     $self->{seats}       = [qw/n e s w/];

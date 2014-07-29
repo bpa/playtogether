@@ -7,7 +7,7 @@ use Gamed::Test;
 use Gamed::Object;
 use Data::Dumper;
 
-my $game  = bless { called => 'AC', public => {}, state => {} }, 'Gamed::Game::Spitzer';
+my $game  = bless { called => 'AC', public => { rules => { play_to => 42 } }, state => {} }, 'Gamed::Game::Spitzer';
 my $logic = Gamed::Game::Spitzer::PlayLogic->new;
 my $hand  = bag(qw/AD AC 7D 10C 9D/);
 
@@ -109,14 +109,15 @@ sub round_end {
         seats        => [qw/n e s w/],
         type         => $opts{type},
         calling_team => $opts{calling_team},
-        players      => {
+        public       => { rules => { play_to => 42 } },
+        players => {
             n => { taken => $opts{taken}[0], public => { points => $opts{start_points}{n} || 0 } },
             e => { taken => $opts{taken}[1], public => { points => $opts{start_points}{e} || 0 } },
             s => { taken => $opts{taken}[2], public => { points => $opts{start_points}{s} || 0 } },
             w => { taken => $opts{taken}[3], public => { points => $opts{start_points}{w} || 0 } },
         },
       },
-      'Gamed::Game::Rook';
+      'Gamed::Game::Spitzer';
 
     $logic->on_round_end($game);
     Gamed::States::after_star($game);
