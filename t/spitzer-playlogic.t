@@ -22,12 +22,26 @@ fail_play( 'AC', ['AS'], 'Must play trump if you don\'t have lead' );
 good_play( '10C', [], "Can lead something other than the called ace in suit" );
 fail_play( '10C', ['9C'], "Must play ace if called suit is led" );
 good_play( 'AC', ['9C'], "Must play ace if called suit is led" );
+
 $game->{state}{suits_led}{C} = 1;
 good_play( '10C', ['9C'], "Must play ace if called suit is led, unless you led the suit earlier" );
 
 $hand = bag(qw/AS AC 7S 10C 9S/);
 fail_play( 'AC', ['9H'], "Can't slough called ace" );
 good_play( '10C', ['9H'], "Can play anything else if don't have trump or lead" );
+
+$hand = bag(qw/JS AC 7S 10C 9S/);
+good_play( '9S', ['8S'], "Follow suit" );
+fail_play( 'JS', ['8S'], "J is trump, not spade" );
+
+$logic->{reztips} = 1;
+good_play( '9S', ['8S'], "Follow suit" );
+good_play( 'JS', ['8S'], "J is a spade when reztips is active" );
+
+$hand = bag(qw/JS AC 7S 10C 9D/);
+fail_play( '9D', ['8S'], "Must follow suit - reztips" );
+good_play( 'JS', ['8S'], "Must follow suit - reztips" );
+$logic->{reztips} = 0;
 
 $hand = bag('AC');
 good_play( 'AC', ['9H'], "Can play called ace if it is all you have" );
@@ -39,6 +53,14 @@ is( $logic->trick_winner( [qw/9S 10C AH/], $game ), 0, 'Non suit loses' );
 is( $logic->trick_winner( [qw/9S AS 8D/],  $game ), 2, 'Trump wins' );
 is( $logic->trick_winner( [qw/9S QD AS/],  $game ), 1, 'Trump wins' );
 is( $logic->trick_winner( [qw/9G 7D QS/],  $game ), 1, 'High trump wins' );
+
+$logic->{reztips} = 1;
+is( $logic->trick_winner( [qw/9S QC AS/],  $game ), 1, 'Trump wins' );
+is( $logic->trick_winner( [qw/KC QC AS/],  $game ), 0, 'Lost the queen to reztips' );
+is( $logic->trick_winner( [qw/AC JC AS/],  $game ), 0, 'Lost the jack to reztips' );
+is( $logic->trick_winner( [qw/QC KC AS/],  $game ), 0, 'Reztips not active if trump led' );
+is( $logic->trick_winner( [qw/8D KC QC/],  $game ), 2, 'Reztips not active if trump led' );
+$logic->{reztips} = 0;
 
 round_end(
     name         => 'Make normal',

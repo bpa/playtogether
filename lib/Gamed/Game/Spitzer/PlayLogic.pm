@@ -30,43 +30,51 @@ sub is_valid_play {
     }
 
     # Following suit
-    return 1 if $self->suit($card) eq $lead;
+    return 1 if $self->suit($card, $lead) eq $lead;
 
     # Sort cards into suits
     my %suit;
     for ( $hand->values ) {
-        push @{ $suit{ $self->suit($_) } }, $_;
+        push @{ $suit{ $self->suit($_, $lead) } }, $_;
     }
 
     # Must follow suit if held
     return if defined $suit{$lead};
 
     # Must play trump if not following suit
-    return if $self->suit($card) ne 'D' && defined $suit{D};
+    return if $self->suit($card, $lead) ne 'D' && defined $suit{D};
 
     # Don't have led suit or trump
     return 1;
 }
 
 sub suit {
-    my ( $value, $suit ) = $_[1] =~ /(.+)(.)$/;
-    return 'D' if $value eq 'J' || $value eq 'Q';    #J and Q are trump
+	my ( $self, $card, $lead ) = @_;
+    my ( $value, $suit ) = $card =~ /(.+)(.)$/;
+	if ($value eq 'J' || $value eq 'Q') { #J and Q are trump
+		if ($self->{reztips} && $lead && $lead eq $suit) {
+			return $suit;
+		}
+    	return 'D';
+	}
     return $suit;
 }
 
 my %rank = (
-    'QC' => 33,
-    '7D' => 32,
-    'QS' => 31,
-    'QH' => 30,
-    'QD' => 29,
-    'JC' => 28,
-    'JS' => 27,
-    'JH' => 26,
-    'JD' => 25,
+    'QC' => 34,
+    '7D' => 33,
+    'QS' => 32,
+    'QH' => 31,
+    'QD' => 30,
+    'JC' => 29,
+    'JS' => 28,
+    'JH' => 27,
+    'JD' => 26,
     A    => 5,
-    10   => 4,
-    K    => 3,
+    10   => 6,
+    K    => 5,
+    Q    => 4,
+    J    => 3,
     9    => 2,
     8    => 1,
     7    => 0,
@@ -78,21 +86,25 @@ sub trick_winner {
     my $winning_seat  = 0;
     my $winning_value = 0;
     for my $p ( 0 .. $#$trick ) {
-        my ( $value, $suit );
-        $value = $rank{ $trick->[$p] };
-        if ( !$value ) {
-            ( $value, $suit ) = $trick->[$p] =~ /(.+)(.)$/;
-            $value = $rank{$value};
+        my ( $ord, $value, $suit );
+        ( $value, $suit ) = $trick->[$p] =~ /(.+)(.)$/;
+		if (($value eq 'J' || $value eq 'Q') && $self->{reztips} && $lead eq $suit) {
+				
+			}
+		}
+        $ord = $rank{ $trick->[$p] };
+        if ( !$ord ) {
+            $ord = $rank{$value};
             if ( $suit eq 'D' ) {
-                $value += 20;
+                $ord += 20;
             }
             elsif ( $suit eq $lead ) {
-                $value += 10;
+                $ord += 10;
             }
         }
-        if ( $value > $winning_value ) {
+        if ( $ord > $winning_value ) {
             $winning_seat  = $p;
-            $winning_value = $value;
+            $winning_value = $ord;
         }
     }
     return $winning_seat;
