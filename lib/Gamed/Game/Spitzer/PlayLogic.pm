@@ -115,6 +115,21 @@ my %score = (
     'zola schneider schwartz' => [ -42, -42, -39, -33, -27, 42 ],
 );
 
+sub on_trick_end {
+    my ( $self, $game ) = @_;
+    my %msg = (
+        trick  => $game->{public}{trick},
+        winner => $game->{public}{player},
+        leader => $game->{public}{leader} );
+    my $points = 0;
+    for my $c ( @{ $game->{public}{trick} } ) {
+        $points += ($point_value{ substr( $c, 0, length($c) - 1 ) } || 0);
+    }
+    $msg{change} += $points;
+    $game->{players}{$game->{public}{player}}{public}{made} += $points;
+    $game->broadcast( trick => \%msg );
+}
+
 sub on_round_end {
     my ( $self, $game ) = @_;
     delete $game->{public}{leader};

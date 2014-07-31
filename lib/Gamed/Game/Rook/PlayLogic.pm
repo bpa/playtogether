@@ -56,18 +56,33 @@ my %point_value = (
     5  => 5,
 );
 
+sub on_trick_end {
+    my ( $self, $game ) = @_;
+    my %msg = (
+        trick  => $game->{public}{trick},
+        winner => $game->{public}{player},
+        leader => $game->{public}{leader} );
+    my $points = 0;
+    for my $c ( @{ $game->{public}{trick} } ) {
+        $points += $point_value{ substr( $c, 0, length($c) - 1 ) };
+    }
+    $msg{change} += $points;
+    $game->{players}{$game->{public}{player}}{public}{made} += $points;
+    $game->broadcast( trick => \%msg );
+}
+
 sub on_round_end {
     my ( $self, $game ) = @_;
     push @{ $game->{players}{ $game->{public}{player} }{taken} }, $game->{nest}->values;
     my @points      = ( 0, 0 );
     my @cards_taken = ( 0, 0 );
     my $team;
-	for my $s ( 0 .. $#{$game->{seats}} ) {
-		$team = $s % 2 if $game->{seats}[$s] eq $game->{public}{bidder};
-	}
+    for my $s ( 0 .. $#{ $game->{seats} } ) {
+        $team = $s % 2 if $game->{seats}[$s] eq $game->{public}{bidder};
+    }
     for my $s ( 0 .. 3 ) {
-        my $t = $s % 2;
-		my $seat = $game->{seats}[$s];
+        my $t    = $s % 2;
+        my $seat = $game->{seats}[$s];
         for ( @{ $game->{players}{$seat}{taken} } ) {
             my ($v) = /(\d+).$/;
             $points[$t] += $point_value{$v} || 0;
@@ -84,12 +99,17 @@ sub on_round_end {
     }
     $game->{public}{points}[0] += $points[0];
     $game->{public}{points}[1] += $points[1];
-    $game->broadcast( round => { bidder => $game->{public}{bidder}, bid => $game->{public}{bid}, made => $pre[$team], points => $game->{public}{points} });
+    $game->broadcast(
+        round => {
+            bidder => $game->{public}{bidder},
+            bid    => $game->{public}{bid},
+            made   => $pre[$team],
+            points => $game->{public}{points} } );
     if ( $game->{public}{points}[0] != $game->{public}{points}[1]
         && ( $game->{public}{points}[0] >= 500 || $game->{public}{points}[1] >= 500 ) )
     {
-		my $final = $game->{public}{points};
-		$game->broadcast( final => { winner => $final->[0] > $final->[1] ? 'NS' : 'EW' } );
+        my $final = $game->{public}{points};
+        $game->broadcast( final => { winner => $final->[0] > $final->[1] ? 'NS' : 'EW' } );
         $game->change_state('GAME_OVER');
     }
     else {

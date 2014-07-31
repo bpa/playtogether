@@ -23,6 +23,7 @@ on 'create' => sub {
     $self->{public}{rules}{play_to}         = $msg->{points} ? int($msg->{points}) : 42;
     $self->{public}{rules}{reztips}         = 1 if $msg->{reztips};
     $self->{public}{rules}{allow_schneider} = 1 if $msg->{allow_schneider};
+    $self->{public}{rules}{autocount}       = 1 if $msg->{autocount};
     $self->{seats}       = [qw/n e s w/];
     $self->change_state('WAITING_FOR_PLAYERS');
 };
