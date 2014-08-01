@@ -1,8 +1,11 @@
 <div ng-controller="SpitzerCtl">
   <div class="container-fluid">
     <div class="row">
-      <div class="col-xs-3 player" ng-class="{playing: p === public.player || state === 'Bidding' && p === public.bidder}" ng-repeat="p in ['n','e','s','w']">
-        <div style="align:center">{{players[p].name}}
+      <div class="col-xs-3 player well" ng-class="{active: p === public.player || state === 'Bidding' && p === public.bidder}" ng-repeat="p in ['n','e','s','w']">
+        <div style="align:center">
+          <span style="color:green" ng-if="players[p].change">+{{players[p].change}}</span>
+          <span class="badge">{{players[p].points}}</span>
+          {{players[p].name}}
           <span ng-if="p === public.caller && public.announcement !== 'none'"> - {{public.announcement}}</span>
         </div>
         <div style="align:center">

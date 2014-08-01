@@ -26,6 +26,16 @@ good_play( 'AC', ['9C'], "Must play ace if called suit is led" );
 $game->{state}{suits_led}{C} = 1;
 good_play( '10C', ['9C'], "Must play ace if called suit is led, unless you led the suit earlier" );
 
+$hand = bag([ 'KH', 'JH', 'KS', '8S', 'QH', '10H', '9D', 'QC' ]);
+fail_play( 'KH', ['8C'], "Must trump" );
+good_play( 'JH', ['8C'], "Trump when don't have suit" );
+fail_play( 'KS', ['8C'], "Must trump" );
+fail_play( '8S', ['8C'], "Must trump" );
+good_play( 'QH', ['8C'], "Trump ok when no suit" );
+fail_play( '10H', ['8C'], "Must trump" );
+good_play( '9D', ['8C'], "Trump ok when no suit" );
+good_play( 'QC', ['8C'], "Trump ok when no suit" );
+
 $hand = bag(qw/AS AC 7S 10C 9S/);
 fail_play( 'AC', ['9H'], "Can't slough called ace" );
 good_play( '10C', ['9H'], "Can play anything else if don't have trump or lead" );
@@ -53,6 +63,7 @@ is( $logic->trick_winner( [qw/9S 10C AH/], $game ), 0, 'Non suit loses' );
 is( $logic->trick_winner( [qw/9S AS 8D/],  $game ), 2, 'Trump wins' );
 is( $logic->trick_winner( [qw/9S QD AS/],  $game ), 1, 'Trump wins' );
 is( $logic->trick_winner( [qw/9G 7D QS/],  $game ), 1, 'High trump wins' );
+is( $logic->trick_winner( [qw/9H 10H AH 7H/],  $game ), 2, 'High card wins' );
 
 $logic->{reztips} = 1;
 is( $logic->trick_winner( [qw/9S QC AS/],  $game ), 1, 'Trump wins' );

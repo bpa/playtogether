@@ -6,7 +6,7 @@
   <tr>
     <td>Allow Schneider:</td>
     <td>
-      <button class="btn" ng-class="{'btn-success': config.schneider, 'btn-danger': !config.schneider}" ng-model="config.schneider" ng-init="config.schneider = true" btn-checkbox>{{config.schneider ? 'Yes' : 'No'}}</button>
+      <button class="btn" ng-class="{'btn-success': config.allow_schneider, 'btn-danger': !config.allow_schneider}" ng-model="config.allow_schneider" ng-init="config.allow_schneider = false" btn-checkbox>{{config.allow_schneider ? 'Yes' : 'No'}}</button>
       <i class="glyphicon-info-sign" popover="Allow players to call Schneider, meaning their team commits to taking 90 points.  This is opposed to Zola Schneider which is done solo." popover-trigger="mouseenter"></i>
     </td>
   </tr>
@@ -17,7 +17,7 @@
       <i class="glyphicon-info-sign" popover="Show who played key cards (Aces, Queens, etc.), and show which trump have been played" popover-trigger="mouseenter"></i>
     </td>
   </tr>
-  <tr ng-if="0">
+  <tr>
     <td>Play with "Reztips" rule:</td>
     <td>
       <button class="btn" ng-class="{'btn-success': config.reztips, 'btn-danger': !config.reztips}" ng-model="config.reztips" ng-init="config.reztips = false" btn-checkbox>{{config.reztips ? 'Yes' : 'No'}}</button>

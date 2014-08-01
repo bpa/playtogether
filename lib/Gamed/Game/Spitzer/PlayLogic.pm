@@ -52,7 +52,7 @@ sub suit {
 	my ( $self, $card, $lead ) = @_;
     my ( $value, $suit ) = $card =~ /(.+)(.)$/;
 	if ($value eq 'J' || $value eq 'Q') { #J and Q are trump
-		if ($self->{reztips} && $lead && $lead eq $suit) {
+		if (ref($self) && $self->{reztips} && $lead && $lead eq $suit) {
 			return $suit;
 		}
     	return 'D';
@@ -61,16 +61,16 @@ sub suit {
 }
 
 my %rank = (
-    'QC' => 34,
-    '7D' => 33,
-    'QS' => 32,
-    'QH' => 31,
-    'QD' => 30,
-    'JC' => 29,
-    'JS' => 28,
-    'JH' => 27,
-    'JD' => 26,
-    A    => 5,
+    'QC' => 36,
+    '7D' => 35,
+    'QS' => 34,
+    'QH' => 33,
+    'QD' => 32,
+    'JC' => 31,
+    'JS' => 30,
+    'JH' => 29,
+    'JD' => 28,
+    A    => 7,
     10   => 6,
     K    => 5,
     Q    => 4,
@@ -88,11 +88,9 @@ sub trick_winner {
     for my $p ( 0 .. $#$trick ) {
         my ( $ord, $value, $suit );
         ( $value, $suit ) = $trick->[$p] =~ /(.+)(.)$/;
-		if (($value eq 'J' || $value eq 'Q') && $self->{reztips} && $lead eq $suit) {
-				
-			}
+		if (!$p || ($value ne 'J' && $value ne 'Q') || !$self->{reztips} || $lead ne $suit) {
+        	$ord = $rank{ $trick->[$p] };
 		}
-        $ord = $rank{ $trick->[$p] };
         if ( !$ord ) {
             $ord = $rank{$value};
             if ( $suit eq 'D' ) {
