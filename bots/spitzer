@@ -5,6 +5,7 @@ use lib "$FindBin::Bin";
 use bot 'Spitzer';
 use Card;
 use Data::Dumper;
+use Time::HiRes 'usleep';
 
 our $| = 1;
 
@@ -62,6 +63,7 @@ on play => sub {
 sub play_card {
     return unless $status{public}{player} eq $status{id};
 
+    usleep((500 + int(rand 750)) * 1000);
     my %hand = ( C => [], D => [], S => [], H => [] );
     my $lead_suit = @{ $status{public}{trick} } ? $status{public}{trick}[0]->s : 'D';
     for my $c ( @{ $status{private}{cards} } ) {
