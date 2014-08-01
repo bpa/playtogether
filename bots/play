@@ -1,8 +1,10 @@
 #! /bin/sh
-./spitzer localhost airhead &
-sleep 1
-./spitzer localhost bob &
-sleep 1
-./spitzer localhost easy &
-sleep 1
-#./rook localhost waldo 2>&1 >/dev/null &
+bots=`ls *.yaml`
+c=0
+for b in `ls *.yaml`; do
+  if [ $c -lt 2 ]; then
+	./$1 localhost ${b%.yaml} &
+	sleep 1
+	c=$((c+1))
+  fi
+done
