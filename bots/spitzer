@@ -96,12 +96,12 @@ on trick => sub {
 
 on final => sub {
     cmd 'quit';
-    exit;
+	%status = ();
 };
 
 on quit => sub {
     cmd 'quit';
-    exit;
+	%status = ();
 };
 
 play;

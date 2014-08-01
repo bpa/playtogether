@@ -101,7 +101,7 @@ my %cmd = (
     games => sub {
         my $msg = shift;
         die "$game not available on server, quitting.\n" unless grep { /$game/ } @{ $msg->{games} };
-        my @games = grep { $_->{game} eq $game } @{ $msg->{instances} };
+        my @games = grep { $_->{game} eq $game && $_->{state} eq 'WaitingForPlayers' } @{ $msg->{instances} };
         if (@games) {
             print "Joining ", $games[0]{name}, "\n";
             send_cmd join => { name => $games[0]{name} };
@@ -109,7 +109,7 @@ my %cmd = (
         else {
 
             #TODO: make this an option
-            send_cmd create => { name => $bot, game => $game };
+            #send_cmd create => { name => $bot, game => $game };
         }
     },
     create => sub {
