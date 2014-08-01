@@ -107,7 +107,6 @@ my %cmd = (
             send_cmd join => { name => $games[0]{name} };
         }
         else {
-
             #TODO: make this an option
             #send_cmd create => { name => $bot, game => $game };
         }

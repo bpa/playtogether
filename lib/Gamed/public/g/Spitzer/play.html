@@ -3,7 +3,10 @@
     <div class="row">
       <div class="col-xs-3 player" ng-class="{playing: p === public.player || state === 'Bidding' && p === public.bidder}" ng-repeat="p in ['n','e','s','w']">
         <div style="align:center">{{players[p].name}}
-          <span ng-show="players[p].announcement">{{player[p].announcement}}</span>
+          <span ng-if="p === public.caller && public.announcement !== 'none'"> - {{public.announcement}}</span>
+        </div>
+        <div style="align:center">
+          <span>{{players[p].made}}</span>
         </div>
         <div ng-class="{lead_card: p === last.leader, winner: p === last.winner}" class="shadow suit_{{last[p].suit_str}}" ng-bind-html="last[p].d"></div>
         <div ng-show="public.trick[p]" class="card suit_{{public.trick[p].suit_str}}">
@@ -97,5 +100,8 @@
     <div class="card suit_{{c.suit_str}}" ng-repeat="c in private.cards.cards" ng-click="clicked()">
       <div ng-bind-html="c.d"></div>
     </div>
+  </div>
+  <div class="footer" style="right: 0">
+    <button type="button" class="btn btn-normal" ng-click="quit()">Quit</button>
   </div>
 </div>
