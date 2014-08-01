@@ -10,6 +10,11 @@
         </div>
         <div style="align:center">
           <span>{{players[p].made}}</span>
+          <span class="badge suit_C" ng-if="public.autocount !== undefined && public.autocount[p].played.indexof('QC') !== -1"> Q&clubs;</span>
+          <span class="badge suit_S" ng-if="public.autocount !== undefined && public.autocount[p].played.indexof('QS') !== -1"> Q&spades;</span>
+          <span class="badge suit_C" ng-if="public.autocount !== undefined && public.autocount[p].played.indexof('AC') !== -1"> A&clubs;</span>
+          <span class="badge suit_S" ng-if="public.autocount !== undefined && public.autocount[p].played.indexof('AS') !== -1"> A&spades;</span>
+          <span class="badge suit_H" ng-if="public.autocount !== undefined && public.autocount[p].played.indexof('AH') !== -1"> A&hearts;</span>
         </div>
         <div ng-class="{lead_card: p === last.leader, winner: p === last.winner}" class="shadow suit_{{last[p].suit_str}}" ng-bind-html="last[p].d"></div>
         <div ng-show="public.trick[p]" class="card suit_{{public.trick[p].suit_str}}">
@@ -92,7 +97,7 @@
     </div>
   </div>
   <div ng-show="state === 'Announcing' && public.player!=id">
-    <span>Waiting for {{players[public.bidder].name}} to announce...</span>
+    <span>Waiting for {{players[public.player].name}} to announce...</span>
   </div>
   <div ng-show="state === 'GameOver'">
     <span>Game Over!</span>
@@ -106,5 +111,11 @@
   </div>
   <div class="footer" style="right: 0">
     <button type="button" class="btn btn-normal" ng-click="quit()">Quit</button>
+  </div>
+  <hr>
+  <div style="font-size:75%" ng-if="public.rules.autocount">
+    <div class="card suit_{{c.suit_str}}" ng-repeat="c in trump.cards" ng-class="{inactive: public.autocount.played.indexOf(c) !== -1}">
+      <div ng-bind-html="c.d"></div>
+    </div>
   </div>
 </div>

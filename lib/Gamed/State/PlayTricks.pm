@@ -15,7 +15,7 @@ sub new {
 
 sub on_enter_state {
     my $self = shift;
-	my $game = $self->{game};
+    my $game = $self->{game};
     for ( 0 .. $#{ $self->{game}{seats} } ) {
         $self->{active_player} = $_ if $self->{game}{seats}[$_] eq $self->{game}{public}{player};
     }
@@ -23,11 +23,11 @@ sub on_enter_state {
         $_->{taken} = [];
     }
     $self->{game}{public}{trick} = [];
-	for my $p (values %{ $game->{players} }) {
-		$p->{public}{made} = 0;
-	}
-	$game->{autocount} = {};
-	$game->{public}{autocount} = $game->{autocount} if ($game->{public}{rules}{autocount});
+    for my $p ( values %{ $game->{players} } ) {
+        $p->{public}{made} = 0;
+    }
+    $game->{autocount} = {};
+    $game->{public}{autocount} = $game->{autocount} if ( $game->{public}{rules}{autocount} );
 }
 
 on 'play' => sub {
@@ -39,9 +39,10 @@ on 'play' => sub {
         return;
     }
     if ( $self->{logic}->is_valid_play( $msg->{card}, $game->{public}{trick}, $player->{private}{cards}, $game ) ) {
-		push @{$game->{autocount}{$client->{in_game_id}}{played}}, $msg->{card};
+        push @{ $game->{autocount}{ $client->{in_game_id} }{played} }, $msg->{card};
+        push @{ $game->{autocount}{played} }, $msg->{card};
         $game->{public}{leader} = $client->{in_game_id} unless @{ $game->{public}{trick} };
-		$game->{suits_led}{$self->{logic}->suit($msg->{card})}++ unless @{ $game->{public}{trick} };
+        $game->{suits_led}{ $self->{logic}->suit( $msg->{card} ) }++ unless @{ $game->{public}{trick} };
         push @{ $game->{public}{trick} }, $msg->{card};
         $player->{private}{cards}->remove( $msg->{card} );
         $self->{active_player} = ++$self->{active_player} % keys %{ $game->{players} };
@@ -51,22 +52,22 @@ on 'play' => sub {
             $self->{active_player} %= keys %{ $game->{players} };
             $game->{public}{player} = $game->{seats}[ $self->{active_player} ];
             push @{ $game->{players}{ $game->{public}{player} }{taken} }, @{ $game->{public}{trick} };
-			$self->{logic}->on_trick_end($game);
-			push @{$game->{autocount}{cards}}, @{$game->{public}{trick}};
+            $self->{logic}->on_trick_end($game);
+            push @{ $game->{autocount}{cards} }, @{ $game->{public}{trick} };
             $game->{public}{trick}  = [];
             $game->{public}{leader} = [];
+
             if ( grep ( scalar( $_->{private}{cards}->values ), values %{ $game->{players} } ) == 0 ) {
                 $self->{logic}->on_round_end($game);
-				delete $self->{suits_led};
+                delete $self->{suits_led};
             }
         }
         else {
-            $game->broadcast(
-                play => { player => $client->{in_game_id}, card => $msg->{card}, next => $game->{public}{player} } );
+            $game->broadcast( play => { player => $client->{in_game_id}, card => $msg->{card}, next => $game->{public}{player} } );
         }
     }
     else {
-        $client->send( error => { reason => 'Invalid card', card => $msg->{card}, cards => $player->{private}{cards} });
+        $client->send( error => { reason => 'Invalid card', card => $msg->{card}, cards => $player->{private}{cards} } );
     }
 };
 
