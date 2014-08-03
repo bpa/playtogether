@@ -1,27 +1,37 @@
 <table>
   <tr>
-    <td>Points to win:</td>
-    <td><input type="range" min="3" max="42" step="3" ng-init="config.points=42" ng-model="config.points">{{config.points}}</td>
-  </tr>
-  <tr>
-    <td>Allow Schneider:</td>
+    <td>Points to win: <span>{{config.points}}</span></td>
     <td>
-      <button class="btn" ng-class="{'btn-success': config.allow_schneider, 'btn-danger': !config.allow_schneider}" ng-model="config.allow_schneider" ng-init="config.allow_schneider = false" btn-checkbox>{{config.allow_schneider ? 'Yes' : 'No'}}</button>
-      <i class="glyphicon-info-sign" popover="Allow players to call Schneider, meaning their team commits to taking 90 points.  This is opposed to Zola Schneider which is done solo." popover-trigger="mouseenter"></i>
+      <div>
+      <input type="range" min="3" max="42" step="3" ng-init="config.points=42" ng-model="config.points">
+    </div>
     </td>
   </tr>
   <tr>
-    <td>Lazy player aids:</td>
     <td>
-      <button class="btn" ng-class="{'btn-success': config.autocount, 'btn-danger': !config.autocount}" ng-model="config.autocount" ng-init="config.autocount = true" btn-checkbox>{{config.autocount ? 'Yes' : 'No'}}</button>
-      <i class="glyphicon-info-sign" popover="Show who played key cards (Aces, Queens, etc.), and show which trump have been played" popover-trigger="mouseenter"></i>
+      <i class="glyphicon glyphicon-info-sign" popover="Allow players to call Schneider, meaning their team commits to taking 90 points.  This is opposed to Zola Schneider which is done solo." popover-trigger="mouseenter"></i>
+      Allow Schneider:
+    </td>
+    <td>
+      &nbsp;<button class="btn" ng-class="{'btn-success': config.allow_schneider, 'btn-danger': !config.allow_schneider}" ng-model="config.allow_schneider" ng-init="config.allow_schneider = false" btn-checkbox>{{config.allow_schneider ? 'Yes' : 'No'}}</button>
     </td>
   </tr>
   <tr>
-    <td>Play with "Reztips" rule:</td>
     <td>
-      <button class="btn" ng-class="{'btn-success': config.reztips, 'btn-danger': !config.reztips}" ng-model="config.reztips" ng-init="config.reztips = false" btn-checkbox>{{config.reztips ? 'Yes' : 'No'}}</button>
-      <i class="glyphicon-info-sign" popover="Play evil.  Queens or Jacks played in suit (except diamonds) are not trump.  They follow the Pinochle ordering instead (A 10 K Q J 9 8 7).  You are required to play a Queen or Jack when its suit is led if it is your only card in that suit, meaning the Queens and Jacks can be drawn out like any other card and taken with a lower trump or higher non-trump." popover-trigger="mouseenter"></i>
+      <i class="glyphicon glyphicon-info-sign" popover="Show who played key cards (Aces, Queens, etc.), and show which trump have been played" popover-trigger="mouseenter"></i>
+      Lazy player aids:
+    </td>
+    <td>
+      &nbsp;<button class="btn" ng-class="{'btn-success': config.autocount, 'btn-danger': !config.autocount}" ng-model="config.autocount" ng-init="config.autocount = true" btn-checkbox>{{config.autocount ? 'Yes' : 'No'}}</button>
+    </td>
+  </tr>
+  <tr>
+    <td>
+      <i class="glyphicon glyphicon-info-sign" popover="Play evil.  Queens or Jacks played in suit (except diamonds) are not trump.  They follow the Pinochle ordering instead (A 10 K Q J 9 8 7).  You are required to play a Queen or Jack when its suit is led if it is your only card in that suit, meaning the Queens and Jacks can be drawn out like any other card and taken with a lower trump or higher non-trump." popover-trigger="mouseenter"></i>
+      Play with "Reztips" rule:
+    </td>
+    <td>
+      &nbsp;<button class="btn" ng-class="{'btn-success': config.reztips, 'btn-danger': !config.reztips}" ng-model="config.reztips" ng-init="config.reztips = false" btn-checkbox>{{config.reztips ? 'Yes' : 'No'}}</button>
     </td>
   </tr>
 </table>

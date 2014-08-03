@@ -24,6 +24,7 @@ on 'create' => sub {
     $self->{countries}   = $self->{board}{territories};
     $self->{min_players} = 2;
     $self->{max_players} = $self->{board}{players};
+    $self->{public}{rules}{board} = $msg->{board};
     find sub {
         if ( $_ eq 'theme.properties' ) {
             $self->{themes}{ basename($File::Find::dir) } = ();
