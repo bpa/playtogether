@@ -1,0 +1,29 @@
+#! /usr/bin/perl
+
+use FindBin;
+use lib "$FindBin::Bin";
+use bot 'SpeedRisk', .1;
+use Data::Dumper;
+
+our $| = 1;
+
+on ready => sub {
+	my $msg = shift;
+	$status{players}{$msg->{player}}{public}{ready} = 1;
+	if (!$status{players}{$status{id}}{public}{ready}) {
+		cmd 'ready';
+	}
+};
+
+on quit => sub {
+	cmd 'quit';
+	%status = ();
+};
+
+on tick => sub {
+#	if ((time - $status{last_join}) > 300) {
+#		cmd 'ready';
+#	}
+};
+
+play;

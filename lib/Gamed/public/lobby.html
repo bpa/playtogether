@@ -9,7 +9,7 @@
         <button ng-repeat="g in games" class="btn btn-success" ng-model="config.game" btn-radio="g" uncheckable>{{g}}</button>
       </div>
     </div>
-    <form name="create" class="col-md-10" ng-show="config.game">
+    <form class="col-md-10" ng-show="config.game">
       <div class="form-inline">
         <input ng-model="config.name" name="name" class="form-control" required ng-class="{'has-error': create.name.$invalid}" placeholder="Game name">
         <button type="button" class="btn btn-primary" ng-click="create()">Create Game</button>

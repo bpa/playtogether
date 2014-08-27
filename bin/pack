@@ -218,7 +218,16 @@ sub write_sheet {
     }
     $image->Crop( width => next_square($max_x), height => next_square($max_y) );
     $image->Write("$file.png");
-    write_file( "$file.json", JSON::Any->objToJson( { frames => \%frames } ) );
+    write_file(
+        "$file.json",
+        JSON::Any->objToJson(
+            {   frames => \%frames,
+                meta   => {
+                    image   => "$file.png",
+                    format  => "RGBA8888",
+                    size    => { w => $width, h => $width },
+                    scale   => 1,
+                } } ) );
 }
 
 sub next_square {
