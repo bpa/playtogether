@@ -405,7 +405,7 @@
          ],
          "name" : "Kamchatka",
          "sprite": { "x": 560, "y": 32 },
-         "token": { "x":601, "y": 60 }
+         "token": { "x": 601, "y": 60 }
       },
       {
          "borders" : [

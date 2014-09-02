@@ -9,6 +9,7 @@ WriteMakefile(
     PREREQ_PM    => {
         AnyEvent               => 0,
         'Authen::Passphrase'   => 0,
+        'Config::Properties'   => 0,
         'Data::UUID'           => 0,
         DBI                    => 0,
         'DBD::SQLite'          => 0,
