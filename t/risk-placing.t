@@ -20,7 +20,7 @@ subtest 'two players' => sub {
 
     my %player_countries;
     $p1->got( { cmd => 'armies' } );
-    $p1->got_one( { cmd => 'state' } );
+    $p1->got_one( { cmd => 'placing' } );
     my $msg = pop @{ $p2->{sock}{packets} };
     is( ~~ @{ $msg->{countries} }, 42 );
     for my $c ( 0 .. 41 ) {
@@ -33,9 +33,8 @@ subtest 'two players' => sub {
         $player_countries{ $msg->{countries}[$c]{owner} }++;
     }
     for my $p ( 0, 1, 'd' ) {
-        is( $player_countries{$p}, 14, "Each player has 14 countries" );
-        is( $risk->{players}{$p}{countries},
-            14, "Game says each player has 14 countries" );
+        is( $player_countries{$p},           14, "Each player has 14 countries" );
+        is( $risk->{players}{$p}{countries}, 14, "Game says each player has 14 countries" );
     }
     is( $risk->{players}{0}{private}{armies}, 26, "Player 1 has 26 armies to place" );
     is( $risk->{players}{1}{private}{armies}, 26, "Player 2 has 26 armies to place" );
@@ -50,8 +49,8 @@ subtest 'all ready starts game' => sub {
     $p1->broadcast( { cmd => 'ready' } );
     $p2->broadcast( { cmd => 'ready' } );
     $p3->game( { cmd => 'ready' } );
-    broadcast( $risk, { cmd   => 'ready' } );
-    broadcast( $risk, { state => 'Playing' } );
+    broadcast( $risk, { cmd => 'ready' } );
+    broadcast( $risk, { cmd => 'playing' } );
     is( $risk->{state}{name}, 'Playing' );
 
     done();
@@ -63,8 +62,8 @@ subtest 'can start with dropped player' => sub {
     $p1->quit();
     $p2->broadcast( { cmd => 'ready' } );
     $p3->game( { cmd => 'ready' } );
-    broadcast( $risk, { cmd   => 'ready' } );
-    broadcast( $risk, { state => 'Playing' } );
+    broadcast( $risk, { cmd => 'ready' } );
+    broadcast( $risk, { cmd => 'playing' } );
     is( $risk->{state}{name}, 'Playing' );
 
     done();
@@ -77,7 +76,7 @@ subtest 'drop unready player starts game' => sub {
     $p3->broadcast( { cmd => 'ready' } );
     $p1->quit();
 
-    broadcast( $risk, { state => 'Playing' } );
+    broadcast( $risk, { cmd => 'playing' } );
     is( $risk->{state}{name}, 'Playing' );
 
     done();
@@ -86,10 +85,10 @@ subtest 'drop unready player starts game' => sub {
 subtest 'last player wins by default' => sub {
     my $risk = placing_with_3();
     $p1->quit();
-    $p2->game({ cmd => 'quit' });
+    $p2->game( { cmd => 'quit' } );
 
     broadcast( $risk, { cmd => 'victory', player => 2 } );
-    broadcast( $risk, { cmd => 'quit', player => 1 } );
+    broadcast( $risk, { cmd => 'quit',    player => 1 } );
     is( $risk->{state}{name}, 'GameOver' );
 
     done();
@@ -98,16 +97,12 @@ subtest 'last player wins by default' => sub {
 subtest 'place' => sub {
     my $risk = placing_with_3();
 
-    $risk->{countries}[0]{owner} = 0;
-    $risk->{countries}[1]{owner} = 1;
+    $risk->{public}{countries}[0]{owner} = 0;
+    $risk->{public}{countries}[1]{owner} = 1;
 
-    $p1->game(
-        { cmd => 'place', country => 0, armies => 0 },
-        { cmd => 'error', reason  => 'Not enough armies' } );
+    $p1->game( { cmd => 'place', country => 0, armies => 0 }, { cmd => 'error', reason => 'Not enough armies' } );
 
-    $p1->game(
-		{ cmd => 'place', country => 0 },
-        { cmd => 'error', reason  => 'Not enough armies' } );
+    $p1->game( { cmd => 'place', country => 0 }, { cmd => 'error', reason => 'Not enough armies' } );
 
     $p1->game( { cmd => 'place', country => 0, armies => 1 } );
     $p1->got( { cmd => 'armies', armies => 25 } );
@@ -119,20 +114,13 @@ subtest 'place' => sub {
     broadcast( $risk, { cmd => 'country', country => { id => 0, armies => 7, owner => 0 } } );
     is( $risk->{players}{0}{private}{armies}, 20 );
 
-    $p1->game(
-        { cmd => 'place', country => 0, armies => -1 },
-        { cmd => 'error', reason  => 'Not enough armies' } );
+    $p1->game( { cmd => 'place', country => 0, armies => -1 }, { cmd => 'error', reason => 'Not enough armies' } );
 
-    $p1->game(
-        { cmd => 'place', country => 0, armies => 21 },
-        { cmd => 'error', reason  => 'Not enough armies' } );
+    $p1->game( { cmd => 'place', country => 0, armies => 21 }, { cmd => 'error', reason => 'Not enough armies' } );
 
-    $p1->game(
-        { cmd => 'place', country => 1, armies => 1 },
-        { cmd => 'error', reason  => 'Not owner' } );
+    $p1->game( { cmd => 'place', country => 1, armies => 1 }, { cmd => 'error', reason => 'Not owner' } );
 
-    $p1->game( { cmd => 'place', armies => 1 },
-        { cmd => 'error', reason => 'No country specified' } );
+    $p1->game( { cmd => 'place', armies => 1 }, { cmd => 'error', reason => 'No country specified' } );
 
     done();
 };
@@ -146,9 +134,9 @@ sub placing_with_3 {
     $p1->broadcast( { cmd => 'ready' } );
     $p2->broadcast( { cmd => 'ready' } );
     $p3->game( { cmd => 'ready' } );
-    broadcast( $risk, { cmd   => 'ready' } );
-    broadcast( $risk, { cmd   => 'armies' } );
-    broadcast( $risk, { state => 'Placing' } );
+    broadcast( $risk, { cmd => 'ready' } );
+    broadcast( $risk, { cmd => 'armies' } );
+    broadcast( $risk, { cmd => 'placing' } );
     is( $risk->{state}{name}, 'Placing' );
     return $risk;
 }

@@ -1,6 +1,5 @@
 package Gamed::Game::SpeedRisk;
 
-use File::Find;
 use File::Basename;
 use File::Spec::Functions 'catdir';
 use Gamed::Handler;
@@ -19,43 +18,47 @@ use Gamed::States {
 
 on 'create' => sub {
     my ( $self, $player, $msg ) = @_;
-	$msg->{board} ||= 'Classic';
-    $self->{board}       = Gamed::Game::SpeedRisk::Board->new( $msg->{board} );
-    $self->{countries}   = $self->{board}{territories};
-    $self->{min_players} = 2;
-    $self->{max_players} = $self->{board}{players};
+    $msg->{board} ||= 'Classic';
+    $self->{board}                = Gamed::Game::SpeedRisk::Board->new( $msg->{board} );
+    $self->{public}{countries}    = $self->{board}{territories};
+    $self->{min_players}          = 2;
+    $self->{max_players}          = $self->{board}{players};
     $self->{public}{rules}{board} = $msg->{board};
-    find sub {
-        if ( $_ eq 'theme.properties' ) {
-            $self->{themes}{ basename($File::Find::dir) } = ();
-        }
-    }, catdir($Gamed::public, "g", "SpeedRisk", $msg->{board}, "themes");
+    opendir( my $dh, catdir( $Gamed::public, "g", "SpeedRisk", $msg->{board} ) );
+
+    for my $file ( grep { !/^\./ && !/^board\./ && /\.json$/ } readdir($dh) ) {
+        $self->{public}{themes}{ substr( $file, 0, -5 ) } = ();
+    }
+    closedir($dh);
     $self->change_state('WAITING_FOR_PLAYERS');
 };
 
 on 'join' => sub {
-	my ($self, $player, $msg) = @_;
-    my $theme = ( keys %{$self->{themes}} )[ rand keys %{$self->{themes}} ];
-    delete $self->{themes}{$theme};
-    $self->{players}{$player->{in_game_id}}{public}{theme} = $theme;
+    my ( $self, $player, $msg ) = @_;
+    my $theme = ( keys %{ $self->{public}{themes} } )[ rand keys %{ $self->{public}{themes} } ];
+    $self->{public}{themes}{$theme} = $player->{in_game_id};
+    $self->{players}{ $player->{in_game_id} }{public}{theme} = $theme;
 };
 
 on 'theme' => sub {
-	my ($self, $player, $msg) = @_;
-	if ( $msg->{theme} && exists $self->{themes}{ $msg->{theme} } ) {
-		$self->{themes}{ $self->{players}{$player->{in_game_id}}{public}{theme} } = ();
-		$self->{players}{$player->{in_game_id}}{public}{theme} = $msg->{theme};
-		delete $self->{themes}{ $msg->{theme} };
-		$self->broadcast( theme => { theme => $msg->{theme}, player => $player->{in_game_id} } );
-	}
-	else {
-		$player->err("Invalid theme");
-	}
+    my ( $self, $player, $msg ) = @_;
+    if (   $msg->{theme}
+        && exists $self->{public}{themes}{ $msg->{theme} }
+        && !defined $self->{public}{themes}{ $msg->{theme} } )
+    {
+        $self->{public}{themes}{ $self->{players}{ $player->{in_game_id} }{public}{theme} } = ();
+        $self->{public}{themes}{ $msg->{theme} }                                            = $player->{in_game_id};
+        $self->{players}{ $player->{in_game_id} }{public}{theme}                            = $msg->{theme};
+        $self->broadcast( theme => { theme => $msg->{theme}, player => $player->{in_game_id} } );
+    }
+    else {
+        $player->err("Invalid theme");
+    }
 };
 
 on 'quit' => sub {
-	my ($self, $client, $msg, $player) = @_;
-    $self->{themes}{ delete $player->{public}{theme} } = ();
+    my ( $self, $client, $msg, $player ) = @_;
+    $self->{public}{themes}{ delete $player->{public}{theme} } = ();
 };
 
 1;

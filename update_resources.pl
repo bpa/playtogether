@@ -12,14 +12,16 @@ use File::Basename;
 use List::Util 'max';
 
 my $game_dir = "lib/Gamed/public/g/SpeedRisk";
-#make_themes('Classic');
+write_theme_json( read_themes() );
+make_themes('Classic');
 make_themes('Ultimate');
 
 sub make_themes {
     my $type  = shift;
     clean_dir($type);
     my $board = decode_json( read_file("$game_dir/$type/board.json") );
-    for my $theme ( read_themes() ) {
+    my @themes = read_themes();
+    for my $theme ( @themes ) {
 		eval {
 			my @images;
 			my $bg = get_image_for_theme($theme, 'background');
@@ -61,6 +63,18 @@ sub read_themes {
 	}
     closedir $dh;
 	return @themes;
+}
+
+sub write_theme_json {
+	my %data;
+	for my $theme (@_) {
+		my %info;
+		while (my ($k, $v) = each %$theme) {
+			$info{$k} = $v if $k =~ /text/ || $k =~ /-[xy]/;
+		}
+		$data{$theme->{name}} = \%info;
+	}
+	write_file("$game_dir/themes.json", encode_json(\%data));
 }
 
 sub get_image_for_theme {
@@ -259,7 +273,7 @@ sub write_sheet {
         to_json (
             {   frames => \%frames,
                 meta   => {
-                    image   => "$dir/$theme.png",
+                    image   => "$theme.png",
                     format  => "RGBA8888",
                     size    => { w => $width, h => $width },
                     scale   => 1,

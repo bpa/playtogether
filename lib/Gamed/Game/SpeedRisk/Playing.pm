@@ -12,7 +12,7 @@ sub new {
 sub on_enter_state {
     my $self = shift;
 	my $game = $self->{game};
-    $game->broadcast( state => { state => 'Playing' } );
+    $game->broadcast( 'playing' );
     $self->{timer} = AE::timer $game->{board}{army_generation_period}, 0, sub {
         $self->generate_armies($game);
     };
@@ -71,16 +71,16 @@ on 'move' => sub {
         || !defined $t
         || $f < 0
         || $t < 0
-        || $f > $game->{countries}
-        || $t > $game->{countries}
-        || !$game->{countries}[$f]{borders}[$t] )
+        || $f > $game->{public}{countries}
+        || $t > $game->{public}{countries}
+        || !$game->{public}{countries}[$f]{borders}[$t] )
     {
         $player->err("Invalid destination");
         return;
     }
 
-    my $from = $game->{countries}[$f];
-    my $to   = $game->{countries}[$t];
+    my $from = $game->{public}{countries}[$f];
+    my $to   = $game->{public}{countries}[$t];
     if ( $from->{owner} != $player->{in_game_id} ) {
         $player->err("Not owner");
         return;
@@ -145,7 +145,7 @@ sub do_attack {
     unless ( $defender->{countries} ) {
         $game->broadcast( defeated => { player => $defender->{public}{id} } );
     }
-    if ( $attacker->{countries} == @{ $game->{countries} } ) {
+    if ( $attacker->{countries} == @{ $game->{public}{countries} } ) {
         $game->broadcast( victory => { player => $attacker->{public}{id} } );
 	$game->change_state('GAME_OVER');
     }

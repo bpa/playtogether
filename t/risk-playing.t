@@ -423,12 +423,12 @@ subtest 'produce armies for countries' => sub {
     my $risk = setup();
     clear_board($risk);
 
-    $risk->{countries}[ ind('Eastern US') ]{owner}   = 1;
-    $risk->{countries}[ ind('Venezuela') ]{owner}    = 1;
-    $risk->{countries}[ ind('North Africa') ]{owner} = 1;
-    $risk->{countries}[ ind('Iceland') ]{owner}      = 1;
-    $risk->{countries}[ ind('Japan') ]{owner}        = 1;
-    $risk->{countries}[ ind('New Guinea') ]{owner}   = 1;
+    $risk->{public}{countries}[ ind('Eastern US') ]{owner}   = 1;
+    $risk->{public}{countries}[ ind('Venezuela') ]{owner}    = 1;
+    $risk->{public}{countries}[ ind('North Africa') ]{owner} = 1;
+    $risk->{public}{countries}[ ind('Iceland') ]{owner}      = 1;
+    $risk->{public}{countries}[ ind('Japan') ]{owner}        = 1;
+    $risk->{public}{countries}[ ind('New Guinea') ]{owner}   = 1;
 
     $risk->{players}{0}{countries} = 4;
     $risk->{players}{1}{countries} = 11;
@@ -460,24 +460,24 @@ subtest 'produce armies for continents' => sub {
     my $risk = setup();
     clear_board($risk);
 
-    $risk->{countries}[ ind('Eastern US') ]{owner} = 1;
-    $risk->{countries}[ ind('Venezuela') ]{owner}  = 1;
-    $risk->{countries}[ ind('New Guinea') ]{owner} = 1;
+    $risk->{public}{countries}[ ind('Eastern US') ]{owner} = 1;
+    $risk->{public}{countries}[ ind('Venezuela') ]{owner}  = 1;
+    $risk->{public}{countries}[ ind('New Guinea') ]{owner} = 1;
 
-    $risk->{countries}[ ind('Iceland') ]{owner}         = 1;
-    $risk->{countries}[ ind('Southern Europe') ]{owner} = 1;
-    $risk->{countries}[ ind('Ukraine') ]{owner}         = 1;
-    $risk->{countries}[ ind('Scandinavia') ]{owner}     = 1;
-    $risk->{countries}[ ind('Great Britain') ]{owner}   = 1;
-    $risk->{countries}[ ind('Western Europe') ]{owner}  = 1;
-    $risk->{countries}[ ind('Northern Europe') ]{owner} = 1;
+    $risk->{public}{countries}[ ind('Iceland') ]{owner}         = 1;
+    $risk->{public}{countries}[ ind('Southern Europe') ]{owner} = 1;
+    $risk->{public}{countries}[ ind('Ukraine') ]{owner}         = 1;
+    $risk->{public}{countries}[ ind('Scandinavia') ]{owner}     = 1;
+    $risk->{public}{countries}[ ind('Great Britain') ]{owner}   = 1;
+    $risk->{public}{countries}[ ind('Western Europe') ]{owner}  = 1;
+    $risk->{public}{countries}[ ind('Northern Europe') ]{owner} = 1;
 
-    $risk->{countries}[ ind('Egypt') ]{owner}        = 2;
-    $risk->{countries}[ ind('Congo') ]{owner}        = 2;
-    $risk->{countries}[ ind('Madagascar') ]{owner}   = 2;
-    $risk->{countries}[ ind('South Africa') ]{owner} = 2;
-    $risk->{countries}[ ind('East Africa') ]{owner}  = 2;
-    $risk->{countries}[ ind('North Africa') ]{owner} = 2;
+    $risk->{public}{countries}[ ind('Egypt') ]{owner}        = 2;
+    $risk->{public}{countries}[ ind('Congo') ]{owner}        = 2;
+    $risk->{public}{countries}[ ind('Madagascar') ]{owner}   = 2;
+    $risk->{public}{countries}[ ind('South Africa') ]{owner} = 2;
+    $risk->{public}{countries}[ ind('East Africa') ]{owner}  = 2;
+    $risk->{public}{countries}[ ind('North Africa') ]{owner} = 2;
 
     $risk->{states}{PLAYING}->generate_armies($risk);
     broadcast( $risk, { cmd => 'army timer' } );
@@ -487,20 +487,20 @@ subtest 'produce armies for continents' => sub {
     $p3->got( { armies => 6 },  '3 + Africa(3) = 6' );
 
     clear_board($risk);
-    $risk->{countries}[ ind('Iceland') ]{owner}      = 2;
-    $risk->{countries}[ ind('North Africa') ]{owner} = 1;
-    $risk->{countries}[ ind('South Africa') ]{owner} = 1;
-    $risk->{countries}[ ind('Japan') ]{owner}        = 1;
+    $risk->{public}{countries}[ ind('Iceland') ]{owner}      = 2;
+    $risk->{public}{countries}[ ind('North Africa') ]{owner} = 1;
+    $risk->{public}{countries}[ ind('South Africa') ]{owner} = 1;
+    $risk->{public}{countries}[ ind('Japan') ]{owner}        = 1;
 
-    $risk->{countries}[ ind('Brazil') ]{owner}    = 1;
-    $risk->{countries}[ ind('Venezuela') ]{owner} = 1;
-    $risk->{countries}[ ind('Argentina') ]{owner} = 1;
-    $risk->{countries}[ ind('Peru') ]{owner}      = 1;
+    $risk->{public}{countries}[ ind('Brazil') ]{owner}    = 1;
+    $risk->{public}{countries}[ ind('Venezuela') ]{owner} = 1;
+    $risk->{public}{countries}[ ind('Argentina') ]{owner} = 1;
+    $risk->{public}{countries}[ ind('Peru') ]{owner}      = 1;
 
-    $risk->{countries}[ ind('New Guinea') ]{owner}        = 2;
-    $risk->{countries}[ ind('Indonesia') ]{owner}         = 2;
-    $risk->{countries}[ ind('Western Australia') ]{owner} = 2;
-    $risk->{countries}[ ind('Eastern Australia') ]{owner} = 2;
+    $risk->{public}{countries}[ ind('New Guinea') ]{owner}        = 2;
+    $risk->{public}{countries}[ ind('Indonesia') ]{owner}         = 2;
+    $risk->{public}{countries}[ ind('Western Australia') ]{owner} = 2;
+    $risk->{public}{countries}[ ind('Eastern Australia') ]{owner} = 2;
 
     $risk->{states}{PLAYING}->generate_armies($risk);
     broadcast( $risk, { cmd => 'army timer' } );
@@ -519,8 +519,8 @@ subtest 'win game' => sub {
     );
 
     for my $i ( 0 .. 39 ) {
-        $risk->{countries}[$i]{owner}  = 0;
-        $risk->{countries}[$i]{armies} = 1;
+        $risk->{public}{countries}[$i]{owner}  = 0;
+        $risk->{public}{countries}[$i]{armies} = 1;
     }
 
     $risk->{players}{0}{countries} = 41;
@@ -586,19 +586,19 @@ sub setup {
     $p3->game( { cmd => 'ready' } );
     broadcast( $risk, { cmd   => 'ready' } );
     broadcast( $risk, { cmd   => 'armies' } );
-    broadcast( $risk, { state => 'Placing' } );
+    broadcast( $risk, { cmd => 'placing' } );
     is( $risk->{state}{name}, 'Placing' );
 
     $p1->broadcast( { cmd => 'ready' } );
     $p2->broadcast( { cmd => 'ready' } );
     $p3->game( { cmd => 'ready' } );
     broadcast( $risk, { cmd   => 'ready' } );
-    broadcast( $risk, { state => 'Playing' } );
+    broadcast( $risk, { cmd => 'playing' } );
     is( $risk->{state}{name}, 'Playing' );
 
     for my $i ( 0 .. 2 ) {
-        $risk->{countries}[$i]{owner}   = $i;
-        $risk->{countries}[$i]{armies}  = 1;
+        $risk->{public}{countries}[$i]{owner}   = $i;
+        $risk->{public}{countries}[$i]{armies}  = 1;
         $risk->{players}{$i}{countries} = 14;
     }
 
@@ -616,8 +616,8 @@ sub clear_board {
 
     #This is a completely invalid state, but useful
     for my $i ( 0 .. 41 ) {
-        $risk->{countries}[$i]{owner}  = 0;
-        $risk->{countries}[$i]{armies} = 1;
+        $risk->{public}{countries}[$i]{owner}  = 0;
+        $risk->{public}{countries}[$i]{armies} = 1;
     }
     for my $p ( values %{ $risk->{players} } ) {
         $p->{countries} = 1;

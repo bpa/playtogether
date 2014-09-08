@@ -40,8 +40,8 @@ sub on_enter_state {
     my @indexes    = shuffle( 0 .. $countries - 1 );
     for my $i (@indexes) {
         my $p = $players[$player_ind];
-        $game->{countries}[$i]{armies} = 1;
-        $game->{countries}[$i]{owner}  = $p->{public}{id};
+        $game->{public}{countries}[$i]{armies} = 1;
+        $game->{public}{countries}[$i]{owner}  = $p->{public}{id};
         $p->{private}{armies}--;
         $p->{countries}++;
         $player_ind = ++$player_ind % @players;
@@ -58,7 +58,7 @@ sub on_enter_state {
     if ( defined $dummy ) {
         $dummy->{ready} = 1;
         while ( $dummy->{private}{armies} ) {
-            for my $c ( @{ $game->{countries} } ) {
+            for my $c ( @{ $game->{public}{countries} } ) {
                 if ( $c->{owner} eq 'd' ) {
                     $dummy->{private}{armies}--;
                     $c->{armies}++;
@@ -68,7 +68,7 @@ sub on_enter_state {
         }
     }
 
-    $game->broadcast( state => { state => 'Placing', countries => $game->{countries} } );
+    $game->broadcast( placing => { countries => $game->{public}{countries} } );
 
 }
 

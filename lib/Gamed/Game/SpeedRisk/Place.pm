@@ -11,9 +11,9 @@ sub on_place {
       unless looks_like_number( $message->{country} );
     my $c = $message->{country};
     $player->err("Invalid country") && return
-      unless 0 <= $c && $c <= $#{ $game->{countries} };
+      unless 0 <= $c && $c <= $#{ $game->{public}{countries} };
 
-    my $country = $game->{countries}[$c];
+    my $country = $game->{public}{countries}[$c];
     $player->err("Not owner") && return
       unless $country->{owner} eq $player->{in_game_id};
 
