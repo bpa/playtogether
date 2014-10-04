@@ -15,6 +15,12 @@ on ready => sub {
 	}
 };
 
+on placing => sub {
+	for my $p (values %{ $status{players} } ) {
+		$p->{public}{ready} = 0;
+	}
+};
+
 on quit => sub {
 	cmd 'quit';
 	%status = ();

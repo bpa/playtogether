@@ -13,8 +13,8 @@ use List::Util 'max';
 
 my $game_dir = "lib/Gamed/public/g/SpeedRisk";
 write_theme_json( read_themes() );
-make_themes('Classic');
-make_themes('Ultimate');
+#make_themes('Classic');
+#make_themes('Ultimate');
 
 sub make_themes {
     my $type  = shift;
@@ -72,7 +72,7 @@ sub write_theme_json {
 		while (my ($k, $v) = each %$theme) {
 			$info{$k} = $v if $k =~ /text/ || $k =~ /-[xy]/;
 		}
-		$data{$theme->{name}} = \%info;
+		$data{$theme->{id}} = \%info;
 	}
 	write_file("$game_dir/themes.json", encode_json(\%data));
 }

@@ -17,7 +17,7 @@ sub on_place {
     $player->err("Not owner") && return
       unless $country->{owner} eq $player->{in_game_id};
 
-    my $armies = $message->{armies} || 0;
+    my $armies = int($message->{armies} || 0);
     $player->err("Invalid armies") && return
       unless looks_like_number($armies);
     $player->err("Not enough armies") && return
