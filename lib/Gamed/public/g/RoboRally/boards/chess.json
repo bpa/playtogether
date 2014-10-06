@@ -1,0 +1,27 @@
+{
+   "name" : "Chess",
+   "width" : 12,
+   "height" : 12,
+   "author": "WotC",
+   "date": 2005,
+   "tiles": [
+   [{},{},{"w":1},{},{"w":1},{},{},{"w":1},{},{"w":1},{},{"t":"wrench"}],
+   [{},{"t":"conveyor2r","o":"e"},{"t":"conveyor2","o":"e"},{"t":"conveyor2","o":"e","w":4},{"t":"conveyor2","o":"e"},{"t":"conveyor2","o":"e","w":4},{"t":"conveyor2","o":"e","w":4},{"t":"conveyor2","o":"e"},{"t":"conveyor2","o":"e","w":4},{"t":"conveyor2","o":"e"},{"t":"conveyor2r","o":"s"},{}],
+
+   [{"w":8},{"t":"conveyor2"},{"t":"conveyor","o":"e"},{},{"t":"conveyor","o":"e"},{},{"t":"conveyor","o":"w"},{},{"t":"conveyor","o":"w"},{},{"t":"conveyor2","o":"s"},{"w":2}],
+   [{},{"t":"conveyor2"},{},{"t":"pit"},{},{"t":"conveyor","o":"e"},{},{"t":"conveyor","o":"w"},{},{"t":"conveyor","o":"w"},{"t":"conveyor2","o":"s"},{}],
+
+   [{"w":8},{"t":"conveyor2"},{"t":"conveyor","o":"e"},{},{"t":"conveyor","o":"e"},{},{"t":"pit"},{},{"t":"conveyor","o":"w"},{},{"t":"conveyor2","o":"s"},{"w":2}],
+   [{},{"t":"conveyor2"},{},{"t":"conveyor","o":"e"},{},{"t":"upgrade"},{},{"t":"conveyor","o":"w"},{},{"t":"conveyor","o":"w"},{"t":"conveyor2","o":"s"},{}],
+
+   [{},{"t":"conveyor2","w":8},{"t":"conveyor","o":"e"},{},{"t":"conveyor","o":"e"},{},{"t":"upgrade"},{},{"t":"pit","o":"w"},{"w":2},{"t":"conveyor2","o":"s"},{}],
+   [{},{"t":"conveyor2"},{},{"t":"conveyor","o":"e"},{},{"t":"pit"},{},{"t":"conveyor","o":"w"},{},{"t":"conveyor","o":"w"},{"t":"conveyor2","o":"s"},{}],
+
+   [{},{"t":"conveyor2"},{"t":"conveyor","o":"e","w":8},{},{"t":"conveyor","o":"e"},{},{"t":"conveyor","o":"e"},{},{"t":"conveyor","o":"w"},{"w":2},{"t":"conveyor2","o":"s"},{}],
+   [{},{"t":"conveyor2"},{},{"t":"conveyor","o":"e"},{},{"t":"conveyor","o":"e"},{},{"t":"conveyor","o":"w"},{},{"t":"conveyor","o":"w"},{"t":"conveyor2","o":"s"},{}],
+
+   [{},{"t":"conveyor2r"},{"t":"conveyor2","o":"w"},{"t":"conveyor2","o":"w","w":1},{"t":"conveyor2","o":"w"},{"t":"conveyor2","o":"w","w":1},{"t":"conveyor2","o":"w","w":1},{"t":"conveyor2","o":"w"},{"t":"conveyor2","o":"w","w":1},{"t":"conveyor2","o":"w"},{"t":"conveyor2r","o":"w"},{}],
+   [{"t":"wrench"},{},{"w":4},{},{"w":4},{},{},{"w":4},{},{"w":4},{},{}]
+
+   ]
+}

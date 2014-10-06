@@ -1,9 +1,14 @@
 #! /bin/sh
 
 bots=`ls *.yaml`
+if [ "$#" -gt 1 ]; then
+	n=$2
+else
+	n=4
+fi
 c=0
 for b in `ls *.yaml`; do
-if [ $c -lt 4 ]; then
+if [ $c -lt $n ]; then
 	./$1 localhost ${b%.yaml} &
 	sleep 1
 	c=`expr $c + 1`

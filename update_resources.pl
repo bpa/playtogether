@@ -12,9 +12,10 @@ use File::Basename;
 use List::Util 'max';
 
 my $game_dir = "lib/Gamed/public/g/SpeedRisk";
-write_theme_json( read_themes() );
+#write_theme_json( read_themes() );
 #make_themes('Classic');
 #make_themes('Ultimate');
+pack_image_dir("resources/RoboRally", "lib/Gamed/public/g/RoboRally", "images");
 
 sub make_themes {
     my $type  = shift;
@@ -114,6 +115,24 @@ sub make_themed_country {
 	}
 	$image->Quantize(colorspace => 'rgb');
 	return wrap_image($image, $theme . "_" . $country->{name});
+}
+
+sub pack_image_dir {
+	my ($source, $dest, $name) = @_;
+    opendir( my $dh, $source ) || die "can't opendir $source: $!";
+    my @images;
+	for my $img (grep { !/^\./ && /\.png$/ } readdir($dh)) {
+		eval {
+			my $image = Image::Magick->new;
+			$image->Read("$source/$img", );
+			my ($base) = $img =~ /([^\/]+).png/;
+			push @images, wrap_image($image, $base);
+		};
+		print "Error reading image '$source/$img': $@\n" if $@;
+	}
+    closedir $dh;
+
+	pack_sheet( $dest, $name, \@images );
 }
 
 sub wrap_image {
