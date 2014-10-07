@@ -20,7 +20,7 @@ use Gamed::States {
 
 on 'create' => sub {
     my ( $self, $player, $msg ) = @_;
-    $msg->{course} ||= 'Checkmate';
+    $msg->{course} ||= 'checkmate';
     $self->{public}{course} = Gamed::Game::RoboRally::Course->new( $msg->{course} );
     $self->{min_players}    = 2;
     $self->{max_players}    = 8;
