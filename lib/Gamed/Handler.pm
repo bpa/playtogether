@@ -26,8 +26,13 @@ sub after {
 
 sub _install {
     my ( $when, $cmd, $code ) = @_;
-    my $pkg = caller(1);
-    $handler{$pkg}{$when}{$cmd} = $code;
+	my $pkg = caller(1);
+	if (ref($code) eq 'CODE') {
+		$handler{$pkg}{$when}{$cmd} = $code;
+	}
+	else {
+		$handler{$pkg}{$when}{$cmd} = $handler{$code}{$when}{$cmd};
+	}
 }
 
 sub handle {
@@ -40,8 +45,7 @@ sub handle {
 sub _handle {
     my ( $pkg, $obj, $player, $when, $msg ) = @_;
     *isa = *{"$pkg\::ISA"};
-    if (@isa) {
-        my $parent = $isa[0];
+    for my $parent (@isa) {
         _handle( $parent, $obj, $player, $when, $msg );
     }
     my $name = $player->{user} ? $player->{user}{name} : 'undef';
@@ -49,7 +53,7 @@ sub _handle {
     for my $cmd ( $msg->{cmd}, '*' ) {
         #print( $pkg, " $when ", $cmd, " ($name)\n" ) if $p->{$cmd};
 		my $player_data = exists $player->{game}{players} ? $player->{game}{players}{$player->{in_game_id}} : undef;
-        $p->{$cmd}( $obj, $player, $msg, $player_data ) if $p->{$cmd};
+        $p->{$cmd}( $obj, $player, $msg, $player_data ) if $p && $p->{$cmd};
     }
     _handle( ref( $obj->{state} ), $obj->{state}, $player, $when, $msg )
       if defined $obj->{state} && ref($obj) eq $pkg;

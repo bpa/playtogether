@@ -2,7 +2,6 @@ package Gamed::Game::SpeedRisk::Playing;
 
 use AnyEvent;
 use Gamed::Handler;
-use Gamed::Game::SpeedRisk::Place;
 use parent 'Gamed::State';
 
 sub new {
@@ -58,7 +57,7 @@ sub generate_armies {
     }
 }
 
-on 'place' => \&Gamed::Game::SpeedRisk::Place::on_place;
+on 'place' => 'Gamed::Game::SpeedRisk::Placing';
 
 on 'move' => sub {
     my ( $self, $player, $message ) = @_;

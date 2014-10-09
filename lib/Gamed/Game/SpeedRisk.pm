@@ -3,8 +3,8 @@ package Gamed::Game::SpeedRisk;
 use File::Basename;
 use File::Spec::Functions 'catdir';
 use Gamed::Handler;
-use Gamed::Game::SpeedRisk::Playing;
 use Gamed::Game::SpeedRisk::Placing;
+use Gamed::Game::SpeedRisk::Playing;
 
 use Gamed::Handler;
 use parent 'Gamed::Game';
