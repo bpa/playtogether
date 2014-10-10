@@ -12,8 +12,11 @@ sub new {
 }
 
 sub on_enter_state {
-    my $self = shift;
-    my $game = $self->{game};
+    my ($self, $game) = @_;
+
+	for my $p ( values %{ $game->{players} } ) {
+		$p->{public}{damage} = 0;
+	}
 
     $game->change_state( $self->{next} );
 }

@@ -21,7 +21,7 @@ sub import {
 
 sub after_star {
     my ( $game, $player, $msg ) = @_;
-    if ( exists $game->{_change_state} ) {
+    while ( exists $game->{_change_state} ) {
         my $state_name = delete $game->{_change_state};
         my $state      = $game->{states}{$state_name};
         die "No state '$state_name' found\n" unless defined $state;

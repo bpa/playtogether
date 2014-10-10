@@ -1,5 +1,6 @@
 package Gamed::Game::RoboRally;
 
+use Gamed::Game::RoboRally::Decks;
 use Gamed::Game::RoboRally::Joining;
 use Gamed::Game::RoboRally::Setup;
 use Gamed::Game::RoboRally::Programming;
@@ -20,6 +21,7 @@ on 'create' => sub {
     my ( $self, $player, $msg ) = @_;
     $msg->{course} ||= 'checkmate';
     $self->{public}{course} = Gamed::Game::RoboRally::Course->new( $msg->{course} );
+	$self->{movement_cards} = Gamed::Game::RoboRally::Decks->new('movement');
     $self->{min_players}    = 2;
     $self->{max_players}    = 8;
 

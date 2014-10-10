@@ -10,7 +10,12 @@ my %TYPE = (
 sub build {
     my ( $self, $type ) = @_;
     $type ||= 'full';
-    $self->{type} = exists $TYPE{$type} ? $type : 'normal';
+    $self->{type} = exists $TYPE{$type} ? $type : 'movement';
+}
+
+sub generate_cards {
+	my $self = shift;
+	return $TYPE{$self->{type}}($self);
 }
 
 sub generate_movement_cards {
