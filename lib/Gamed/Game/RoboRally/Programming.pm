@@ -15,11 +15,49 @@ sub on_enter_state {
 
     $game->{movement_cards}->reset->shuffle;
     for my $p ( values %{ $game->{players} } ) {
+		$p->{locked} = 0;
         my $cards = 9 - $p->{public}{damage};
         $p->{private}{cards} = Gamed::Object::Bag->new( $game->{movement_cards}->deal($cards) );
         $p->{client}->send( programming => { cards => $p->{private}{cards} } );
     }
 }
+
+on 'program' => sub {
+    my ( $self, $player, $msg, $player_data ) = @_;
+	my @cards;
+    my $game = $self->{game};
+
+	if ($player_data->{locked}) {
+		$player->err('Registers are already programmed');
+		return;
+	}
+
+	$msg->{lock} = 0 unless defined $msg->{lock};
+
+	if (ref($msg->{registers}) ne 'ARRAY' || @{$msg->{registers}} > 5 ) {
+		$player->err("Invalid program");
+		return;
+	}
+
+	for my $r (@{$msg->{registers}}) {
+		if (ref($r) ne 'ARRAY' || @$r > 1 ) {
+			$player->err("Invalid program");
+			return;
+		}
+		push @cards, @$r;
+	}
+
+	for my $c (@cards) {
+		unless ($player_data->{private}{cards}->contains($c)) {
+			$player->err("Invalid card");
+			return;
+		}
+	}
+
+	$player_data->{locked} = $msg->{lock};
+	$player_data->{private}{registers} = $msg->{registers};
+	$player->send( program => { lock => $msg->{lock}  } );
+};
 
 on 'quit' => sub {
     my ( $self, $player, $msg, $player_data ) = @_;

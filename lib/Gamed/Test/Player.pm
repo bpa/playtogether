@@ -104,4 +104,9 @@ sub err {
     $self->{sock}->send( { cmd => 'error', reason => $reason } );
 }
 
+sub reset {
+	my $self = shift;
+	$self->{sock}{packets} = [];
+}
+
 1;
