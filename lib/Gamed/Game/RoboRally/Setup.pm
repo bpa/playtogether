@@ -16,6 +16,7 @@ sub on_enter_state {
 
 	for my $p ( values %{ $game->{players} } ) {
 		$p->{public}{damage} = 0;
+		$p->{public}{locked} = [];
 	}
 
     $game->change_state( $self->{next} );

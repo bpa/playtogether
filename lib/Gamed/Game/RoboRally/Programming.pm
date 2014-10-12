@@ -18,6 +18,7 @@ sub on_enter_state {
 		$p->{locked} = 0;
         my $cards = 9 - $p->{public}{damage};
         $p->{private}{cards} = Gamed::Object::Bag->new( $game->{movement_cards}->deal($cards) );
+        $p->{private}{registers} = [];
         $p->{client}->send( programming => { cards => $p->{private}{cards} } );
     }
 }
@@ -39,12 +40,21 @@ on 'program' => sub {
 		return;
 	}
 
-	for my $r (@{$msg->{registers}}) {
-		if (ref($r) ne 'ARRAY' || @$r > 1 ) {
+	if ($msg->{lock} && @{$msg->{registers}} != 5) {
+    	$player->err('Programming incomplete');
+		return;
+	}
+
+	for my $i ( 0 .. 4 ) {
+		last unless defined $msg->{registers}[$i];
+		my $r = $msg->{registers}[$i];
+		if (ref($r) ne 'ARRAY' 
+		|| locked_but_not_matching( $i, $r, $player_data )
+		|| @$r > 1 ) {
 			$player->err("Invalid program");
 			return;
 		}
-		push @cards, @$r;
+		push @cards, @$r unless $player_data->{public}{locked}[$i];
 	}
 
 	for my $c (@cards) {
@@ -53,7 +63,7 @@ on 'program' => sub {
 			return;
 		}
 	}
-
+	
 	$player_data->{locked} = $msg->{lock};
 	$player_data->{private}{registers} = $msg->{registers};
 	$player->send( program => { lock => $msg->{lock}  } );
@@ -74,5 +84,46 @@ on 'quit' => sub {
           unless grep { !$_->{public}{ready} } values %{ $game->{players} };
     }
 };
+
+sub locked_but_not_matching {
+	my ($i, $register, $player_data) = @_;
+	return unless $player_data->{public}{locked}[$i];
+
+	my $locked = $player_data->{public}{registers}[$i];
+
+	return 1 unless @$register == @$locked;
+	for my $j ( 0 .. $#$register ) {
+		return 1 unless $register->[$j] eq $locked->[$j];
+	}
+
+	return;
+}
+
+sub handle_time_up {
+	my ($self, $game) = @_;
+
+	for my $p ( values %{$game->{players}} ) {
+		next if $p->{locked};
+
+		my $cards = Gamed::Object::Bag->new($p->{private}{cards}->values);
+		for my $i ( 0 .. 4) {
+			$cards->remove($p->{private}{registers}[$i]) unless $p->{public}{locked}[$i];
+		}
+
+		my @available = shuffle $cards->values;
+		for my $i ( 0 .. 4 ) {
+			$p->{private}{registers}[$i] ||= [];
+			my $r = $p->{private}{registers}[$i];
+			if (@$r == 0) { 
+				if ($p->{public}{locked}[$i]) {
+					push @$r, @{$p->{public}{registers}[$i]};
+				}
+				else {
+					push @$r, shift @available;
+				}
+			}
+		}
+	}
+}
 
 1;
