@@ -1,8 +1,8 @@
 package Gamed::Game::RoboRally;
 
 use Gamed::Game::RoboRally::Decks;
+use Gamed::Game::RoboRally::Course;
 use Gamed::Game::RoboRally::Joining;
-use Gamed::Game::RoboRally::Setup;
 use Gamed::Game::RoboRally::Programming;
 use Gamed::Game::RoboRally::Executing;
 
@@ -10,9 +10,8 @@ use Gamed::Handler;
 use parent 'Gamed::Game';
 
 use Gamed::States {
-    WAITING_FOR_PLAYERS => Gamed::Game::RoboRally::Joining->new( next     => 'SETUP' ),
-    SETUP               => Gamed::Game::RoboRally::Setup->new( next       => 'PROGRAMMING' ),
-    PROGRAMMING         => Gamed::Game::RoboRally::Programming->new( next => 'EXECUTING' ),
+    WAITING_FOR_PLAYERS => Gamed::Game::RoboRally::Joining->new,
+    PROGRAMMING         => Gamed::Game::RoboRally::Programming->new,
     EXECUTING           => Gamed::Game::RoboRally::Executing->new,
     GAME_OVER           => Gamed::State::GameOver->new,
 };

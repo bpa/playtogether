@@ -7,7 +7,7 @@ use parent 'Gamed::State';
 
 sub new {
     my ( $pkg, %opts ) = @_;
-    bless { name => 'Programming', next => $opts{next} }, $pkg;
+    bless { name => 'Programming' }, $pkg;
 }
 
 sub on_enter_state {
@@ -80,7 +80,7 @@ on 'quit' => sub {
         $game->change_state('GAME_OVER');
     }
     else {
-        $game->change_state( $self->{next} )
+        $game->change_state( 'EXECUTING' )
           unless grep { !$_->{public}{ready} } values %{ $game->{players} };
     }
 };

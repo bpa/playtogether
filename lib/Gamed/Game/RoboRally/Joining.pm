@@ -9,6 +9,10 @@ use File::Spec::Functions 'catdir';
 use File::Slurp;
 use JSON::Any;
 
+sub new {
+	bless { name => 'Joining' }, shift;
+}
+
 sub on_enter_state {
     my ( $self, $game ) = @_;
     $self->{min} = 2;
@@ -24,6 +28,15 @@ sub on_enter_state {
         };
     }
     closedir($dh);
+}
+
+sub on_leave_state {
+    my ( $self, $game ) = @_;
+
+    for my $p ( values %{ $game->{players} } ) {
+        $p->{public}{damage} = 0;
+        $p->{public}{locked} = [];
+    }
 }
 
 on 'join'         => "Gamed::State::WaitingForPlayers";
@@ -64,7 +77,7 @@ on 'ready' => sub {
     if ( keys %{ $game->{players} } >= $self->{min} ) {
         $player_data->{public}{ready} = 1;
         $game->broadcast( ready => { player => $client->{in_game_id} } );
-        $game->change_state( $self->{next} )
+        $game->change_state('PROGRAMMING')
           unless grep { !$_->{public}{ready} } values %{ $game->{players} };
     }
     else {
