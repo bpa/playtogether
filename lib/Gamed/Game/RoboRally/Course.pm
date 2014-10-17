@@ -1,9 +1,10 @@
 package Gamed::Game::RoboRally::Course;
 
+use strict;
+use warnings;
 use JSON::Any;
 use File::Slurp;
 use File::Spec::Functions 'catdir';
-use Data::Dumper;
 
 my $json = JSON::Any->new;
 
@@ -13,12 +14,24 @@ sub new {
         catdir( $Gamed::public, "g", "RoboRally", "courses", "$name.json" ) );
     die "No course named " . $name . " known" unless $text;
 	my $course = $json->decode($text);
-    my $self = bless { course => $course }, $pkg;
-	$self->check_tile_types;
-	return $self;
+	my %self = ( course => $course );
+	for my $y ( 0 .. $#{$course->{tiles}} ) {
+		my $row = $course->{tiles}[$y];
+		for my $x ( 0 .. $#$row ) {
+			my $tile = $row->[$x];
+			if ($tile->{t} && $tile->{t} =~ /^[1-8]$/) {
+				$self{start}{$tile->{t}} = [$x,$y];
+			}
+		}
+	}
+    bless \%self, $pkg;
 }
 
-sub check_tile_types {
+sub add_bot {
+	my ($self, $bot, $num) = @_;
+	my $loc = $self->{start}{$num};
+	$self->{course}{pieces}{$bot} = {x=>$loc->[0], y => $loc->[1]};
+	$self->{course}{pieces}{"$bot\_archive"} = {x=>$loc->[0], y => $loc->[1]};
 }
 
 sub execute {
@@ -31,6 +44,8 @@ sub execute {
 	$self->do_lasers;
 	$self->do_touches;
 }
+
+sub pieces { return $_[0]->{course}{pieces} }
 
 sub do_movement {
 	my $self = shift;

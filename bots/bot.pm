@@ -66,6 +66,7 @@ my %cmd = (
 	join => sub {
 		my $msg = shift;
 		if ( defined $status{id} ) {
+		print Dumper $msg;
 			$status{players}{ $msg->{player}{id} } = $msg->{player};
 		}
 		else {
@@ -101,7 +102,7 @@ my %cmd = (
     games => sub {
         my $msg = shift;
         die "$game not available on server, quitting.\n" unless grep { /$game/ } @{ $msg->{games} };
-        my @games = grep { $_->{game} eq $game && $_->{state} eq 'WaitingForPlayers' } @{ $msg->{instances} };
+        my @games = grep { $_->{game} eq $game && $_->{status} eq 'Joining' } @{ $msg->{instances} };
         if (@games) {
             print "Joining ", $games[0]{name}, "\n";
             send_cmd join => { name => $games[0]{name} };

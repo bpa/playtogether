@@ -1,12 +1,12 @@
 
 {
-  "name":"Checkmate",
+  "name":"Risky Exchange",
   "difficulty": "easy",
   "length": "short",
   "width": 12,
   "height": 16,
-  "flags":[[7,2],[3,8]],
-  "players": [5,8],
+  "pieces":{"flag_1":{"id":0,"x":7,"y":1},"flag_2":{"id":1,"x":9,"y":7},"flag_3":{"id":2,"x":1,"y":4}},
+  "players": [2,8],
   "tiles": [
      [{"t":"wrench"},{},{"w":1},{"t":"conveyor"},{"w":8},{"t":"conveyor","o":"s"},{"t":"conveyor"},{"w":1},{"t":"conveyor","o":"s"},{"w":1},{"t":"conveyor"},{}],
      [{"t":"conveyor","o":"w"},{},{"t":"pit"},{"t":"conveyor"},{},{"t":"conveyor","o":"s"},{"t":"conveyor"},{},{"t":"conveyor","o":"s"},{},{"t":"gear_r"},{"t":"conveyor","o":"w"}],

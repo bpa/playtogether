@@ -15,6 +15,24 @@ on ready => sub {
 	}
 };
 
+on state_Joining => sub {
+	return if defined $status{players}{$status{id}}{bot};
+	my %bot;
+	for my $p (values %{ $status{players} } ) {
+		$bot{$p->{bot}} = 1;
+	}
+	for my $name (keys %{ $status{public}{bots} } ) {
+		unless ($bot{$name}) {
+			cmd bot => $name;
+		}
+	}
+};
+
+on bot => sub {
+	my $msg = shift;
+	$status{players}{$msg->{player}}{bot} = $msg->{bot};
+};
+
 on quit => sub {
 	cmd 'quit';
 	%status = ();
