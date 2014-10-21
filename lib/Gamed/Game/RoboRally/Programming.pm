@@ -15,7 +15,7 @@ sub on_enter_state {
 
     $game->{movement_cards}->reset->shuffle;
     for my $p ( values %{ $game->{players} } ) {
-		$p->{locked} = 0;
+		$p->{public}{ready} = 0;
         my $cards = 9 - $p->{public}{damage};
         $p->{private}{cards} = Gamed::Object::Bag->new( $game->{movement_cards}->deal($cards) );
         $p->{private}{registers} = [];
@@ -28,20 +28,13 @@ on 'program' => sub {
 	my @cards;
     my $game = $self->{game};
 
-	if ($player_data->{locked}) {
+	if ($player_data->{ready}) {
 		$player->err('Registers are already programmed');
 		return;
 	}
 
-	$msg->{lock} = 0 unless defined $msg->{lock};
-
 	if (ref($msg->{registers}) ne 'ARRAY' || @{$msg->{registers}} > 5 ) {
 		$player->err("Invalid program");
-		return;
-	}
-
-	if ($msg->{lock} && @{$msg->{registers}} != 5) {
-    	$player->err('Programming incomplete');
 		return;
 	}
 
@@ -64,9 +57,23 @@ on 'program' => sub {
 		}
 	}
 	
-	$player_data->{locked} = $msg->{lock};
 	$player_data->{private}{registers} = $msg->{registers};
-	$player->send( program => { lock => $msg->{lock}  } );
+	$player->send( 'program' );
+};
+
+on ready => sub {
+    my ( $self, $player, $msg, $player_data ) = @_;
+    my $game = $self->{game};
+
+	if (grep ( @$_ > 0, @{$player_data->{private}{registers}}) != 5) {
+    	$player->err('Programming incomplete');
+		return;
+	}
+
+    $player_data->{public}{ready} = 1;
+    $game->broadcast( ready => { player => $player->{in_game_id} } );
+    $game->change_state('EXECUTING')
+    	unless grep { !$_->{public}{ready} } values %{ $game->{players} };
 };
 
 on 'quit' => sub {
@@ -103,7 +110,7 @@ sub handle_time_up {
 	my ($self, $game) = @_;
 
 	for my $p ( values %{$game->{players}} ) {
-		next if $p->{locked};
+		next if $p->{ready};
 
 		my $cards = Gamed::Object::Bag->new($p->{private}{cards}->values);
 		for my $i ( 0 .. 4) {
