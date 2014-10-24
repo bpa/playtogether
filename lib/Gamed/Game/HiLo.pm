@@ -1,7 +1,8 @@
-package Gamed::Test::Game::HiLo;
+package Gamed::Game::HiLo;
 
 use Gamed::Handler;
 use parent 'Gamed::Game';
+our $TEST = 1;
 
 on 'create' => sub {
 	my ($game, $player, $msg) = @_;

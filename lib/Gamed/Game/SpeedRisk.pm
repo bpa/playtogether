@@ -1,5 +1,6 @@
 package Gamed::Game::SpeedRisk;
 
+our $DEV = 1;
 use File::Basename;
 use File::Spec::Functions 'catdir';
 use Gamed::Handler;

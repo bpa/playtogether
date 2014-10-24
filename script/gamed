@@ -17,9 +17,8 @@ BEGIN {
         }
         write_file( $secret_file, $str );
     }
-    if ( @ARGV > 0 && $ARGV[0] eq '-test' ) {
-        require Gamed;
-        Gamed->import('Gamed::Test::Game');
-    }
+    require Gamed;
+    $Gamed::TEST = 1 if grep { /-test/ } @ARGV;
+    $Gamed::DEV  = 1 if grep { /-dev/ } @ARGV;
 }
 use Gamed::Mojo;
