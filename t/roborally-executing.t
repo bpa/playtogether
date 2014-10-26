@@ -59,8 +59,8 @@ sub execute {
 		for my $p ( @$setup ) {
 			my @cards = map { [$_] } $rally->{players}{$p->[1]}{private}{cards}->values;
 			unshift @cards, [@$p[4,]];
-			$rally->{players}{$p->[1]}{private}{cards}->add( @$p[4, -1] );
-			$p->[0]->game( { cmd => 'program', registers => [@cards[0,4]] } );
+			$rally->{players}{$p->[1]}{private}{cards}->add( @$p[4,] );
+			$p->[0]->game( { cmd => 'program', registers => [@cards[0..4]] }, { cmd => 'program' } );
 			$p->[0]->game( { cmd => 'ready' } );
 			broadcast( $rally, { cmd => 'ready', player => $p->[0]{in_game_id} }, "Got ready" );
 		}
