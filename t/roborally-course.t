@@ -77,6 +77,30 @@ move(
     before   => { a => { x => 5, y => 14, o => 'n', solid => 1 }, b => { x => 6, y => 14, o => 'n', solid => 1 } },
     final    => { a => { x => 5, y => 13, o => 'n', solid => 1 }, b => { x => 6, y => 12, o => 'n', solid => 1 } } );
 
+move(
+    scenario => 'Move 3 into wall 2 away',
+    register => 1,
+    cards    => [ [ 'a', ['3100'] ] ],
+    actions  => [ [ { piece => 'a', move => 2, dir => "n" } ] ],
+    before   => { a => { x => 2, y => 14, o => 'n', solid => 1 } },
+    final    => { a => { x => 2, y => 12, o => 'n', solid => 1 } } );
+
+move(
+    scenario => 'Move 3 into wall 1 away',
+    register => 1,
+    cards    => [ [ 'a', ['3100'] ] ],
+    actions  => [ [ { piece => 'a', move => 1, dir => "n" } ] ],
+    before   => { a => { x => 2, y => 13, o => 'n', solid => 1 } },
+    final    => { a => { x => 2, y => 12, o => 'n', solid => 1 } } );
+
+move(
+    scenario => "Can't move into wall",
+    register => 1,
+    cards    => [ [ 'a', ['3100'] ] ],
+    actions  => [],
+    before   => { a => { x => 2, y => 12, o => 'n', solid => 1 } },
+    final    => { a => { x => 2, y => 12, o => 'n', solid => 1 } } );
+
 sub move {
     my %a = @_;
     subtest $a{scenario} => sub {
