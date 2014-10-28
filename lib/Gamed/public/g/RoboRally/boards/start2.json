@@ -5,7 +5,7 @@
    "tiles": [
    [{"t":"7"},{},{"w":9},{},{"w":1},{},{},{"w":3},{},{"w":1},{},{"t":"8"}],
    [{},{"w":2,"t":"5"},{"w":2},{},{},{},{},{},{},{"w":8,"t":"6"},{"w":8},{}],
-   [{"t":"conveyor","o":"e"},{"t":"conveyor","o":"e"},{"t":"conveyorr","o":"s"},{"t":"3"},{},{},{"w":8},{},{"t":"4"},{"t":"conveyorl","o":"s"},{"t":"conveyor","o":"w"},{"t":"conveyor","o"}],
-   [{},{},{"t":"conveyorl","o":"e"},{"t":"conveyor","o":"e"},{"t":"conveyor","o":"e"},{"t":"1"},{"t":"2","w":"8"},{"t":"conveyor","o":"w"},{"conveyor","o":"w"},{"t":"conveyorr","o":"w"},{},{}]
+   [{"t":"conveyor","o":1},{"t":"conveyor","o":1},{"t":"conveyorr","o":2},{"t":"3"},{},{},{"w":8},{},{"t":"4"},{"t":"conveyorl","o":2},{"t":"conveyor","o":3},{"t":"conveyor","o"}],
+   [{},{},{"t":"conveyorl","o":1},{"t":"conveyor","o":1},{"t":"conveyor","o":1},{"t":"1"},{"t":"2","w":"8"},{"t":"conveyor","o":3},{"conveyor","o":3},{"t":"conveyorr","o":3},{},{}]
    ]
 }

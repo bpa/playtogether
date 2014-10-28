@@ -7,7 +7,6 @@ use File::Slurp;
 use File::Spec::Functions 'catdir';
 
 my $json       = JSON::Any->new;
-my %directions = ( n => 0, e => 1, s => 2, w => 3, 0 => 'n', 1 => 'e', 2 => 's', 3 => 'w' );
 my %rotations  = ( r => 1, u => 2, l => 3 );
 my @movement   = ( [ 0, -1 ], [ 1, 0 ], [ 0, 1 ], [ -1, 0 ] );
 

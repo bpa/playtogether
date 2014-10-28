@@ -1,5 +1,6 @@
 package Gamed::Game::RoboRally;
 
+our $DEV = 1;
 use Gamed::Game::RoboRally::Decks;
 use Gamed::Game::RoboRally::Course;
 use Gamed::Game::RoboRally::Joining;
