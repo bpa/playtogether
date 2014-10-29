@@ -1,6 +1,10 @@
 package Gamed::Handler;
 
+use strict;
+use warnings;
+
 sub import {
+	no strict 'refs';
 	my $caller = caller(0);
 	*{"$caller\::before"} = \&before;
 	*{"$caller\::on"} = \&on;
@@ -43,6 +47,7 @@ sub handle {
 }
 
 sub _handle {
+	no strict;
     my ( $pkg, $obj, $player, $when, $msg ) = @_;
     *isa = *{"$pkg\::ISA"};
     for my $parent (@isa) {

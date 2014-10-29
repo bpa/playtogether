@@ -7,6 +7,7 @@ use Gamed::State::WaitingForPlayers;
 use File::Basename;
 use File::Spec::Functions 'catdir';
 use File::Slurp;
+use List::Util 'shuffle';
 use JSON::Any;
 
 sub new {
@@ -33,10 +34,16 @@ sub on_enter_state {
 sub on_leave_state {
     my ( $self, $game ) = @_;
 
-    for my $p ( values %{ $game->{players} } ) {
+	my $pos = 1;
+    my @players = shuffle values %{ $game->{players } };
+    for my $p ( @players ) {
         $p->{public}{damage} = 0;
         $p->{public}{locked} = [];
+		$p->{public}{number} = $pos;
+		$game->{public}{course}->add_bot($p->{public}{bot}, $pos);
+		$pos++;
     }
+	$game->broadcast( pieces => { %{$game->{public}{course}->pieces} } );
 }
 
 on 'join'         => "Gamed::State::WaitingForPlayers";

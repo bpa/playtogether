@@ -6,21 +6,21 @@
    "date": 2005,
    "tiles": [
    [{},{},{"w":1},{},{"w":1},{},{},{"w":1},{},{"w":1},{},{"t":"wrench"}],
-   [{},{"t":"conveyor2r","o":"e"},{"t":"conveyor2","o":"e"},{"t":"conveyor2","o":"e","w":4},{"t":"conveyor2","o":"e"},{"t":"conveyor2","o":"e","w":4},{"t":"conveyor2","o":"e","w":4},{"t":"conveyor2","o":"e"},{"t":"conveyor2","o":"e","w":4},{"t":"conveyor2","o":"e"},{"t":"conveyor2r","o":"s"},{}],
+   [{},{"t":"conveyor2r","o":1},{"t":"conveyor2","o":1},{"t":"conveyor2","o":1,"w":4},{"t":"conveyor2","o":1},{"t":"conveyor2","o":1,"w":4},{"t":"conveyor2","o":1,"w":4},{"t":"conveyor2","o":1},{"t":"conveyor2","o":1,"w":4},{"t":"conveyor2","o":1},{"t":"conveyor2r","o":2},{}],
 
-   [{"w":8},{"t":"conveyor2"},{"t":"conveyor","o":"e"},{},{"t":"conveyor","o":"e"},{},{"t":"conveyor","o":"w"},{},{"t":"conveyor","o":"w"},{},{"t":"conveyor2","o":"s"},{"w":2}],
-   [{},{"t":"conveyor2"},{},{"t":"pit"},{},{"t":"conveyor","o":"e"},{},{"t":"conveyor","o":"w"},{},{"t":"conveyor","o":"w"},{"t":"conveyor2","o":"s"},{}],
+   [{"w":8},{"t":"conveyor2"},{"t":"conveyor","o":1},{},{"t":"conveyor","o":1},{},{"t":"conveyor","o":3},{},{"t":"conveyor","o":3},{},{"t":"conveyor2","o":2},{"w":2}],
+   [{},{"t":"conveyor2"},{},{"t":"pit"},{},{"t":"conveyor","o":1},{},{"t":"conveyor","o":3},{},{"t":"conveyor","o":3},{"t":"conveyor2","o":2},{}],
 
-   [{"w":8},{"t":"conveyor2"},{"t":"conveyor","o":"e"},{},{"t":"conveyor","o":"e"},{},{"t":"pit"},{},{"t":"conveyor","o":"w"},{},{"t":"conveyor2","o":"s"},{"w":2}],
-   [{},{"t":"conveyor2"},{},{"t":"conveyor","o":"e"},{},{"t":"upgrade"},{},{"t":"conveyor","o":"w"},{},{"t":"conveyor","o":"w"},{"t":"conveyor2","o":"s"},{}],
+   [{"w":8},{"t":"conveyor2"},{"t":"conveyor","o":1},{},{"t":"conveyor","o":1},{},{"t":"pit"},{},{"t":"conveyor","o":3},{},{"t":"conveyor2","o":2},{"w":2}],
+   [{},{"t":"conveyor2"},{},{"t":"conveyor","o":1},{},{"t":"upgrade"},{},{"t":"conveyor","o":3},{},{"t":"conveyor","o":3},{"t":"conveyor2","o":2},{}],
 
-   [{},{"t":"conveyor2","w":8},{"t":"conveyor","o":"e"},{},{"t":"conveyor","o":"e"},{},{"t":"upgrade"},{},{"t":"pit","o":"w"},{"w":2},{"t":"conveyor2","o":"s"},{}],
-   [{},{"t":"conveyor2"},{},{"t":"conveyor","o":"e"},{},{"t":"pit"},{},{"t":"conveyor","o":"w"},{},{"t":"conveyor","o":"w"},{"t":"conveyor2","o":"s"},{}],
+   [{},{"t":"conveyor2","w":8},{"t":"conveyor","o":1},{},{"t":"conveyor","o":1},{},{"t":"upgrade"},{},{"t":"pit","o":3},{"w":2},{"t":"conveyor2","o":2},{}],
+   [{},{"t":"conveyor2"},{},{"t":"conveyor","o":1},{},{"t":"pit"},{},{"t":"conveyor","o":3},{},{"t":"conveyor","o":3},{"t":"conveyor2","o":2},{}],
 
-   [{},{"t":"conveyor2"},{"t":"conveyor","o":"e","w":8},{},{"t":"conveyor","o":"e"},{},{"t":"conveyor","o":"e"},{},{"t":"conveyor","o":"w"},{"w":2},{"t":"conveyor2","o":"s"},{}],
-   [{},{"t":"conveyor2"},{},{"t":"conveyor","o":"e"},{},{"t":"conveyor","o":"e"},{},{"t":"conveyor","o":"w"},{},{"t":"conveyor","o":"w"},{"t":"conveyor2","o":"s"},{}],
+   [{},{"t":"conveyor2"},{"t":"conveyor","o":1,"w":8},{},{"t":"conveyor","o":1},{},{"t":"conveyor","o":1},{},{"t":"conveyor","o":3},{"w":2},{"t":"conveyor2","o":2},{}],
+   [{},{"t":"conveyor2"},{},{"t":"conveyor","o":1},{},{"t":"conveyor","o":1},{},{"t":"conveyor","o":3},{},{"t":"conveyor","o":3},{"t":"conveyor2","o":2},{}],
 
-   [{},{"t":"conveyor2r"},{"t":"conveyor2","o":"w"},{"t":"conveyor2","o":"w","w":1},{"t":"conveyor2","o":"w"},{"t":"conveyor2","o":"w","w":1},{"t":"conveyor2","o":"w","w":1},{"t":"conveyor2","o":"w"},{"t":"conveyor2","o":"w","w":1},{"t":"conveyor2","o":"w"},{"t":"conveyor2r","o":"w"},{}],
+   [{},{"t":"conveyor2r"},{"t":"conveyor2","o":3},{"t":"conveyor2","o":3,"w":1},{"t":"conveyor2","o":3},{"t":"conveyor2","o":3,"w":1},{"t":"conveyor2","o":3,"w":1},{"t":"conveyor2","o":3},{"t":"conveyor2","o":3,"w":1},{"t":"conveyor2","o":3},{"t":"conveyor2r","o":3},{}],
    [{"t":"wrench"},{},{"w":4},{},{"w":4},{},{},{"w":4},{},{"w":4},{},{}]
 
    ]
