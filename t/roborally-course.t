@@ -106,7 +106,7 @@ move(
     register => 1,
     cards    => [ [ 'a', ['3100'] ] ],
     actions  => [ [ { piece => 'a', move => 1, dir => 3, die => 'fall' } ] ],
-    before   => { a => { x => 13, y => 6, o => 3, solid => 1 } },
+    before   => { a => { x => 9, y => 6, o => 3, solid => 1 } },
     final    => {} );
 
 move(

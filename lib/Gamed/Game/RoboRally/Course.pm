@@ -28,6 +28,8 @@ sub new {
         }
     }
 	$self{tiles} = $course->{tiles};
+	$self{w} = $course->{width};
+	$self{h} = $course->{height};
     bless \%self, $pkg;
 }
 
@@ -71,7 +73,6 @@ sub do_move {
     }
 
     my $dir = $piece->{o};
-
     if ( $move eq 'b' ) {
         $dir  = ( $dir + 2 ) % 4;
         $move = 1;
@@ -90,18 +91,28 @@ sub do_move {
 		last if $tile->{w} & $front;
 		$x += $dx;
 		$y += $dy;
+		if ($x < 0 || $y < 0 || $x >= $self->{w} || $y >= $self->{h}) {
+			$max++;
+			last;
+		}
 		$tile = $self->{tiles}[$y][$x];
-		last unless $tile;
 		last if $tile->{w} & $back;
-		last if $tile->{t} && $tile->{t} eq "pit";
 		$max++;
+		last unless $tile;
+		last if $tile->{t} && $tile->{t} eq "pit";
 	}
 	return unless $max;
 
 	$move = $max if $move > $max;
 	$piece->{x} += $dx * $move;
     $piece->{y} += $dy * $move;
-    return [ { piece => $id, move => $move, dir => $dir } ];
+    my %action = ( piece => $id, move => $move, dir => $dir );
+	if ($piece->{x} < 0 || $piece->{y} < 0 || $piece->{x} >= $self->{w} || $piece->{y} >= $self->{h}
+		|| ($tile->{t} && $tile->{t} eq 'pit')) {
+		delete $self->{pieces}{$id};
+		$action{die} = 'fall';
+	}
+	return [ \%action ];
 }
 
 sub do_express_conveyors {
