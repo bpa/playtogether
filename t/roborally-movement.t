@@ -8,10 +8,10 @@ use Gamed::Game::RoboRally::Course;
 
 my $course = Gamed::Game::RoboRally::Course->new('checkmate');
 $course->add_bot( 'a', 1 );
-is_deeply( $course->{course}{pieces}{a}, { x => 5, y => 14, o => 0, solid => 1 } );
+is_deeply( $course->{course}{pieces}{a}, { x => 5, y => 14, o => 0, solid => 1, id => 'a' } );
 
 $course->add_bot( 'b', 2 );
-is_deeply( $course->{course}{pieces}{b}, { x => 6, y => 14, o => 0, solid => 1 } );
+is_deeply( $course->{course}{pieces}{b}, { x => 6, y => 14, o => 0, solid => 1, id => 'b' } );
 
 move(
     scenario => 'Rotate Right',
@@ -154,8 +154,8 @@ move(
     register => 1,
     cards    => [ [ 'a', ['1100'] ] ],
     actions  => [ [ { piece => 'a', move => 1, dir => 0 }, { piece => 'b', move => 1, dir => 0, die => 'fall' } ] ],
-    before   => { a => { x => 0, y => 1, o => 0, solid => 1 }, b => { x => 1, y => 0, o => 2, solid => 1 } },
-    final => { a => { x => 0, y => 0, o => 0, solid => 1 } } );
+    before   => { a => { x => 0, y => 1, o => 0, solid => 1 }, b => { x => 0, y => 0, o => 2, solid => 1 } },
+    final    => { a => { x => 0, y => 0, o => 0, solid => 1 } } );
 
 move(
     scenario => "Push 3 bots",
@@ -200,13 +200,40 @@ move(
         a => { x => 5, y => 5, o => 2, solid => 1 },
         b => { x => 5, y => 6, o => 1, solid => 1 },
         c => { x => 5, y => 8, o => 3, solid => 1 },
+        d => { x => 5, y => 9, o => 0, solid => 1 },
     },
-    final => { c => { x => 5, y => 0, o => 3, solid => 1 } } );
+    final => {
+		c => { x => 5, y => 8, o => 3, solid => 1 },
+    	d => { x => 5, y => 9, o => 0, solid => 1 } } );
+
+move(
+    scenario => "Push bot column into wall",
+    register => 1,
+    cards    => [ [ 'a', ['3100'] ] ],
+    actions  => [
+	[ { piece => 'a', move => 1, dir => 2 }, { piece => 'b', move => 1, dir => 2 } ] ],
+    before   => {
+        a => { x => 6, y => 5, o => 2, solid => 1 },
+        b => { x => 6, y => 6, o => 1, solid => 1 },
+        c => { x => 6, y => 8, o => 3, solid => 1 },
+        d => { x => 6, y => 9, o => 0, solid => 1 },
+    },
+    final => {
+		a => { x => 6, y => 6, o => 2, solid => 1 },
+		b => { x => 6, y => 7, o => 1, solid => 1 },
+		c => { x => 6, y => 8, o => 3, solid => 1 },
+    	d => { x => 6, y => 9, o => 0, solid => 1 } } );
 
 sub move {
     my %a = @_;
     subtest $a{scenario} => sub {
         my ( %pieces, @bots );
+		while (my ($k, $v) = each(%{$a{before}})) {
+			$v->{id} = $k;
+		}
+		while (my ($k, $v) = each(%{$a{final}})) {
+			$v->{id} = $k;
+		}
         $course->{pieces} = $a{before};
         my $actions = $course->do_movement( $a{register}, $a{cards} );
         is_deeply( $actions, $a{actions} );

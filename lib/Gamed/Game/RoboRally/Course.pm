@@ -5,10 +5,11 @@ use warnings;
 use JSON::Any;
 use File::Slurp;
 use File::Spec::Functions 'catdir';
+use List::Util 'min';
 
 my $json       = JSON::Any->new;
 my %rotations  = ( r => 1, u => 2, l => 3 );
-my @movement   = ( [ 0, -1 ], [ 1, 0 ], [ 0, 1 ], [ -1, 0 ] );
+my @movement   = ( -1, 1, 1, -1 );
 my @walls      = ( 1, 2, 4, 8 );
 
 sub new {
@@ -36,7 +37,7 @@ sub new {
 sub add_bot {
     my ( $self, $bot, $num ) = @_;
     my $loc = $self->{start}{$num};
-    $self->{course}{pieces}{$bot} = { x => $loc->[0], y => $loc->[1], o => 0, solid => 1 };
+    $self->{course}{pieces}{$bot} = { x => $loc->[0], y => $loc->[1], o => 0, solid => 1, id => $bot };
     $self->{course}{pieces}{"$bot\_archive"} = { x => $loc->[0], y => $loc->[1] };
 }
 
@@ -52,6 +53,15 @@ sub execute {
 }
 
 sub pieces { return $_[0]->{course}{pieces} }
+
+sub firstind(&@) {
+	my $f = \&{shift @_};
+	for my $ind ( 0 .. $#_ ) {
+		local $_ = $_[$ind];
+		return $ind if $f->();
+	}
+	return -1;
+}
 
 sub do_movement {
     my ( $self, $register, $cards ) = @_;
@@ -77,42 +87,61 @@ sub do_move {
         $dir  = ( $dir + 2 ) % 4;
         $move = 1;
     }
+	my $d = $movement[$dir];
+	my ($xy, $z) = $dir % 2 == 0 ? qw/y x/ : qw/x y/;
 
-    my $dx = $movement[$dir][0];
-    my $dy = $movement[$dir][1];
+	my @actions;
+	my @pieces = grep { $_->{$z} == $piece->{$z} } values %{ $self->{pieces} };
+	my $loc = $piece->{$xy};
+
+	while ($move) {
+		my $ind = firstind { $_->{$xy} == $loc } @pieces;
+		$loc += $d;
+		if ($ind == -1) {
+			$move--;
+			next;
+		}
+		$piece = splice @pieces, $ind, 1;
+		$move = $self->max_movement($piece->{x}, $piece->{y}, $move, $dir, \@pieces);
+		if ($move) {
+			$piece->{$xy} += $d * $move;
+			my %action = ( piece => $piece->{id}, move => $move, dir => $dir );
+			my $tile = $self->{tiles}[$piece->{y}][$piece->{x}];
+			if ($piece->{x} < 0 || $piece->{y} < 0 || $piece->{x} >= $self->{w} || $piece->{y} >= $self->{h}
+				|| ($tile->{t} && $tile->{t} eq 'pit')) {
+				delete $self->{pieces}{$piece->{id}};
+				$action{die} = 'fall';
+			}
+			push @actions, \%action;
+		}
+	}
+
+	return @actions ? \@actions : ();
+}
+
+sub max_movement {
+	my ($self, $x, $y, $move, $dir, $pieces, $idx) = @_;
 	my $front = $walls[$dir];
 	my $back = $walls[($dir + 2) % 4];
-
-	my $max = 0;
-    my $x = $piece->{x};
-    my $y = $piece->{y};
+	my @d = (0, 0);
+	$d[$dir % 2] = $movement[$dir];
 	my $tile = $self->{tiles}[$y][$x];
-	while ($max < 5) {
-		last if $tile->{w} & $front;
-		$x += $dx;
-		$y += $dy;
+	my ($wall, $pit) = (0, 0);
+	while ($wall < $move || $pit < $move) {
+		return $wall if $tile->{w} & $front;
+		$y += $d[0];
+		$x += $d[1];
 		if ($x < 0 || $y < 0 || $x >= $self->{w} || $y >= $self->{h}) {
-			$max++;
-			last;
+			return min ++$pit, $move;
 		}
 		$tile = $self->{tiles}[$y][$x];
-		last if $tile->{w} & $back;
-		$max++;
-		last unless $tile;
-		last if $tile->{t} && $tile->{t} eq "pit";
+		return $wall if $tile->{w} & $back;
+		$pit++;
+		$wall++ unless grep { $_->{x} == $x && $_->{y} == $y } @$pieces;
+		return min $move, $pit unless $tile;
+		return min $move, $pit if $tile->{t} && $tile->{t} eq "pit";
 	}
-	return unless $max;
-
-	$move = $max if $move > $max;
-	$piece->{x} += $dx * $move;
-    $piece->{y} += $dy * $move;
-    my %action = ( piece => $id, move => $move, dir => $dir );
-	if ($piece->{x} < 0 || $piece->{y} < 0 || $piece->{x} >= $self->{w} || $piece->{y} >= $self->{h}
-		|| ($tile->{t} && $tile->{t} eq 'pit')) {
-		delete $self->{pieces}{$id};
-		$action{die} = 'fall';
-	}
-	return [ \%action ];
+	return $move;
 }
 
 sub do_express_conveyors {
