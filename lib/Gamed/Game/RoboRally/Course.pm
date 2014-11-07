@@ -146,12 +146,65 @@ sub max_movement {
 
 sub do_express_conveyors {
     my ( $self, $register ) = @_;
-    return;
+    return $self->move_conveyors('conveyor2');
 }
 
 sub do_conveyors {
     my ( $self, $register ) = @_;
-    return;
+    return $self->move_conveyors('conveyor');;
+}
+
+sub move_conveyors {
+	my ($self, $type) = @_;
+	my (@new, %actions, @replace);
+	for my $p ( values %{ $self->{pieces} } ) {
+		next if $p->{archive};
+		my $tile = $self->{tiles}[$p->{y}][$p->{x}];
+		my $dir = $tile->{o} || 0;
+		my $x = $p->{x};
+		my $y = $p->{y};
+		if ($tile->{t} && $tile->{t} =~ $type) {
+			next if $tile->{w} & $walls[$dir];
+			my @d = (0, 0);
+			$d[$dir % 2] = $movement[$dir];
+			$y += $d[0];
+			$x += $d[1];
+			if ($x < 0 || $y < 0 || $x >= $self->{w} || $y >= $self->{h}) {
+				$actions{$p->{id}} = { piece => $p->{id}, move => 1, dir => $dir, die => 'fall', x => $x, y => $y };
+				next;
+			}
+			$tile = $self->{tiles}[$y][$x];
+			my $next_dir = $tile->{o} || 0;
+			next if $tile->{t} && $tile->{t} =~ $type && $next_dir == ($dir + 2) % 4;
+			next if $tile->{w} & $walls[($dir + 2) % 4];
+			if ($tile->{t} && $tile->{t} eq "pit") {
+				$actions{$p->{id}} = { piece => $p->{id}, move => 1, dir => $dir, die => 'fall', x => $x, y => $y };
+				next;
+			}
+		}
+		else {
+			$new[$x][$y] ||= $p;
+		}
+		if ($new[$x][$y]) {
+			my $o = $p;
+			my $r = $new[$x][$y];
+			while ($r) {
+				delete $actions{$r->{id}};
+				last if $o->{id} eq $r->{id};
+				$o = $r;
+				$r = $new[$o->{x}][$o->{y}];
+			}
+			next;
+		}
+		$actions{$p->{id}} = { piece => $p->{id}, move => 1, dir => $dir, x => $x, y => $y };
+		$new[$x][$y] = $p;
+	}
+	for my $p ( values %actions ) {
+		my $piece = $self->{pieces}{$p->{piece}};
+		$piece->{x} = delete $p->{x};
+		$piece->{y} = delete $p->{y};
+	}
+	return %actions ? [ values %actions ] : ();
 }
 
 sub do_pushers {
