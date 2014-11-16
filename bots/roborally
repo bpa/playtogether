@@ -38,6 +38,15 @@ on quit => sub {
 	%status = ();
 };
 
+on programming => sub {
+	my $msg = shift;
+	my @registers;
+	for ( 1 .. 5 ) {
+		push (@registers, pop(@cards));
+	}
+	cmd program => { registers => \@registers };
+};
+
 on tick => sub {
 #	if ((time - $status{last_join}) > 300) {
 #		cmd 'ready';
