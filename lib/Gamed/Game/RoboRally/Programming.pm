@@ -58,7 +58,7 @@ on 'program' => sub {
 	}
 	
 	$player_data->{private}{registers} = $msg->{registers};
-	$player->send( 'program' );
+	$player->send( 'program', registers => $msg->{registers} );
 };
 
 on ready => sub {

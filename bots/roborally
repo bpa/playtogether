@@ -8,49 +8,50 @@ use Data::Dumper;
 our $| = 1;
 
 on ready => sub {
-	my $msg = shift;
-	$status{players}{$msg->{player}}{public}{ready} = 1;
-	if (!$status{players}{$status{id}}{public}{ready}) {
-		cmd 'ready';
-	}
+    my $msg = shift;
+    $status{players}{ $msg->{player} }{public}{ready} = 1;
+    if ( !$status{players}{ $status{id} }{public}{ready} ) {
+        cmd 'ready';
+    }
 };
 
 on state_Joining => sub {
-	return if defined $status{players}{$status{id}}{bot};
-	my %bot;
-	for my $p (values %{ $status{players} } ) {
-		$bot{$p->{bot}} = 1;
-	}
-	for my $name (keys %{ $status{public}{bots} } ) {
-		unless ($bot{$name}) {
-			cmd bot => $name;
-		}
-	}
+    return if defined $status{players}{ $status{id} }{bot};
+    my %bot;
+    for my $p ( values %{ $status{players} } ) {
+        $bot{ $p->{bot} } = 1;
+    }
+    for my $name ( keys %{ $status{public}{bots} } ) {
+        unless ( $bot{$name} ) {
+            cmd bot => $name;
+        }
+    }
 };
 
 on bot => sub {
-	my $msg = shift;
-	$status{players}{$msg->{player}}{bot} = $msg->{bot};
+    my $msg = shift;
+    $status{players}{ $msg->{player} }{bot} = $msg->{bot};
 };
 
 on quit => sub {
-	cmd 'quit';
-	%status = ();
+    cmd 'quit';
+    %status = ();
 };
 
 on programming => sub {
-	my $msg = shift;
-	my @registers;
-	for ( 1 .. 5 ) {
-		push (@registers, pop(@cards));
-	}
-	cmd program => { registers => \@registers };
+    my $msg = shift;
+    $status{players}{ $status{id} }{public}{ready} = 0;
+    my @registers;
+    for ( 1 .. 5 ) {
+        push( @registers, [pop( @{ $msg->{cards} } )] );
+    }
+    cmd program => { registers => \@registers };
 };
 
 on tick => sub {
-#	if ((time - $status{last_join}) > 300) {
-#		cmd 'ready';
-#	}
+    #	if ((time - $status{last_join}) > 300) {
+    #		cmd 'ready';
+    #	}
 };
 
 play;
