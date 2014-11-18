@@ -30,7 +30,7 @@ on 'create' => sub {
 
 on 'quit' => sub {
     my ( $self, $client, $msg, $player ) = @_;
-    delete $self->{public}{bots}{ delete $player->{public}{bot} }{player};
+    delete $self->{public}{bots}{ delete $player->{public}{bot} }{player} if $player->{public}{bot};
 };
 
 1;
