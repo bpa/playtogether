@@ -43,7 +43,7 @@ sub execute {
 
 sub do_movement {
     my ( $self, $phase ) = @_;
-	my $current = $self->{register};
+	my $current = $self->{register} - 1;
 	my @register;
 	for my $p ( values %{ $self->{game}{players} } ) {
 		push @register, [ $p->{public}{bot} => $p->{private}{registers}[$current] ];

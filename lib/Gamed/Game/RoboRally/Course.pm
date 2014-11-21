@@ -29,6 +29,7 @@ sub new {
         }
     }
 	$self{tiles} = $course->{tiles};
+	$self{pieces} = $course->{pieces};
 	$self{w} = $course->{width};
 	$self{h} = $course->{height};
     bless \%self, $pkg;
@@ -38,18 +39,7 @@ sub add_bot {
     my ( $self, $bot, $num ) = @_;
     my $loc = $self->{start}{$num};
     $self->{course}{pieces}{$bot} = { x => $loc->[0], y => $loc->[1], o => 0, solid => 1, id => $bot };
-    $self->{course}{pieces}{"$bot\_archive"} = { x => $loc->[0], y => $loc->[1] };
-}
-
-sub execute {
-    my $self = shift;
-    $self->do_movement;
-    $self->do_express_conveyors;
-    $self->do_conveyors;
-    $self->do_pushers;
-    $self->do_gears;
-    $self->do_lasers;
-    $self->do_touches;
+    $self->{course}{pieces}{"$bot\_archive"} = { x => $loc->[0], y => $loc->[1], archive => 1 };
 }
 
 sub pieces { return $_[0]->{course}{pieces} }
@@ -77,6 +67,7 @@ sub do_movement {
 sub do_move {
     my ( $self, $register, $id, $priority, $move, $optional ) = @_;
     my $piece = $self->{pieces}{$id};
+	$piece->{o} ||= 0;
     if ( $move =~ /[rlu]/o ) {
         $piece->{o} = ( $piece->{o} + $rotations{$move} ) % 4;
         return [ { piece => $id, rotate => $move } ];
@@ -120,7 +111,7 @@ sub do_move {
 }
 
 sub max_movement {
-	my ($self, $x, $y, $move, $dir, $pieces, $idx) = @_;
+	my ($self, $x, $y, $move, $dir, $pieces) = @_;
 	my $front = $walls[$dir];
 	my $back = $walls[($dir + 2) % 4];
 	my @d = (0, 0);
