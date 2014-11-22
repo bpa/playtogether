@@ -39,7 +39,7 @@ sub add_bot {
     my ( $self, $bot, $num ) = @_;
     my $loc = $self->{start}{$num};
     $self->{course}{pieces}{$bot} = { x => $loc->[0], y => $loc->[1], o => 0, solid => 1, id => $bot };
-    $self->{course}{pieces}{"$bot\_archive"} = { x => $loc->[0], y => $loc->[1], archive => 1 };
+    $self->{course}{pieces}{"$bot\_archive"} = { x => $loc->[0], y => $loc->[1], archive => 1, id => "$bot\_archive" };
 }
 
 sub pieces { return $_[0]->{course}{pieces} }
@@ -67,6 +67,7 @@ sub do_movement {
 sub do_move {
     my ( $self, $register, $id, $priority, $move, $optional ) = @_;
     my $piece = $self->{pieces}{$id};
+	return () unless $piece;
 	$piece->{o} ||= 0;
     if ( $move =~ /[rlu]/o ) {
         $piece->{o} = ( $piece->{o} + $rotations{$move} ) % 4;
@@ -82,7 +83,7 @@ sub do_move {
 	my ($xy, $z) = $dir % 2 == 0 ? qw/y x/ : qw/x y/;
 
 	my @actions;
-	my @pieces = grep { $_->{$z} == $piece->{$z} } values %{ $self->{pieces} };
+	my @pieces = grep { !defined $_->{archive} && $_->{$z} == $piece->{$z} } values %{ $self->{pieces} };
 	my $loc = $piece->{$xy};
 
 	while ($move) {
@@ -195,7 +196,7 @@ sub move_conveyors {
 		$piece->{x} = delete $p->{x};
 		$piece->{y} = delete $p->{y};
 	}
-	return %actions ? [ values %actions ] : ();
+	return [ values %actions ];
 }
 
 sub do_pushers {
@@ -205,12 +206,12 @@ sub do_pushers {
 
 sub do_gears {
     my ( $self, $register ) = @_;
-    return;
+    return [];
 }
 
 sub do_lasers {
     my ( $self, $register ) = @_;
-    return;
+    return [];
 }
 
 sub TO_JSON {

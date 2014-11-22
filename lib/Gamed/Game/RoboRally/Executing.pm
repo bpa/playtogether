@@ -69,7 +69,7 @@ sub do_touches {
 sub do_end {
     my $self = shift;
 
-    $self->{phase} = 0;
+    $self->{phase} = -1; # The next step after running this is to increment phase on success
 
     if ( ++$self->{register} > 5 ) {
         $self->{game}->change_state("PROGRAMMING");
