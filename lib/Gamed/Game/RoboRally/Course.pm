@@ -201,7 +201,7 @@ sub move_conveyors {
 		$piece->{x} = delete $p->{x};
 		$piece->{y} = delete $p->{y};
 	}
-	return [ values %actions ];
+	return [ [ values %actions ] ];
 }
 
 sub do_pushers {

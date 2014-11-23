@@ -213,7 +213,7 @@ sub run_test {
         $course->{pieces} = $a{before};
         my $actions = $course->$phase();
         @{$actions} = sort { $a->{piece} cmp $b->{piece} } @$actions if $actions;
-        is_deeply( $actions, $a{actions} );
+        is_deeply( $actions, [ $a{actions} ] );
         while ( my ( $piece, $data ) = each %{ $a{final} } ) {
             is_deeply( $course->{pieces}{$piece}, $data, "$piece final position" );
         }
