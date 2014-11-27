@@ -145,13 +145,13 @@ $course->{tiles}[2][10] = { t => 'conveyor',  o => 0, w => 0 };
 conveyor(
     scenario => "Rotate right when coming from right",
     before   => { a => { x => 11, y => 1, o => 0, solid => 1 } },
-    actions  => [ { piece => 'a', move => 1, dir => 3 } ],
+    actions  => [ { piece => 'a', move => 1, dir => 3, rotate => 'r' } ],
     final    => { a => { x => 10, y => 1, o => 1, solid => 1 } } );
 
 conveyor(
     scenario => "Rotate left when coming from left",
     before   => { a => { x => 9, y => 1, o => 0, solid => 1 } },
-    actions  => [ { piece => 'a', move => 1, dir => 1 } ],
+    actions  => [ { piece => 'a', move => 1, dir => 1, rotate => 'l' } ],
     final    => { a => { x => 10, y => 1, o => 3, solid => 1 } } );
 
 conveyor(
@@ -212,7 +212,7 @@ sub run_test {
         }
         $course->{pieces} = $a{before};
         my $actions = $course->$phase();
-        @{$actions} = sort { $a->{piece} cmp $b->{piece} } @$actions if $actions;
+        @{$actions->[0]} = sort { $a->{piece} cmp $b->{piece} } @{$actions->[0]} if $actions->[0];
         is_deeply( $actions, [ $a{actions} ] );
         while ( my ( $piece, $data ) = each %{ $a{final} } ) {
             is_deeply( $course->{pieces}{$piece}, $data, "$piece final position" );

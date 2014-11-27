@@ -6,11 +6,17 @@ use JSON::Any;
 use File::Slurp;
 use File::Spec::Functions 'catdir';
 use List::Util 'min';
+	use Data::Dumper;
 
 my $json       = JSON::Any->new;
 my %rotations  = ( r => 1, u => 2, l => 3 );
+my @rotations  = qw/_ r u l/;
 my @movement   = ( -1, 1, 1, -1 );
 my @walls      = ( 1, 2, 4, 8 );
+my %conveyor_rotation = (
+	'r' => [0, 1, 0, 0],
+	'l' => [0, 0, 0, 3],
+	'^' => [0, 1, 0, 3] );
 
 sub new {
     my ( $pkg, $name ) = @_;
@@ -175,7 +181,9 @@ sub move_conveyors {
 			}
 		}
 		else {
-			$new[$x][$y] ||= $p;
+			if ($p->{solid}) {
+				$new[$x][$y] ||= $p;
+			}
 		}
 		if ($new[$x][$y]) {
 			my @replace = ($p, $new[$x][$y]);
@@ -194,12 +202,24 @@ sub move_conveyors {
 			next;
 		}
 		$actions{$p->{id}} = { piece => $p->{id}, move => 1, dir => $dir, x => $x, y => $y };
-		$new[$x][$y] = $p;
+		if ($tile->{t}) {
+			my ($r) = $tile->{t} =~ /conveyor2?([rl^])$/;		
+			my $table = $r ? $conveyor_rotation{$r} : undef;
+			if ($table) {
+				my $side = (4 + $tile->{o} - $dir) % 4;
+				$actions{$p->{id}}{rotate} = $rotations[$table->[$side]] if $table->[$side];
+				$actions{$p->{id}}{o} = (4 + $p->{o} + $table->[$side]) % 4;
+			}
+		}
+		if ($p->{solid}) {
+			$new[$x][$y] = $p;
+		}
 	}
 	for my $p ( values %actions ) {
 		my $piece = $self->{pieces}{$p->{piece}};
 		$piece->{x} = delete $p->{x};
-		$piece->{y} = delete $p->{y};
+	 	$piece->{y} = delete $p->{y};
+	 	$piece->{o} = delete $p->{o} || $piece->{o};
 	}
 	return [ [ values %actions ] ];
 }
