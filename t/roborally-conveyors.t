@@ -190,7 +190,7 @@ conveyor(
     final   => {
         a      => { x => 3, y => 3, o => 0, solid => 1 },
         b      => { x => 2, y => 3, o => 0, solid => 1 },
-        flag_1 => { x => 1, y => 3, o => 0 } } );
+        flag_1 => { x => 2, y => 3, o => 0 } } );
 
 sub conveyor {
     run_test( 'do_conveyors', @_ );

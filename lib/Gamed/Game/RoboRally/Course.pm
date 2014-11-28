@@ -185,18 +185,15 @@ sub move_conveyors {
 				$new[$x][$y] ||= $p;
 			}
 		}
-		if ($new[$x][$y]) {
+		if ($p->{solid} && $new[$x][$y]) {
 			my @replace = ($p, $new[$x][$y]);
 			while (@replace) {
 				my $o = shift @replace;
 				my $r = $new[$o->{x}][$o->{y}];
 				delete $actions{$o->{id}};
-				while ($r) {
-					delete $actions{$r->{id}};
-					last if $o->{id} eq $r->{id};
-					$new[$o->{x}][$o->{y}] = $o;
-					$o = $r;
-					$r = $new[$o->{x}][$o->{y}];
+				$new[$o->{x}][$o->{y}] = $o;
+				if ($r && $r->{id} ne $o->{id}) {
+					push @replace, $r;
 				}
 			}
 			next;
