@@ -3,7 +3,7 @@
    "width" : 12,
    "height" : 12,
    "tiles": [
-     [{"t":"wrench"},{},{"w":1},{"t":"conveyor"},{"w":8},{"t":"conveyor","o":2},{"t":"conveyor"},{"w":1},{"t":"conveyor","o":2},{"w":1},{"t":"conveyor"},{}],
+     [{"t":"wrench"},{},{"w":1},{"t":"conveyor"},{"w":1},{"t":"conveyor","o":2},{"t":"conveyor"},{"w":1},{"t":"conveyor","o":2},{"w":1},{"t":"conveyor"},{}],
      [{"t":"conveyor","o":3},{},{"t":"pit"},{"t":"conveyor"},{},{"t":"conveyor","o":2},{"t":"conveyor"},{},{"t":"conveyor","o":2},{},{"t":"gear_r"},{"t":"conveyor","o":3}],
      [{"w":8},{},{},{"t":"conveyor"},{},{"t":"conveyor","o":2},{"t":"conveyor"},{},{"t":"conveyor","o":2},{"w":8},{},{"w":2}],
      [{"t":"conveyor","o":1},{"t":"conveyor","o":1},{"t":"conveyor","o":1},{"t":"gear_l"},{},{"t":"conveyor","o":2},{"t":"conveyor"},{},{"t":"conveyor","o":2},{"t":"conveyor2","o":1},{"t":"conveyor2","o":1},{"t":"conveyor2","o":1}],
@@ -14,6 +14,6 @@
 	 [{"t":"conveyor","o":3},{"t":"conveyor","o":3},{"t":"conveyor","o":3},{"t":"gear_l"},{},{"t":"conveyor2","o":2},{"t":"conveyor"},{},{"t":"gear_r"},{"t":"conveyor","o":3},{"t":"conveyor","o":3},{"t":"conveyor","o":3}],
 	 [{"w":8},{},{},{"t":"conveyor"},{},{"t":"conveyor2","o":2},{"t":"conveyor"},{},{"t":"conveyor","o":2},{},{"w":1},{"w":2}],
 	 [{"t":"pit"},{"w":4},{},{"t":"conveyor"},{},{"t":"conveyor2","o":2},{"t":"conveyor"},{},{"t":"conveyor","o":2},{},{"t":"gear_l"},{"t":"conveyor","o":1}],
-	 [{},{},{"w":4},{"t":"conveyor"},{},{"t":"conveyor2","o":2},{},{"w":4},{"t":"conveyor","o":2},{"w":4},{"t":"conveyor"},{"t":"wrench"}]
+	 [{},{},{"w":4},{"t":"conveyor"},{"w":4},{"t":"conveyor2","o":2},{},{"w":4},{"t":"conveyor","o":2},{"w":4},{"t":"conveyor"},{"t":"wrench"}]
    ]
 }
