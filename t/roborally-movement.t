@@ -224,6 +224,21 @@ move(
 		c => { x => 6, y => 8, o => 3, solid => 1 },
     	d => { x => 6, y => 9, o => 0, solid => 1 } } );
 
+move(
+    scenario => "Can't push archive markers or flags",
+    register => 1,
+    cards    => [ [ 'a', ['3100'] ] ],
+    actions  => [ [ { piece => 'a', move => 3, dir => 2 } ] ],
+    before   => {
+        a         => { x => 0, y => 0, o => 2, solid   => 1 },
+        flag_1    => { x => 0, y => 1, o => 1 },
+        a_archive => { x => 0, y => 2, o => 3, archive => 1 },
+    },
+    final => {
+        a         => { x => 0, y => 3, o => 2, solid   => 1 },
+        flag_1    => { x => 0, y => 1, o => 1 },
+        a_archive => { x => 0, y => 2, o => 3, archive => 1 } } );
+
 sub move {
     my %a = @_;
     subtest $a{scenario} => sub {

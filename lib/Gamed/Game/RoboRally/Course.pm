@@ -90,7 +90,7 @@ sub do_move {
 	my ($xy, $z) = $dir % 2 == 0 ? qw/y x/ : qw/x y/;
 
 	my @actions;
-	my @pieces = grep { !defined $_->{archive} && $_->{$z} == $piece->{$z} } values %{ $self->{pieces} };
+	my @pieces = grep { defined $_->{solid} && $_->{$z} == $piece->{$z} } values %{ $self->{pieces} };
 	my $loc = $piece->{$xy};
 
 	while ($move) {
