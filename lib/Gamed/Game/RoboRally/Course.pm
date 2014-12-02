@@ -29,6 +29,7 @@ sub new {
         for my $x ( 0 .. $#$row ) {
             my $tile = $row->[$x];
 			$tile->{w} ||= 0;
+			$tile->{o} ||= 0;
             if ( $tile->{t} && $tile->{t} =~ /^[1-8]$/o ) {
                 $self{start}{ $tile->{t} } = [ $x, $y ];
             }
@@ -158,7 +159,7 @@ sub move_conveyors {
 	for my $p ( values %{ $self->{pieces} } ) {
 		next if $p->{archive};
 		my $tile = $self->{tiles}[$p->{y}][$p->{x}];
-		my $dir = $tile->{o} || 0;
+		my $dir = $tile->{o};
 		my $x = $p->{x};
 		my $y = $p->{y};
 		if ($tile->{t} && $tile->{t} =~ $type) {
@@ -172,7 +173,7 @@ sub move_conveyors {
 				next;
 			}
 			$tile = $self->{tiles}[$y][$x];
-			my $next_dir = $tile->{o} || 0;
+			my $next_dir = $tile->{o};
 			next if $tile->{t} && $tile->{t} =~ $type && $next_dir == ($dir + 2) % 4;
 			next if $tile->{w} & $walls[($dir + 2) % 4];
 			if ($tile->{t} && $tile->{t} eq "pit") {
@@ -181,9 +182,8 @@ sub move_conveyors {
 			}
 		}
 		else {
-			if ($p->{solid}) {
-				$new[$x][$y] ||= $p;
-			}
+			next unless $p->{solid};
+			$new[$x][$y] ||= $p;
 		}
 		if ($p->{solid} && $new[$x][$y]) {
 			my @replace = ($p, $new[$x][$y]);
@@ -238,7 +238,7 @@ sub do_gears {
 		$p->{o} = ($p->{o} + $rotations{$dir}) % 4;
 		push @actions, { piece => $p->{id}, rotate => $dir, o => $p->{o} };
 	}
-    return \@actions;
+    return [ @actions ? \@actions : () ];
 }
 
 sub do_lasers {

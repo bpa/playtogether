@@ -21,6 +21,12 @@ express(
     final => { a => { x => 7, y => 5, o => 0, solid => 1 }, b => { x => 8, y => 6, o => 2, solid => 1 } } );
 
 conveyor(
+    scenario => "Non movement",
+    before   => { a => { x => 0, y => 0, o => 0, solid => 1 }, flag_1 => { x => 0, y => 0 } },
+    actions => [],
+    before   => { a => { x => 0, y => 0, o => 0, solid => 1 }, flag_1 => { x => 0, y => 0 } } );
+
+conveyor(
     scenario => "Conveyed onto floor",
     before   => { a => { x => 7, y => 5, o => 0, solid => 1 } },
     actions => [ { piece => 'a', move => 1, dir => 3 } ],

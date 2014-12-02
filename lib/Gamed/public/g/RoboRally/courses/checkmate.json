@@ -13,7 +13,7 @@
    [{},{"t":"conveyor2"},{},{"t":"pit"},{},{"t":"conveyor","o":1},{},{"t":"conveyor","o":3},{},{"t":"conveyor","o":3},{"t":"conveyor2","o":2},{}],
    [{"w":8},{"t":"conveyor2"},{"t":"conveyor","o":1},{},{"t":"conveyor","o":1},{},{"t":"pit"},{},{"t":"conveyor","o":3},{},{"t":"conveyor2","o":2},{"w":2}],
    [{},{"t":"conveyor2","w":2},{},{"t":"conveyor","o":1},{},{"t":"upgrade"},{},{"t":"conveyor","o":3},{},{"t":"conveyor","o":3},{"t":"conveyor2","o":2,"w":8},{}],
-   [{},{"t":"conveyor2","w":2},{"t":"conveyor","o":1},{},{"t":"conveyor","o":1},{},{"t":"upgrade"},{},{"t":"pit","o":3},{},{"t":"conveyor2","o":8,"w":8},{}],
+   [{},{"t":"conveyor2","w":2},{"t":"conveyor","o":1},{},{"t":"conveyor","o":1},{},{"t":"upgrade"},{},{"t":"pit","o":3},{},{"t":"conveyor2","o":2,"w":8},{}],
    [{"w":8},{"t":"conveyor2"},{},{"t":"conveyor","o":1},{},{"t":"pit"},{},{"t":"conveyor","o":3},{},{"t":"conveyor","o":3},{"t":"conveyor2","o":2},{"w":2}],
    [{},{"t":"conveyor2","w":2},{"t":"conveyor","o":1},{},{"t":"conveyor","o":1},{},{"t":"conveyor","o":3},{},{"t":"conveyor","o":3},{},{"t":"conveyor2","o":2,"w":8},{}],
    [{"w":8},{"t":"conveyor2"},{},{"t":"conveyor","o":1},{},{"t":"conveyor","o":1},{},{"t":"conveyor","o":3},{},{"t":"conveyor","o":3},{"t":"conveyor2","o":2},{"w":2}],
