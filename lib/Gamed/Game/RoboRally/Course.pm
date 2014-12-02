@@ -228,7 +228,17 @@ sub do_pushers {
 
 sub do_gears {
     my ( $self, $register ) = @_;
-    return [];
+	my @actions;
+	for my $p ( values %{ $self->{pieces} } ) {
+		next unless $p->{solid};
+		my $tile = $self->{tiles}[$p->{y}][$p->{x}];
+		next unless $tile->{t};
+		my ($dir) = $tile->{t} =~ /^gear_([rl])/;
+		next unless $dir;
+		$p->{o} = ($p->{o} + $rotations{$dir}) % 4;
+		push @actions, { piece => $p->{id}, rotate => $dir, o => $p->{o} };
+	}
+    return \@actions;
 }
 
 sub do_lasers {
