@@ -9,7 +9,7 @@ $Gamed::TEST = 1;
 Gamed->import;
 use Gamed::Login;
 use Exporter 'import';
-use JSON;
+use JSON::MaybeXS;
 use Mojo::Util;
 our @EXPORT = qw/json text game broadcast broadcasted broadcast_one error/;
 
@@ -23,7 +23,7 @@ Module::Pluggable::Object->new(
 use Test::Builder;
 my $tb = Test::Builder->new;
 
-my $j = JSON->new->convert_blessed;
+my $j = JSON::MaybeXS->new(convert_blessed => 1);
 sub json ($) { $j->encode( $_[0] ) }
 sub hash ($) { $j->decode( $_[0] ) }
 

@@ -14,7 +14,7 @@ WriteMakefile(
         DBI                    => 0,
         'DBD::SQLite'          => 0,
         EV                     => 0,
-        'JSON::Any'            => 0,
+        'JSON::MaybeXS'        => 0,
 		'List::Util'           => 0,
         'Mojolicious::Lite'    => 0,
     },    # e.g., Module::Name => 1.1

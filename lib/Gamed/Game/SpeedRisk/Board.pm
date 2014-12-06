@@ -1,10 +1,10 @@
 package Gamed::Game::SpeedRisk::Board;
 
-use JSON::Any;
+use JSON::MaybeXS;
 use File::Slurp;
 use File::Spec::Functions 'catdir';
 
-my $json = JSON::Any->new;
+my $json = JSON::MaybeXS->new;
 
 sub new {
     my ($pkg, $variant) = @_;

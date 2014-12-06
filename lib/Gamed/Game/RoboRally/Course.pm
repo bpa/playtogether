@@ -2,13 +2,13 @@ package Gamed::Game::RoboRally::Course;
 
 use strict;
 use warnings;
-use JSON::Any;
+use JSON::MaybeXS;
 use File::Slurp;
 use File::Spec::Functions 'catdir';
 use List::Util 'min';
 	use Data::Dumper;
 
-my $json       = JSON::Any->new;
+my $json       = JSON::MaybeXS->new;
 my %rotations  = ( r => 1, u => 2, l => 3 );
 my @rotations  = qw/_ r u l/;
 my @movement   = ( -1, 1, 1, -1 );

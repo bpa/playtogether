@@ -28,7 +28,7 @@ my @phase = (
     [ \&do_phase    => 'gears' ],
     [ \&do_phase    => 'lasers' ],
     [ \&do_touches  => 'touches' ],
-    [ \&do_end      => 'cleanup' ],
+    [ \&do_cleanup  => 'cleanup' ],
 );
 
 sub execute {
@@ -66,7 +66,7 @@ sub do_touches {
     return 1;
 }
 
-sub do_end {
+sub do_cleanup {
     my $self = shift;
 
     $self->{phase} = -1; # The next step after running this is to increment phase on success

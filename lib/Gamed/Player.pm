@@ -1,11 +1,10 @@
 package Gamed::Player;
 
-use JSON::XS;
+use JSON::MaybeXS;
 use Gamed::Login;
 
-my $json = JSON::XS->new;
+my $json = JSON::MaybeXS->new(convert_blessed => 1);
 $json->allow_blessed;
-$json->convert_blessed;
 
 sub new {
     my $pkg = shift;

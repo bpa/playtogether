@@ -8,7 +8,7 @@ use File::Basename;
 use File::Spec::Functions 'catdir';
 use File::Slurp;
 use List::Util 'shuffle';
-use JSON::Any;
+use JSON::MaybeXS;
 
 sub new {
 	bless { name => 'Joining' }, shift;
@@ -19,7 +19,7 @@ sub on_enter_state {
     $self->{min} = 2;
     $self->{max} = 8;
 
-    my $json = JSON::Any->new;
+    my $json = JSON::MaybeXS->new;
     my $dir = catdir( $Gamed::public, "g", "RoboRally", "bots" );
     opendir( my $dh, $dir );
     for my $file ( grep { !/^\./ && /\.json$/ } readdir($dh) ) {
@@ -37,6 +37,7 @@ sub on_leave_state {
 	my $pos = 1;
     my @players = shuffle values %{ $game->{players } };
     for my $p ( @players ) {
+        $p->{public}{lives}  = 3;
         $p->{public}{damage} = 0;
         $p->{public}{locked} = [];
 		$p->{public}{number} = $pos;

@@ -15,11 +15,17 @@ sub on_enter_state {
 
     $game->{movement_cards}->reset->shuffle;
     for my $p ( values %{ $game->{players} } ) {
-		$p->{public}{ready} = 0;
-        my $cards = 9 - $p->{public}{damage};
-        $p->{private}{cards} = Gamed::Object::Bag->new( $game->{movement_cards}->deal($cards) );
-        $p->{private}{registers} = [];
-        $p->{client}->send( programming => { cards => $p->{private}{cards} } );
+		if ($p->{public}{lives} > 0) {
+			$p->{public}{ready} = 0;
+			my $cards = 9 - $p->{public}{damage};
+			$p->{private}{cards} = Gamed::Object::Bag->new( $game->{movement_cards}->deal($cards) );
+		}
+		else {
+			$p->{public}{ready} = 1;
+			$p->{private}{cards} = Gamed::Object::Bag->new();
+		}
+		$p->{private}{registers} = [];
+		$p->{client}->send( programming => { cards => $p->{private}{cards} } );
     }
 }
 

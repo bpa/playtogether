@@ -35,56 +35,56 @@ subtest 'programming' => sub {
 
     my @hand = $rally->{players}{0}{private}{cards}->values;
 
-	#Program only one register
-	program( $rally, $p1, [0]);
+    #Program only one register
+    program( $rally, $p1, [0] );
 
-	#Deprogram
-	program( $rally, $p1, []);
+    #Deprogram
+    program( $rally, $p1, [] );
     is_deeply( $rally->{players}{0}{private}{registers}, [] );
 
-	#Program must be array of arrays
+    #Program must be array of arrays
     $p1->game( { cmd => 'program', registers => [ $hand[0] ] }, { reason => "Invalid program" } );
 
-	#Bad format errors before invalid cards
+    #Bad format errors before invalid cards
     $p1->game( { cmd => 'program', registers => ['3100'] }, { reason => "Invalid program" } );
 
-	#Must hold hard to use
-    $p1->game( { cmd => 'program', registers => [ [ '3100' ] ] }, { reason => "Invalid card" } );
+    #Must hold hard to use
+    $p1->game( { cmd => 'program', registers => [ ['3100'] ] }, { reason => "Invalid card" } );
 
-	#No options to use multiple cards in a register
+    #No options to use multiple cards in a register
     $p1->game( { cmd => 'program', registers => [ [ $hand[0], $hand[1] ] ] }, { reason => "Invalid program" } );
 
-	#Can't lock in programming without all registers programmed
+    #Can't lock in programming without all registers programmed
     $p1->game( { cmd => 'program', registers => [ [ $hand[0] ], [ $hand[1] ], [ $hand[2] ], [ $hand[3] ] ] }, { cmd => 'program' } );
-	$p1->game( { cmd => 'ready' }, { reason => 'Programming incomplete' } );
+    $p1->game( { cmd => 'ready' }, { reason => 'Programming incomplete' } );
 
-	#No phantom 6th register
+    #No phantom 6th register
     $p1->game( { cmd => 'program', registers => [ [ $hand[0] ], [ $hand[1] ], [ $hand[2] ], [ $hand[3] ], [ $hand[4] ], [ $hand[5] ] ] }, { reason => "Invalid program" } );
 
-	#Happy path
-	program( $rally, $p1, [0,1,2,3,4]);
+    #Happy path
+    program( $rally, $p1, [ 0, 1, 2, 3, 4 ] );
 
-	#Lock program
-	program( $rally, $p1, [0,1,2,3,4]);
-	$p1->broadcast( { cmd => 'ready' });
-	program( $rally, $p1, [0], 'Registers are already programmed' );
+    #Lock program
+    program( $rally, $p1, [ 0, 1, 2, 3, 4 ] );
+    $p1->broadcast( { cmd => 'ready' } );
+    program( $rally, $p1, [0], 'Registers are already programmed' );
 
     done();
 };
 
 subtest 'locked registers' => sub {
     my $rally = setup();
-	$p1->reset;
-	$p2->reset;
+    $p1->reset;
+    $p2->reset;
 
-    $rally->{players}{0}{public}{damage} = 5;
-    $rally->{players}{0}{public}{locked} = [ 0,0,0,0,1 ];
+    $rally->{players}{0}{public}{damage}    = 5;
+    $rally->{players}{0}{public}{locked}    = [ 0, 0, 0, 0, 1 ];
     $rally->{players}{0}{public}{registers} = [ [], [], [], [], ['u20'] ];
-    $rally->{players}{1}{public}{damage} = 2;
+    $rally->{players}{1}{public}{damage}    = 2;
 
-	$rally->{state}->on_enter_state($rally);
+    $rally->{state}->on_enter_state($rally);
 
-	# Did p1 get set up correctly?
+    # Did p1 get set up correctly?
     is_deeply( $rally->{players}{0}{private}{registers}, [] );
 
     $p1->got_one(
@@ -95,95 +95,118 @@ subtest 'locked registers' => sub {
         {   cmd   => 'programming',
             cards => sub { $_[0]->values == 7 }
         } );
-	
-	# Add a card to simulate 'Extra Memory' option
+
+    # Add a card to simulate 'Extra Memory' option
     $rally->{players}{0}{private}{cards}->add('b0');
     my @hand = $rally->{players}{0}{private}{cards}->values;
 
-	# Register 5 is locked
-	program( $rally, $p1, [0, 1, 2, 3, 4], { reason => "Invalid program" } );
-	program( $rally, $p1, [0, 1, 2, 3, 'u20']);
-	program( $rally, $p1, [0, 1, 2, 3]);
+    # Register 5 is locked
+    program( $rally, $p1, [ 0, 1, 2, 3, 4 ], { reason => "Invalid program" } );
+    program( $rally, $p1, [ 0, 1, 2, 3, 'u20' ] );
+    program( $rally, $p1, [ 0, 1, 2, 3 ] );
 
-	done();
+    done();
+};
+
+subtest 'dead' => sub {
+    my $rally = setup();
+	for my $p ($p1, $p2, $p3, $p4) {
+    	$p->reset;
+    	$rally->{players}{$p->{in_game_id}}{public}{lives} = $p->{in_game_id};
+	}
+
+    $rally->{state}->on_enter_state($rally);
+
+    is_deeply( $rally->{players}{0}{private}{registers}, [] );
+    $p1->got_one( { cmd   => 'programming', cards => [] } );
+
+    for my $p ( $p2, $p3, $p4 ) {
+        is_deeply( $rally->{players}{ $p->{in_game_id} }{private}{registers}, [] );
+        $p->got_one(
+            {   cmd   => 'programming',
+                cards => sub { $_[0]->values == 9 }
+            } );
+    }
+
+    done();
 };
 
 subtest 'time up' => sub {
     my $rally = setup();
-	$p1->reset;
-	$p2->reset;
-	$p3->reset;
-	$p4->reset;
+    $p1->reset;
+    $p2->reset;
+    $p3->reset;
+    $p4->reset;
 
-    program( $rally, $p1, [0]);
-    program( $rally, $p2, [0,1]);
-    program( $rally, $p3, [0,1,2]);
-    program( $rally, $p4, [0,1,2,3]);
+    program( $rally, $p1, [0] );
+    program( $rally, $p2, [ 0, 1 ] );
+    program( $rally, $p3, [ 0, 1, 2 ] );
+    program( $rally, $p4, [ 0, 1, 2, 3 ] );
 
-	$rally->{state}->handle_time_up($rally);
+    $rally->{state}->handle_time_up($rally);
 
-	for my $p ( $p1, $p2, $p3, $p4 ) {
-		is( @{$rally->{players}{$p->{in_game_id}}{private}{registers}}, 5);
-		my $register = $rally->{players}{$p->{in_game_id}}{private}{registers};
-		for my $i ( 0 .. 4 ) {
-			is (@{$register->[$i]}, 1);
-		}
-	}
+    for my $p ( $p1, $p2, $p3, $p4 ) {
+        is( @{ $rally->{players}{ $p->{in_game_id} }{private}{registers} }, 5 );
+        my $register = $rally->{players}{ $p->{in_game_id} }{private}{registers};
+        for my $i ( 0 .. 4 ) {
+            is( @{ $register->[$i] }, 1 );
+        }
+    }
 
-	done();
+    done();
 };
 
 subtest 'time up with locked' => sub {
     my $rally = setup();
-	$p1->reset;
-	$p2->reset;
+    $p1->reset;
+    $p2->reset;
 
-    $rally->{players}{0}{public}{damage} = 5;
-    $rally->{players}{0}{public}{locked} = [ 0,0,0,0,1 ];
+    $rally->{players}{0}{public}{damage}    = 5;
+    $rally->{players}{0}{public}{locked}    = [ 0, 0, 0, 0, 1 ];
     $rally->{players}{0}{public}{registers} = [ [], [], [], [], ['u20'] ];
 
-	# Simulating a player that has had 'Fire Control' used on them
-    $rally->{players}{1}{public}{locked} = [ 0,0,1,0,0 ];
+    # Simulating a player that has had 'Fire Control' used on them
+    $rally->{players}{1}{public}{locked} = [ 0, 0, 1, 0, 0 ];
     $rally->{players}{1}{public}{registers} = [ [], [], ['3840'], [], [] ];
 
-	$rally->{state}->on_enter_state($rally);
-	$p1->reset;
-	$p2->reset;
+    $rally->{state}->on_enter_state($rally);
+    $p1->reset;
+    $p2->reset;
 
-    program( $rally, $p1, [0]);
-    program( $rally, $p2, [0,1]);
+    program( $rally, $p1, [0] );
+    program( $rally, $p2, [ 0, 1 ] );
 
-	$rally->{state}->handle_time_up($rally);
+    $rally->{state}->handle_time_up($rally);
 
-	is_deeply( $rally->{players}{0}{private}{registers}[4], ['u20'] );
-	is_deeply( $rally->{players}{1}{private}{registers}[2], ['3840'] );
-	is( @{$rally->{players}{0}{private}{registers}}, 5);
-	is( @{$rally->{players}{1}{private}{registers}}, 5);
+    is_deeply( $rally->{players}{0}{private}{registers}[4], ['u20'] );
+    is_deeply( $rally->{players}{1}{private}{registers}[2], ['3840'] );
+    is( @{ $rally->{players}{0}{private}{registers} }, 5 );
+    is( @{ $rally->{players}{1}{private}{registers} }, 5 );
 
-	done();
+    done();
 };
 
 sub program {
-	my ($rally, $player, $cards, $reason) = @_;
+    my ( $rally, $player, $cards, $reason ) = @_;
     local $Test::Builder::Level = $Test::Builder::Level + 1;
-    my @hand = $rally->{players}{$player->{in_game_id}}{private}{cards}->values;
-	my @program;
-	for my $c (@$cards) {
-		if (length($c) > 1) {
-			push @program, [$c];
-		}
-		else {
-			push @program, [$hand[$c]];
-		}
-	}
-    $player->handle( { cmd => 'program', registers => \@program });
-	if ($reason) {
-		$player->got_one($reason);
-	}
-	else {
-		$player->got_one({ cmd => 'program' });
-    	is_deeply( $rally->{players}{$player->{in_game_id}}{private}{registers}, \@program );
-	}
+    my @hand = $rally->{players}{ $player->{in_game_id} }{private}{cards}->values;
+    my @program;
+    for my $c (@$cards) {
+        if ( length($c) > 1 ) {
+            push @program, [$c];
+        }
+        else {
+            push @program, [ $hand[$c] ];
+        }
+    }
+    $player->handle( { cmd => 'program', registers => \@program } );
+    if ($reason) {
+        $player->got_one($reason);
+    }
+    else {
+        $player->got_one( { cmd => 'program' } );
+        is_deeply( $rally->{players}{ $player->{in_game_id} }{private}{registers}, \@program );
+    }
 }
 
 sub setup {

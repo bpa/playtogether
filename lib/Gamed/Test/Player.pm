@@ -1,11 +1,11 @@
 package Gamed::Test::Player;
 
-use JSON;
+use JSON::MaybeXS;
 use Data::UUID;
 use Test::Builder;
 use parent 'Gamed::Player';
 
-my $json = JSON->new->convert_blessed;
+my $json = JSON::MaybeXS->new(convert_blessed => 1);
 my $tb   = Test::Builder->new;
 my $uuid = Data::UUID->new;
 

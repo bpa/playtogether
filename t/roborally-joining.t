@@ -20,6 +20,9 @@ subtest 'two players' => sub {
     $p2->game( { cmd => 'ready' } );
     broadcast( $rally, { cmd => 'ready', player => 1 }, "Got ready" );
     is( $rally->{state}{name}, 'Programming' );
+	for my $p ( values %{ $rally->{players} } ) {
+		is( $p->{public}{lives}, 3 );
+	}
 
     done();
 };
