@@ -106,12 +106,12 @@ subtest 'place' => sub {
 
     $p1->game( { cmd => 'place', country => 0, armies => 1 } );
     $p1->got( { cmd => 'armies', armies => 25 } );
-    broadcast( $risk, { cmd => 'country', country => { id => 0, armies => 2, owner => 0 } } );
+    broadcast( $risk, { cmd => 'country', country => { id => 0, armies => 2, owner => '0' } } );
     is( $risk->{players}{0}{private}{armies}, 25 );
 
     $p1->game( { cmd => 'place', country => 0, armies => 5 } );
     $p1->got( { cmd => 'armies', armies => 20 } );
-    broadcast( $risk, { cmd => 'country', country => { id => 0, armies => 7, owner => 0 } } );
+    broadcast( $risk, { cmd => 'country', country => { id => 0, armies => 7, owner => '0' } } );
     is( $risk->{players}{0}{private}{armies}, 20 );
 
     $p1->game( { cmd => 'place', country => 0, armies => -1 }, { cmd => 'error', reason => 'Not enough armies' } );

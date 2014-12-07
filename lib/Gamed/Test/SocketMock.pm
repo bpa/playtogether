@@ -4,6 +4,9 @@ use Test::Builder;
 use Data::Dumper;
 my $tb = Test::Builder->new;
 $Data::Dumper::Terse = 1;
+use JSON::MaybeXS;
+
+my $json = JSON::MaybeXS->new(convert_blessed => 1);
 
 sub new {
     bless {}, shift;
@@ -11,7 +14,7 @@ sub new {
 
 sub send {
     my ( $self, $msg ) = @_;
-    push @{ $self->{packets} }, $msg;
+    push @{ $self->{packets} }, $json->decode($json->encode($msg));
 }
 
 sub got_one {

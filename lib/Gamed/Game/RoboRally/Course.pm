@@ -218,7 +218,7 @@ sub move_conveyors {
 	 	$piece->{y} = delete $p->{y};
 	 	$piece->{o} = delete $p->{o} || $piece->{o};
 	}
-	return [ [ values %actions ] ];
+	return [ %actions ? [ values %actions ] : () ];
 }
 
 sub do_pushers {

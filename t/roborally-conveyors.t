@@ -23,7 +23,7 @@ express(
 conveyor(
     scenario => "Non movement",
     before   => { a => { x => 0, y => 0, o => 0, solid => 1 }, flag_1 => { x => 0, y => 0 } },
-    actions => [],
+    actions => undef,
     before   => { a => { x => 0, y => 0, o => 0, solid => 1 }, flag_1 => { x => 0, y => 0 } } );
 
 conveyor(
@@ -55,7 +55,7 @@ conveyor(
 conveyor(
     scenario => "Can't push bot",
     before   => { a => { x => 6, y => 5, o => 0, solid => 1 }, b => { x => 7, y => 5, o => 2, solid => 1 } },
-    actions  => [],
+    actions  => undef,
     final    => { a => { x => 6, y => 5, o => 0, solid => 1 }, b => { x => 7, y => 5, o => 2, solid => 1 } },
 );
 
@@ -67,7 +67,7 @@ conveyor(
         c => { x => 2, y => 3, o => 1, solid => 1 },
         d => { x => 3, y => 3, o => 3, solid => 1 },
     },
-    actions => [],
+    actions => undef,
     final   => {
         a => { x => 0, y => 3, o => 0, solid => 1 },
         b => { x => 1, y => 3, o => 2, solid => 1 },
@@ -87,7 +87,7 @@ $course->{tiles}[3][3] = { t => 'conveyor', o => 3, w => 0 };
 conveyor(
     scenario => "Won't move onto conveyor moving in opposite direction",
     before   => { a => { x => 2, y => 3, o => 0, solid => 1 } },
-    actions  => [],
+    actions  => undef,
     final    => { a => { x => 2, y => 3, o => 0, solid => 1 } } );
 
 #Add walls to stop movment
@@ -96,13 +96,13 @@ $course->{tiles}[1][10]{w} = 2;
 conveyor(
     scenario => "Won't move through wall in same tile",
     before   => { a => { x => 3, y => 0, o => 0, solid => 1 } },
-    actions  => [],
+    actions  => undef,
     final    => { a => { x => 3, y => 0, o => 0, solid => 1 } } );
 
 conveyor(
     scenario => "Won't move through wall in next tile over",
     before   => { a => { x => 11, y => 1, o => 0, solid => 1 } },
-    actions  => [],
+    actions  => undef,
     final    => { a => { x => 11, y => 1, o => 0, solid => 1 } } );
 
 #Reverse a conveyor so it pushes into a common spot
@@ -110,7 +110,7 @@ $course->{tiles}[5][4]{o} = 1;
 conveyor(
     scenario => "Don't move two bots into the same space",
     before   => { a => { x => 4, y => 5, o => 0, solid => 1 }, b => { x => 5, y => 4, o => 0, solid => 1 } },
-    actions  => [],
+    actions  => undef,
 	final    => { a => { x => 4, y => 5, o => 0, solid => 1 }, b => { x => 5, y => 4, o => 0, solid => 1 } } );
 $course = Gamed::Game::RoboRally::Course->new('risky_exchange');
 
@@ -169,14 +169,14 @@ conveyor(
 conveyor(
     scenario => "No movement when coming from front",
     before   => { a => { x => 10, y => 0, o => 0, solid => 1 } },
-    actions  => [],
+    actions  => undef,
     final    => { a => { x => 10, y => 0, o => 0, solid => 1 } } );
 $course = Gamed::Game::RoboRally::Course->new('risky_exchange');
 
 conveyor(
     scenario => "Archive markers don't move",
     before   => { a => { x => 0, y => 1, o => 0, archive => 1 } },
-    actions  => [],
+    actions  => undef,
     final    => { a => { x => 0, y => 1, o => 0, archive => 1 } } );
 
 conveyor(
@@ -219,7 +219,7 @@ sub run_test {
         $course->{pieces} = $a{before};
         my $actions = $course->$phase();
         @{$actions->[0]} = sort { $a->{piece} cmp $b->{piece} } @{$actions->[0]} if $actions->[0];
-        is_deeply( $actions, [ $a{actions} ] );
+        is_deeply( $actions, [ $a{actions} ? $a{actions} : () ] );
         while ( my ( $piece, $data ) = each %{ $a{final} } ) {
             is_deeply( $course->{pieces}{$piece}, $data, "$piece final position" );
         }

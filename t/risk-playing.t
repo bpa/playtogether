@@ -128,8 +128,8 @@ subtest 'attack with one army' => sub {
         {
             cmd    => 'attack',
             result => [
-                { country => ind('Western Australia'), armies => 5, owner => 0 },
-                { country => ind('New Guinea'),        armies => 4, owner => 1 }
+                { country => ind('Western Australia'), armies => 5, owner => '0' },
+                { country => ind('New Guinea'),        armies => 4, owner => '1' }
             ]
         }
     );
@@ -146,8 +146,8 @@ subtest 'attack with one army' => sub {
         {
             cmd    => 'attack',
             result => [
-                { country => ind('Western Australia'), armies => 4, owner => 0 },
-                { country => ind('New Guinea'),        armies => 4, owner => 1 }
+                { country => ind('Western Australia'), armies => 4, owner => '0' },
+                { country => ind('New Guinea'),        armies => 4, owner => '1' }
             ]
         }
     );
@@ -164,8 +164,8 @@ subtest 'attack with one army' => sub {
         {
             cmd    => 'attack',
             result => [
-                { country => ind('Western Australia'), armies => 3, owner => 0 },
-                { country => ind('New Guinea'),        armies => 4, owner => 1 }
+                { country => ind('Western Australia'), armies => 3, owner => '0' },
+                { country => ind('New Guinea'),        armies => 4, owner => '1' }
             ]
         }
     );
@@ -191,8 +191,8 @@ subtest 'attack order' => sub {
         {
             cmd    => 'attack',
             result => [
-                { country => ind('Western Australia'), armies => 10, owner => 0 },
-                { country => ind('New Guinea'),        armies => 8,  owner => 1 }
+                { country => ind('Western Australia'), armies => 10, owner => '0' },
+                { country => ind('New Guinea'),        armies => 8,  owner => '1' }
             ]
         }
     );
@@ -218,8 +218,8 @@ subtest 'valid attacks with more than one army' => sub {
         {
             cmd    => 'attack',
             result => [
-                { country => ind('Western Australia'), armies => 10, owner => 0 },
-                { country => ind('New Guinea'),        armies => 8,  owner => 1 }
+                { country => ind('Western Australia'), armies => 10, owner => '0' },
+                { country => ind('New Guinea'),        armies => 8,  owner => '1' }
             ]
         }
     );
@@ -236,8 +236,8 @@ subtest 'valid attacks with more than one army' => sub {
         {
             cmd    => 'attack',
             result => [
-                { country => ind('Western Australia'), armies => 9, owner => 0 },
-                { country => ind('New Guinea'),        armies => 7, owner => 1 }
+                { country => ind('Western Australia'), armies => 9, owner => '0' },
+                { country => ind('New Guinea'),        armies => 7, owner => '1' }
             ]
         }
     );
@@ -254,8 +254,8 @@ subtest 'valid attacks with more than one army' => sub {
         {
             cmd    => 'attack',
             result => [
-                { country => ind('Western Australia'), armies => 7, owner => 0 },
-                { country => ind('New Guinea'),        armies => 7, owner => 1 }
+                { country => ind('Western Australia'), armies => 7, owner => '0' },
+                { country => ind('New Guinea'),        armies => 7, owner => '1' }
             ]
         }
     );
@@ -272,8 +272,8 @@ subtest 'valid attacks with more than one army' => sub {
         {
             cmd    => 'attack',
             result => [
-                { country => ind('Western Australia'), armies => 5, owner => 0 },
-                { country => ind('New Guinea'),        armies => 7, owner => 1 }
+                { country => ind('Western Australia'), armies => 5, owner => '0' },
+                { country => ind('New Guinea'),        armies => 7, owner => '1' }
             ]
         }
     );
@@ -402,12 +402,12 @@ subtest 'place' => sub {
     #Normal placement
     $p1->game( { cmd => 'place', country => 0, armies => 1 } );
     $p1->got( { cmd => 'armies', armies => 9 } );
-    broadcast( $risk, { cmd => 'country', country => { id => 0, armies => 2, owner => 0 } } );
+    broadcast( $risk, { cmd => 'country', country => { id => 0, armies => 2, owner => '0' } } );
     is( $risk->{players}{0}{private}{armies}, 9 );
 
     $p1->game( { cmd => 'place', country => 0, armies => 5 } );
     $p1->got( { cmd => 'armies', armies => 4 } );
-    broadcast( $risk, { cmd => 'country', country => { id => 0, armies => 7, owner => 0 } } );
+    broadcast( $risk, { cmd => 'country', country => { id => 0, armies => 7, owner => '0' } } );
     is( $risk->{players}{0}{private}{armies}, 4 );
 
     #Negative armies
@@ -541,14 +541,14 @@ subtest 'win game' => sub {
         {
             cmd    => 'attack',
             result => [
-                { country => ind('Western Australia'), armies => 1, owner => 0 },
-                { country => ind('Eastern Australia'), armies => 8, owner => 0 }
+                { country => ind('Western Australia'), armies => 1, owner => '0' },
+                { country => ind('Eastern Australia'), armies => 8, owner => '0' }
             ]
         }
     );
 
-    broadcast( $risk, { cmd => 'defeated',  player => 1 } );
-    broadcast( $risk, { cmd => 'victory', player => 0 } );
+    broadcast( $risk, { cmd => 'defeated', player => 1 } );
+    broadcast( $risk, { cmd => 'victory',  player => 0 } );
     is( $risk->{state}{name}, 'GameOver' );
 
     done();

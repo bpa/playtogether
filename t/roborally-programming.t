@@ -15,12 +15,12 @@ subtest 'two players' => sub {
     is( $rally->{players}{0}{private}{cards}->values, 9, "player 1 was dealt 9 cards" );
     $p1->got_one(
         {   cmd   => 'programming',
-            cards => sub { $_[0]->values == 9 }
+            cards => sub { @{$_[0]} == 9 }
         } );
     is( $rally->{players}{1}{private}{cards}->values, 9, "player 2 was dealt 9 cards" );
     $p2->got_one(
         {   cmd   => 'programming',
-            cards => sub { $_[0]->values == 9 }
+            cards => sub { @{$_[0]} == 9 }
         } );
 
     done();
@@ -89,11 +89,11 @@ subtest 'locked registers' => sub {
 
     $p1->got_one(
         {   cmd   => 'programming',
-            cards => sub { $_[0]->values == 4 }
+            cards => sub { @{$_[0]} == 4 }
         } );
     $p2->got_one(
         {   cmd   => 'programming',
-            cards => sub { $_[0]->values == 7 }
+            cards => sub { @{$_[0]} == 7 }
         } );
 
     # Add a card to simulate 'Extra Memory' option
@@ -124,7 +124,7 @@ subtest 'dead' => sub {
         is_deeply( $rally->{players}{ $p->{in_game_id} }{private}{registers}, [] );
         $p->got_one(
             {   cmd   => 'programming',
-                cards => sub { $_[0]->values == 9 }
+                cards => sub { @{$_[0]} == 9 }
             } );
     }
 

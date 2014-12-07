@@ -25,7 +25,7 @@ broadcast( $game, { cmd => 'bid' } );
 is( $game->{state}{name}, 'Declaring', 'Ready to start test' );
 
 broadcast( $game, { cmd => 'declaring' } );
-$e->got_one( { nest => bag(qw/1R 14R 13R 12R 11R/) }, 'Nest sent to bid winner' );
+$e->got_one( { nest => sub { bag(@{$_[0]}) eq bag(qw/1R 14R 13R 12R 11R/) } }, 'Nest sent to bid winner' );
 is(
     $game->{players}{1}{private}{cards},
     bag(qw/1R 14R 13R 12R 11R 5G 6G 7G 8G 9G 5R 6R 7R 8R 9R/),

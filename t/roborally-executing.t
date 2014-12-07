@@ -81,7 +81,7 @@ sub execute {
                 my $msg = $setup->[0][0]{sock}{packets}[0];
                 if ( ref($phase) ) {
                 	broadcast( $rally, { cmd => 'execute', phase => $phase->{phase} } );
-                    is_deeply( $msg, $phase );
+                    is_deeply( $phase, $msg );
                 }
                 else {
                 	broadcast( $rally, { cmd => 'execute', phase => $phase } );
