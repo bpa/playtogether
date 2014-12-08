@@ -210,7 +210,7 @@ sub program {
 }
 
 sub setup {
-    my $rally = $p1->create( 'RoboRally', 'test', { course => 'Checkmate' } );
+    my $rally = $p1->create( 'RoboRally', 'test', { course => 'checkmate' } );
     ok( defined $rally->{public}{course}, "public/course is defined" );
     $p2->join('test');
     $p3->join('test');
