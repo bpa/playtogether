@@ -11,26 +11,26 @@ my $course = Gamed::Game::RoboRally::Course->new('risky_exchange');
 conveyor(
     scenario => "Normal conveyor movement",
     before   => { a => { x => 8, y => 5, o => 0, solid => 1 }, b => { x => 7, y => 6, o => 2, solid => 1 } },
-    actions => [ { piece => 'a', move => 1, dir => 3 }, { piece => 'b', move => 1, dir => 1 } ],
-    final => { a => { x => 7, y => 5, o => 0, solid => 1 }, b => { x => 8, y => 6, o => 2, solid => 1 } } );
+    actions  => [ { piece => 'a', move => 1, dir => 3 }, { piece => 'b', move => 1, dir => 1 } ],
+    final    => { a => { x => 7, y => 5, o => 0, solid => 1 }, b => { x => 8, y => 6, o => 2, solid => 1 } } );
 
 express(
     scenario => "Normal express conveyor movement",
     before   => { a => { x => 7, y => 5, o => 0, solid => 1 }, b => { x => 7, y => 6, o => 2, solid => 1 } },
-    actions => [ { piece => 'b', move => 1, dir => 1 } ],
-    final => { a => { x => 7, y => 5, o => 0, solid => 1 }, b => { x => 8, y => 6, o => 2, solid => 1 } } );
+    actions  => [ { piece => 'b', move => 1, dir => 1 } ],
+    final    => { a => { x => 7, y => 5, o => 0, solid => 1 }, b => { x => 8, y => 6, o => 2, solid => 1 } } );
 
 conveyor(
     scenario => "Non movement",
     before   => { a => { x => 0, y => 0, o => 0, solid => 1 }, flag_1 => { x => 0, y => 0 } },
-    actions => undef,
+    actions  => undef,
     before   => { a => { x => 0, y => 0, o => 0, solid => 1 }, flag_1 => { x => 0, y => 0 } } );
 
 conveyor(
     scenario => "Conveyed onto floor",
     before   => { a => { x => 7, y => 5, o => 0, solid => 1 } },
-    actions => [ { piece => 'a', move => 1, dir => 3 } ],
-    final => { a => { x => 6, y => 5, o => 0, solid => 1 } } );
+    actions  => [ { piece => 'a', move => 1, dir => 3 } ],
+    final    => { a => { x => 6, y => 5, o => 0, solid => 1 } } );
 
 conveyor(
     scenario => "Conveyed off board",
@@ -41,16 +41,14 @@ conveyor(
 conveyor(
     scenario => "Two bots move while next to each other",
     before   => { a => { x => 8, y => 5, o => 0, solid => 1 }, b => { x => 9, y => 5, o => 2, solid => 1 } },
-    actions => [ { piece => 'a', move => 1, dir => 3 }, { piece => 'b', move => 1, dir => 3 } ],
-    final => { a => { x => 7, y => 5, o => 0, solid => 1 }, b => { x => 8, y => 5, o => 2, solid => 1 } },
-);
+    actions  => [ { piece => 'a', move => 1, dir => 3 }, { piece => 'b', move => 1, dir => 3 } ],
+    final    => { a => { x => 7, y => 5, o => 0, solid => 1 }, b => { x => 8, y => 5, o => 2, solid => 1 } }, );
 
 conveyor(
     scenario => "Two bots next to eachother move, one onto floor",
     before   => { a => { x => 7, y => 5, o => 0, solid => 1 }, b => { x => 8, y => 5, o => 2, solid => 1 } },
     actions  => [ { piece => 'a', move => 1, dir => 3 }, { piece => 'b', move => 1, dir => 3 } ],
-    final    => { a => { x => 6, y => 5, o => 0, solid => 1 }, b => { x => 7, y => 5, o => 2, solid => 1 } },
-);
+    final    => { a => { x => 6, y => 5, o => 0, solid => 1 }, b => { x => 7, y => 5, o => 2, solid => 1 } }, );
 
 conveyor(
     scenario => "Can't push bot",
@@ -65,15 +63,13 @@ conveyor(
         a => { x => 0, y => 3, o => 0, solid => 1 },
         b => { x => 1, y => 3, o => 2, solid => 1 },
         c => { x => 2, y => 3, o => 1, solid => 1 },
-        d => { x => 3, y => 3, o => 3, solid => 1 },
-    },
+        d => { x => 3, y => 3, o => 3, solid => 1 }, },
     actions => undef,
     final   => {
         a => { x => 0, y => 3, o => 0, solid => 1 },
         b => { x => 1, y => 3, o => 2, solid => 1 },
         c => { x => 2, y => 3, o => 1, solid => 1 },
-        d => { x => 3, y => 3, o => 3, solid => 1 },
-    } );
+        d => { x => 3, y => 3, o => 3, solid => 1 }, } );
 
 $course->{tiles}[0][2] = { t => 'conveyor', o => 2, w => 0 };    #Add a conveyor into a pit
 conveyor(
@@ -91,7 +87,7 @@ conveyor(
     final    => { a => { x => 2, y => 3, o => 0, solid => 1 } } );
 
 #Add walls to stop movment
-$course->{tiles}[0][3]{w} = 1;
+$course->{tiles}[0][3]{w}  = 1;
 $course->{tiles}[1][10]{w} = 2;
 conveyor(
     scenario => "Won't move through wall in same tile",
@@ -111,7 +107,8 @@ conveyor(
     scenario => "Don't move two bots into the same space",
     before   => { a => { x => 4, y => 5, o => 0, solid => 1 }, b => { x => 5, y => 4, o => 0, solid => 1 } },
     actions  => undef,
-	final    => { a => { x => 4, y => 5, o => 0, solid => 1 }, b => { x => 5, y => 4, o => 0, solid => 1 } } );
+    final    => { a => { x => 4, y => 5, o => 0, solid => 1 }, b => { x => 5, y => 4, o => 0, solid => 1 } }
+);
 $course = Gamed::Game::RoboRally::Course->new('risky_exchange');
 
 conveyor(
@@ -190,8 +187,7 @@ conveyor(
     before   => {
         a      => { x => 3, y => 3, o => 0, solid => 1 },
         b      => { x => 2, y => 3, o => 0, solid => 1 },
-        flag_1 => { x => 1, y => 3, o => 0 }
-    },
+        flag_1 => { x => 1, y => 3, o => 0 } },
     actions => [ { piece => 'flag_1', move => 1, dir => 1 } ],
     final   => {
         a      => { x => 3, y => 3, o => 0, solid => 1 },
@@ -218,7 +214,7 @@ sub run_test {
         }
         $course->{pieces} = $a{before};
         my $actions = $course->$phase();
-        @{$actions->[0]} = sort { $a->{piece} cmp $b->{piece} } @{$actions->[0]} if $actions->[0];
+        @{ $actions->[0] } = sort { $a->{piece} cmp $b->{piece} } @{ $actions->[0] } if $actions->[0];
         is_deeply( $actions, [ $a{actions} ? $a{actions} : () ] );
         while ( my ( $piece, $data ) = each %{ $a{final} } ) {
             is_deeply( $course->{pieces}{$piece}, $data, "$piece final position" );

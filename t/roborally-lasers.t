@@ -13,14 +13,12 @@ gears(
     before   => {
         a => { x => 8,  y => 8,  o => 1, solid => 1 },
         b => { x => 9,  y => 9,  o => 2, solid => 1 },
-        c => { x => 10, y => 10, o => 3, solid => 1 },
-    },
+        c => { x => 10, y => 10, o => 3, solid => 1 }, },
     actions => [ { piece => 'a', rotate => 'l' }, { piece => 'c', rotate => 'r' } ],
     final   => {
         a => { x => 8,  y => 8,  o => 0, solid => 1 },
         b => { x => 9,  y => 9,  o => 2, solid => 1 },
-        c => { x => 10, y => 10, o => 0, solid => 1 },
-    } );
+        c => { x => 10, y => 10, o => 0, solid => 1 }, } );
 
 sub gears {
     my (%a) = @_;

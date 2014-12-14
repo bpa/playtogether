@@ -14,30 +14,26 @@ execute(
         [ 'squash_bot',  3, 15, 0, 'r220' ],
         [ 'trundle_bot', 4, 15, 0, 'l210' ],
         [ 'twitch',      5, 15, 0, 'u50' ],
-        [ 'twonky',      6, 14, 0, 'b100' ]
-    ],
+        [ 'twonky',      6, 14, 0, 'b100' ] ],
     [
         {   cmd     => 'execute',
             phase   => 'movement',
             actions => [
-                [ { piece => 'spin_bot',    move => 3, dir => 0 } ],
-                [ { piece => 'hulk_x90',    move => 2, dir => 0 } ],
+                [ { piece => 'spin_bot', move => 3, dir => 0 } ],
+                [ { piece => 'hulk_x90', move => 2, dir => 0 } ],
                 [ { piece => 'squash_bot',  rotate => "r" } ],
                 [ { piece => 'trundle_bot', rotate => "l" } ],
                 [ { piece => 'hammer_bot',  move   => 1, dir => 0 } ],
                 [ { piece => 'twonky',      move   => 1, dir => 2 } ],
-                [ { piece => 'twitch',      rotate => "u" } ] ]
-        },
+                [ { piece => 'twitch',      rotate => "u" } ] ] },
         { cmd => 'execute', actions => [], phase => 'express_conveyors' },
         { cmd => 'execute', actions => [], phase => 'conveyors' },
         { cmd => 'execute', actions => [], phase => 'gears' },
-        { cmd => 'execute', actions => [], phase => 'lasers' },
-    ],
+        { cmd => 'execute', actions => [], phase => 'lasers' }, ],
     [qw/movement express_conveyors conveyors gears lasers/],
     [qw/movement express_conveyors conveyors gears lasers/],
     [qw/movement express_conveyors conveyors gears lasers/],
-    [qw/movement express_conveyors conveyors gears lasers/],
-);
+    [qw/movement express_conveyors conveyors gears lasers/], );
 
 sub execute {
     my ( $course, $scenario, $setup, @expected ) = @_;
@@ -80,11 +76,11 @@ sub execute {
             for my $phase (@$register) {
                 my $msg = $setup->[0][0]{sock}{packets}[0];
                 if ( ref($phase) ) {
-                	broadcast( $rally, { cmd => 'execute', phase => $phase->{phase} } );
+                    broadcast( $rally, { cmd => 'execute', phase => $phase->{phase} } );
                     is_deeply( $phase, $msg );
                 }
                 else {
-                	broadcast( $rally, { cmd => 'execute', phase => $phase } );
+                    broadcast( $rally, { cmd => 'execute', phase => $phase } );
                     is( $msg->{phase}, $phase );
                 }
             }

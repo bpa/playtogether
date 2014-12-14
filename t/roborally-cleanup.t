@@ -5,19 +5,19 @@ subtest 'dead' => sub {
     $p2->reset;
     $p3->reset;
 
-	#First death, due to damage
-    $rally->{players}{0}{public}{locked}    = [ 0, 0, 1, 1, 1 ];
+    #First death, due to damage
+    $rally->{players}{0}{public}{locked} = [ 0, 0, 1, 1, 1 ];
     $rally->{players}{0}{public}{registers} = [ [], [], ['r70'], ['3840'], ['u20'] ];
-    $rally->{players}{0}{public}{damage}    = 10;
+    $rally->{players}{0}{public}{damage} = 10;
     delete $rally->{board}{pieces}{twonky};
 
-	#First death, due to pit
-    $rally->{players}{1}{public}{damage}    = 0;
+    #First death, due to pit
+    $rally->{players}{1}{public}{damage} = 0;
     delete $rally->{board}{pieces}{twitch};
 
-	#Third and final death, due to pit
-    $rally->{players}{2}{public}{damage}    = 4;
-    $rally->{players}{2}{public}{lives}     = 1;
+    #Third and final death, due to pit
+    $rally->{players}{2}{public}{damage} = 4;
+    $rally->{players}{2}{public}{lives}  = 1;
     delete $rally->{board}{pieces}{zoom_bot};
 
     $rally->{state}->on_enter_state($rally);
@@ -32,7 +32,7 @@ subtest 'dead' => sub {
     }
     is( $rally->{players}{2}{public}{lives}, 0 );
     is_deeply( $rally->{players}{2}{private}{registers}, [] );
-    $p3->got_one( { cmd   => 'programming', cards => [] } );
+    $p3->got_one( { cmd => 'programming', cards => [] } );
 
     done();
 };

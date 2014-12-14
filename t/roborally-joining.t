@@ -12,17 +12,18 @@ my $p4 = Gamed::Test::Player->new('4');
 
 subtest 'two players' => sub {
     my $rally = $p1->create( 'RoboRally', 'test', { course => 'checkmate' } );
-	ok( defined $rally->{public}{course}, "public/course is defined");
+    ok( defined $rally->{public}{course}, "public/course is defined" );
     $p2->join('test');
     $p1->broadcast( { cmd => 'bot', 'bot' => 'twonky' } );
     $p1->broadcast( { cmd => 'ready' } );
-    $p2->broadcast( { cmd => 'bot', bot => 'twitch' } );
+    $p2->broadcast( { cmd => 'bot', bot   => 'twitch' } );
     $p2->game( { cmd => 'ready' } );
     broadcast( $rally, { cmd => 'ready', player => 1 }, "Got ready" );
     is( $rally->{state}{name}, 'Programming' );
-	for my $p ( values %{ $rally->{players} } ) {
-		is( $p->{public}{lives}, 3 );
-	}
+
+    for my $p ( values %{ $rally->{players} } ) {
+        is( $p->{public}{lives}, 3 );
+    }
 
     done();
 };
@@ -38,7 +39,7 @@ subtest "Bot choice is final" => sub {
 subtest "Can't be ready until bot chosen" => sub {
     my $rally = $p1->create( 'RoboRally', 'test', { course => 'checkmate' } );
     $p2->join('test');
-    $p1->game( { cmd => 'ready'}, { reason => 'No bot chosen' } );
+    $p1->game( { cmd => 'ready' }, { reason => 'No bot chosen' } );
 
     done();
 };
