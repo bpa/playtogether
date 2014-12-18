@@ -6,17 +6,17 @@ use JSON::MaybeXS;
 use File::Slurp;
 use File::Spec::Functions 'catdir';
 use List::Util 'min';
-	use Data::Dumper;
+use Data::Dumper;
 
-my $json       = JSON::MaybeXS->new;
-my %rotations  = ( r => 1, u => 2, l => 3 );
-my @rotations  = qw/_ r u l/;
-my @movement   = ( -1, 1, 1, -1 );
-my @walls      = ( 1, 2, 4, 8 );
+my $json              = JSON::MaybeXS->new;
+my %rotations         = ( r => 1, u => 2, l => 3 );
+my @rotations         = qw/_ r u l/;
+my @movement          = ( -1, 1, 1, -1 );
+my @walls             = ( 1, 2, 4, 8 );
 my %conveyor_rotation = (
-	'r' => [0, 1, 0, 0],
-	'l' => [0, 0, 0, 3],
-	'^' => [0, 1, 0, 3] );
+    'r' => [ 0, 1, 0, 0 ],
+    'l' => [ 0, 0, 0, 3 ],
+    '^' => [ 0, 1, 0, 3 ] );
 
 sub new {
     my ( $pkg, $name ) = @_;
@@ -28,36 +28,36 @@ sub new {
         my $row = $course->{tiles}[$y];
         for my $x ( 0 .. $#$row ) {
             my $tile = $row->[$x];
-			$tile->{w} ||= 0;
-			$tile->{o} ||= 0;
+            $tile->{w} ||= 0;
+            $tile->{o} ||= 0;
             if ( $tile->{t} && $tile->{t} =~ /^[1-8]$/o ) {
                 $self{start}{ $tile->{t} } = [ $x, $y ];
             }
         }
     }
-	$self{tiles} = $course->{tiles};
-	$self{pieces} = $course->{pieces};
-	$self{w} = $course->{width};
-	$self{h} = $course->{height};
+    $self{tiles}  = $course->{tiles};
+    $self{pieces} = $course->{pieces};
+    $self{w}      = $course->{width};
+    $self{h}      = $course->{height};
     bless \%self, $pkg;
 }
 
 sub add_bot {
     my ( $self, $bot, $num ) = @_;
     my $loc = $self->{start}{$num};
-    $self->{course}{pieces}{$bot} = { x => $loc->[0], y => $loc->[1], o => 0, solid => 1, id => $bot };
-    $self->{course}{pieces}{"$bot\_archive"} = { x => $loc->[0], y => $loc->[1], archive => 1, id => "$bot\_archive" };
+    $self->{course}{pieces}{$bot} = { x => $loc->[0], y => $loc->[1], o => 0, solid => 1, id => $bot, type => 'bot', flag => 0 };
+    $self->{course}{pieces}{"$bot\_archive"} = { x => $loc->[0], y => $loc->[1], id => "$bot\_archive", type => 'archive' };
 }
 
 sub pieces { return $_[0]->{course}{pieces} }
 
 sub firstind(&@) {
-	my $f = \&{shift @_};
-	for my $ind ( 0 .. $#_ ) {
-		local $_ = $_[$ind];
-		return $ind if $f->();
-	}
-	return -1;
+    my $f = \&{ shift @_ };
+    for my $ind ( 0 .. $#_ ) {
+        local $_ = $_[$ind];
+        return $ind if $f->();
+    }
+    return -1;
 }
 
 sub do_movement {
@@ -74,8 +74,8 @@ sub do_movement {
 sub do_move {
     my ( $self, $register, $id, $priority, $move, $optional ) = @_;
     my $piece = $self->{pieces}{$id};
-	return () unless $piece;
-	$piece->{o} ||= 0;
+    return () unless $piece;
+    $piece->{o} ||= 0;
     if ( $move =~ /[rlu]/o ) {
         $piece->{o} = ( $piece->{o} + $rotations{$move} ) % 4;
         return [ { piece => $id, rotate => $move } ];
@@ -86,61 +86,65 @@ sub do_move {
         $dir  = ( $dir + 2 ) % 4;
         $move = 1;
     }
-	my $d = $movement[$dir];
-	my ($xy, $z) = $dir % 2 == 0 ? qw/y x/ : qw/x y/;
+    my $d = $movement[$dir];
+    my ( $xy, $z ) = $dir % 2 == 0 ? qw/y x/ : qw/x y/;
 
-	my @actions;
-	my @pieces = grep { defined $_->{solid} && $_->{$z} == $piece->{$z} } values %{ $self->{pieces} };
-	my $loc = $piece->{$xy};
+    my @actions;
+    my @pieces = grep { defined $_->{solid} && $_->{$z} == $piece->{$z} } values %{ $self->{pieces} };
+    my $loc = $piece->{$xy};
 
-	while ($move) {
-		my $ind = firstind { $_->{$xy} == $loc } @pieces;
-		$loc += $d;
-		if ($ind == -1) {
-			$move--;
-			next;
-		}
-		$piece = splice @pieces, $ind, 1;
-		$move = $self->max_movement($piece->{x}, $piece->{y}, $move, $dir, \@pieces);
-		if ($move) {
-			$piece->{$xy} += $d * $move;
-			my %action = ( piece => $piece->{id}, move => $move, dir => $dir );
-			my $tile = $self->{tiles}[$piece->{y}][$piece->{x}];
-			if ($piece->{x} < 0 || $piece->{y} < 0 || $piece->{x} >= $self->{w} || $piece->{y} >= $self->{h}
-				|| ($tile->{t} && $tile->{t} eq 'pit')) {
-				delete $self->{pieces}{$piece->{id}};
-				$action{die} = 'fall';
-			}
-			push @actions, \%action;
-		}
-	}
+    while ($move) {
+        my $ind = firstind { $_->{$xy} == $loc } @pieces;
+        $loc += $d;
+        if ( $ind == -1 ) {
+            $move--;
+            next;
+        }
+        $piece = splice @pieces, $ind, 1;
+        $move = $self->max_movement( $piece->{x}, $piece->{y}, $move, $dir, \@pieces );
+        if ($move) {
+            $piece->{$xy} += $d * $move;
+            my %action = ( piece => $piece->{id}, move => $move, dir => $dir );
+            my $tile = $self->{tiles}[ $piece->{y} ][ $piece->{x} ];
+            if (   $piece->{x} < 0
+                || $piece->{y} < 0
+                || $piece->{x} >= $self->{w}
+                || $piece->{y} >= $self->{h}
+                || ( $tile->{t} && $tile->{t} eq 'pit' ) )
+            {
+                delete $self->{pieces}{ $piece->{id} };
+                $action{die} = 'fall';
+            }
+            push @actions, \%action;
+        }
+    }
 
-	return @actions ? \@actions : ();
+    return @actions ? \@actions : ();
 }
 
 sub max_movement {
-	my ($self, $x, $y, $move, $dir, $pieces) = @_;
-	my $front = $walls[$dir];
-	my $back = $walls[($dir + 2) % 4];
-	my @d = (0, 0);
-	$d[$dir % 2] = $movement[$dir];
-	my $tile = $self->{tiles}[$y][$x];
-	my ($wall, $pit) = (0, 0);
-	while ($wall < $move || $pit < $move) {
-		return $wall if $tile->{w} & $front;
-		$y += $d[0];
-		$x += $d[1];
-		if ($x < 0 || $y < 0 || $x >= $self->{w} || $y >= $self->{h}) {
-			return min ++$pit, $move;
-		}
-		$tile = $self->{tiles}[$y][$x];
-		return $wall if $tile->{w} & $back;
-		$pit++;
-		$wall++ unless grep { $_->{x} == $x && $_->{y} == $y } @$pieces;
-		return min $move, $pit unless $tile;
-		return min $move, $pit if $tile->{t} && $tile->{t} eq "pit";
-	}
-	return $move;
+    my ( $self, $x, $y, $move, $dir, $pieces ) = @_;
+    my $front = $walls[$dir];
+    my $back  = $walls[ ( $dir + 2 ) % 4 ];
+    my @d     = ( 0, 0 );
+    $d[ $dir % 2 ] = $movement[$dir];
+    my $tile = $self->{tiles}[$y][$x];
+    my ( $wall, $pit ) = ( 0, 0 );
+    while ( $wall < $move || $pit < $move ) {
+        return $wall if $tile->{w} & $front;
+        $y += $d[0];
+        $x += $d[1];
+        if ( $x < 0 || $y < 0 || $x >= $self->{w} || $y >= $self->{h} ) {
+            return min ++$pit, $move;
+        }
+        $tile = $self->{tiles}[$y][$x];
+        return $wall if $tile->{w} & $back;
+        $pit++;
+        $wall++ unless grep { $_->{x} == $x && $_->{y} == $y } @$pieces;
+        return min $move, $pit unless $tile;
+        return min $move, $pit if $tile->{t} && $tile->{t} eq "pit";
+    }
+    return $move;
 }
 
 sub do_express_conveyors {
@@ -150,75 +154,79 @@ sub do_express_conveyors {
 
 sub do_conveyors {
     my ( $self, $register ) = @_;
-    return $self->move_conveyors('conveyor');;
+    return $self->move_conveyors('conveyor');
 }
 
 sub move_conveyors {
-	my ($self, $type) = @_;
-	my (@new, %actions, @replace);
-	for my $p ( values %{ $self->{pieces} } ) {
-		next if $p->{archive};
-		my $tile = $self->{tiles}[$p->{y}][$p->{x}];
-		my $dir = $tile->{o};
-		my $x = $p->{x};
-		my $y = $p->{y};
-		if ($tile->{t} && $tile->{t} =~ $type) {
-			next if $tile->{w} & $walls[$dir];
-			my @d = (0, 0);
-			$d[$dir % 2] = $movement[$dir];
-			$y += $d[0];
-			$x += $d[1];
-			if ($x < 0 || $y < 0 || $x >= $self->{w} || $y >= $self->{h}) {
-				$actions{$p->{id}} = { piece => $p->{id}, move => 1, dir => $dir, die => 'fall', x => $x, y => $y };
-				next;
-			}
-			$tile = $self->{tiles}[$y][$x];
-			my $next_dir = $tile->{o};
-			next if $tile->{t} && $tile->{t} =~ $type && $next_dir == ($dir + 2) % 4;
-			next if $tile->{w} & $walls[($dir + 2) % 4];
-			if ($tile->{t} && $tile->{t} eq "pit") {
-				$actions{$p->{id}} = { piece => $p->{id}, move => 1, dir => $dir, die => 'fall', x => $x, y => $y };
-				next;
-			}
+    my ( $self, $type ) = @_;
+    my ( @new, %actions, @replace );
+    for my $p ( values %{ $self->{pieces} } ) {
+        next if $p->{type} eq 'archive';
+        my $tile = $self->{tiles}[ $p->{y} ][ $p->{x} ];
+        my $dir  = $tile->{o};
+        my $x    = $p->{x};
+        my $y    = $p->{y};
+        if ( $tile->{t} && $tile->{t} =~ $type ) {
+            next if $tile->{w} & $walls[$dir];
+            my @d = ( 0, 0 );
+            $d[ $dir % 2 ] = $movement[$dir];
+            $y += $d[0];
+            $x += $d[1];
+            if ( $x < 0 || $y < 0 || $x >= $self->{w} || $y >= $self->{h} ) {
+                $actions{ $p->{id} } =
+                  { piece => $p->{id}, move => 1, dir => $dir, die => 'fall', x => $x, y => $y };
+                next;
+            }
+            $tile = $self->{tiles}[$y][$x];
+            my $next_dir = $tile->{o};
+            next if $tile->{t} && $tile->{t} =~ $type && $next_dir == ( $dir + 2 ) % 4;
+            next if $tile->{w} & $walls[ ( $dir + 2 ) % 4 ];
+            if ( $tile->{t} && $tile->{t} eq "pit" ) {
+                $actions{ $p->{id} } =
+                  { piece => $p->{id}, move => 1, dir => $dir, die => 'fall', x => $x, y => $y };
+                next;
+            }
+        }
+        else {
+            next unless $p->{solid};
+            $new[$x][$y] ||= $p;
+        }
+        if ( $p->{solid} && $new[$x][$y] ) {
+            my @replace = ( $p, $new[$x][$y] );
+            while (@replace) {
+                my $o = shift @replace;
+                my $r = $new[ $o->{x} ][ $o->{y} ];
+                delete $actions{ $o->{id} };
+                $new[ $o->{x} ][ $o->{y} ] = $o;
+                if ( $r && $r->{id} ne $o->{id} ) {
+                    push @replace, $r;
+                }
+            }
+            next;
+        }
+        $actions{ $p->{id} } = { piece => $p->{id}, move => 1, dir => $dir, x => $x, y => $y };
+        if ( $tile->{t} ) {
+            my ($r) = $tile->{t} =~ /conveyor2?([rl^])$/;
+            my $table = $r ? $conveyor_rotation{$r} : undef;
+            if ($table) {
+                my $side = ( 4 + $tile->{o} - $dir ) % 4;
+                $actions{ $p->{id} }{rotate} = $rotations[ $table->[$side] ] if $table->[$side];
+                $actions{ $p->{id} }{o} = ( 4 + $p->{o} + $table->[$side] ) % 4;
+            }
+        }
+        if ( $p->{solid} ) {
+            $new[$x][$y] = $p;
+        }
+    }
+    for my $p ( values %actions ) {
+        my $piece = $self->{pieces}{ $p->{piece} };
+        $piece->{x} = delete $p->{x};
+        $piece->{y} = delete $p->{y};
+		if (defined $piece->{o}) {
+        	$piece->{o} = delete $p->{o} || $piece->{o};
 		}
-		else {
-			next unless $p->{solid};
-			$new[$x][$y] ||= $p;
-		}
-		if ($p->{solid} && $new[$x][$y]) {
-			my @replace = ($p, $new[$x][$y]);
-			while (@replace) {
-				my $o = shift @replace;
-				my $r = $new[$o->{x}][$o->{y}];
-				delete $actions{$o->{id}};
-				$new[$o->{x}][$o->{y}] = $o;
-				if ($r && $r->{id} ne $o->{id}) {
-					push @replace, $r;
-				}
-			}
-			next;
-		}
-		$actions{$p->{id}} = { piece => $p->{id}, move => 1, dir => $dir, x => $x, y => $y };
-		if ($tile->{t}) {
-			my ($r) = $tile->{t} =~ /conveyor2?([rl^])$/;		
-			my $table = $r ? $conveyor_rotation{$r} : undef;
-			if ($table) {
-				my $side = (4 + $tile->{o} - $dir) % 4;
-				$actions{$p->{id}}{rotate} = $rotations[$table->[$side]] if $table->[$side];
-				$actions{$p->{id}}{o} = (4 + $p->{o} + $table->[$side]) % 4;
-			}
-		}
-		if ($p->{solid}) {
-			$new[$x][$y] = $p;
-		}
-	}
-	for my $p ( values %actions ) {
-		my $piece = $self->{pieces}{$p->{piece}};
-		$piece->{x} = delete $p->{x};
-	 	$piece->{y} = delete $p->{y};
-	 	$piece->{o} = delete $p->{o} || $piece->{o};
-	}
-	return [ %actions ? [ values %actions ] : () ];
+    }
+    return [ %actions ? [ values %actions ] : () ];
 }
 
 sub do_pushers {
@@ -228,16 +236,16 @@ sub do_pushers {
 
 sub do_gears {
     my ( $self, $register ) = @_;
-	my @actions;
-	for my $p ( values %{ $self->{pieces} } ) {
-		next unless $p->{solid};
-		my $tile = $self->{tiles}[$p->{y}][$p->{x}];
-		next unless $tile->{t};
-		my ($dir) = $tile->{t} =~ /^gear_([rl])/;
-		next unless $dir;
-		$p->{o} = ($p->{o} + $rotations{$dir}) % 4;
-		push @actions, { piece => $p->{id}, rotate => $dir, o => $p->{o} };
-	}
+    my @actions;
+    for my $p ( values %{ $self->{pieces} } ) {
+        next unless $p->{solid};
+        my $tile = $self->{tiles}[ $p->{y} ][ $p->{x} ];
+        next unless $tile->{t};
+        my ($dir) = $tile->{t} =~ /^gear_([rl])/;
+        next unless $dir;
+        $p->{o} = ( $p->{o} + $rotations{$dir} ) % 4;
+        push @actions, { piece => $p->{id}, rotate => $dir, o => $p->{o} };
+    }
     return [ @actions ? \@actions : () ];
 }
 

@@ -4,7 +4,7 @@
   "length": "short",
   "width": 12,
   "height": 16,
-  "pieces":{"flag_1":{"id":"flag_1","x":7,"y":2},"flag_2":{"id":"flag_2","x":3,"y":8}},
+  "pieces":{"flag_1":{"id":"flag_1","x":7,"y":2,"flag":1,"type":"flag"},"flag_2":{"id":"flag_2","x":3,"y":8,"flag":2,"type":"flag"}},
   "players": [5,8],
   "tiles": [
    [{},{},{"w":1},{},{"w":1},{},{},{"w":1},{},{"w":1},{},{"t":"wrench"}],

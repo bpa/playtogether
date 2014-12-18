@@ -5,21 +5,22 @@ use Gamed;
 use Gamed::Test;
 use Data::Dumper;
 use Gamed::Game::RoboRally::Course;
+use T::Roborally;
 
 my $course = Gamed::Game::RoboRally::Course->new('checkmate');
 $course->add_bot( 'a', 1 );
-is_deeply( $course->{course}{pieces}{a}, { x => 5, y => 14, o => 0, solid => 1, id => 'a' } );
+is_deeply( $course->{course}{pieces}{a}, { x => 5, y => 14, o => 0, solid => 1, id => 'a', type => 'bot', flag => 0 } );
 
 $course->add_bot( 'b', 2 );
-is_deeply( $course->{course}{pieces}{b}, { x => 6, y => 14, o => 0, solid => 1, id => 'b' } );
+is_deeply( $course->{course}{pieces}{b}, { x => 6, y => 14, o => 0, solid => 1, id => 'b', type => 'bot', flag => 0 } );
 
 move(
     scenario => 'Rotate Right',
     register => 1,
     cards    => [ [ 'a', ['r100'] ] ],
     actions  => [ [ { piece => 'a', rotate => 'r' } ] ],
-    before   => { a => { x => 5, y => 14, o => 0, solid => 1 } },
-    final    => { a => { x => 5, y => 14, o => 1, solid => 1 } } );
+    before   => { bot('a', 5, 14, N) },
+    after    => { bot('a', 5, 14, E) } );
 
 move(
     scenario => 'Rotate Left',
@@ -27,7 +28,7 @@ move(
     cards    => [ [ 'a', ['l100'] ] ],
     actions  => [ [ { piece => 'a', rotate => 'l' } ] ],
     before   => { a => { x => 5, y => 14, o => 0, solid => 1 } },
-    final    => { a => { x => 5, y => 14, o => 3, solid => 1 } } );
+    after    => { a => { x => 5, y => 14, o => 3, solid => 1 } } );
 
 move(
     scenario => 'U-Turn',
@@ -35,7 +36,7 @@ move(
     cards    => [ [ 'a', ['u100'] ] ],
     actions  => [ [ { piece => 'a', rotate => 'u' } ] ],
     before   => { a => { x => 5, y => 14, o => 0, solid => 1 } },
-    final    => { a => { x => 5, y => 14, o => 2, solid => 1 } } );
+    after    => { a => { x => 5, y => 14, o => 2, solid => 1 } } );
 
 move(
     scenario => 'Backwards',
@@ -43,7 +44,7 @@ move(
     cards    => [ [ 'a', ['b100'] ] ],
     actions  => [ [ { piece => 'a', move => 1, dir => 2 } ] ],
     before   => { a => { x => 5, y => 14, o => 0, solid => 1 } },
-    final    => { a => { x => 5, y => 15, o => 0, solid => 1 } } );
+    after    => { a => { x => 5, y => 15, o => 0, solid => 1 } } );
 
 move(
     scenario => 'Move 1',
@@ -51,7 +52,7 @@ move(
     cards    => [ [ 'a', ['1100'] ] ],
     actions  => [ [ { piece => 'a', move => 1, dir => 0 } ] ],
     before   => { a => { x => 5, y => 14, o => 0, solid => 1 } },
-    final    => { a => { x => 5, y => 13, o => 0, solid => 1 } } );
+    after    => { a => { x => 5, y => 13, o => 0, solid => 1 } } );
 
 move(
     scenario => 'Move 2',
@@ -59,7 +60,7 @@ move(
     cards    => [ [ 'a', ['2100'] ] ],
     actions  => [ [ { piece => 'a', move => 2, dir => 0 } ] ],
     before   => { a => { x => 5, y => 14, o => 0, solid => 1 } },
-    final    => { a => { x => 5, y => 12, o => 0, solid => 1 } } );
+    after    => { a => { x => 5, y => 12, o => 0, solid => 1 } } );
 
 move(
     scenario => 'Move 3',
@@ -67,7 +68,7 @@ move(
     cards    => [ [ 'a', ['3100'] ] ],
     actions  => [ [ { piece => 'a', move => 3, dir => 0 } ] ],
     before   => { a => { x => 5, y => 14, o => 0, solid => 1 } },
-    final    => { a => { x => 5, y => 11, o => 0, solid => 1 } } );
+    after    => { a => { x => 5, y => 11, o => 0, solid => 1 } } );
 
 move(
     scenario => 'Moves are ordered',
@@ -75,7 +76,7 @@ move(
     cards    => [ [ 'a', ['1100'] ], [ 'b', ['2200'] ] ],
     actions  => [ [ { piece => 'b', move => 2, dir => 0 } ], [ { piece => 'a', move => 1, dir => 0 } ] ],
     before   => { a => { x => 5, y => 14, o => 0, solid => 1 }, b => { x => 6, y => 14, o => 0, solid => 1 } },
-    final    => { a => { x => 5, y => 13, o => 0, solid => 1 }, b => { x => 6, y => 12, o => 0, solid => 1 } } );
+    after    => { a => { x => 5, y => 13, o => 0, solid => 1 }, b => { x => 6, y => 12, o => 0, solid => 1 } } );
 
 move(
     scenario => 'Move 3 into wall 2 away',
@@ -83,7 +84,7 @@ move(
     cards    => [ [ 'a', ['3100'] ] ],
     actions  => [ [ { piece => 'a', move => 2, dir => 0 } ] ],
     before   => { a => { x => 2, y => 14, o => 0, solid => 1 } },
-    final    => { a => { x => 2, y => 12, o => 0, solid => 1 } } );
+    after    => { a => { x => 2, y => 12, o => 0, solid => 1 } } );
 
 move(
     scenario => 'Move 3 into wall 1 away',
@@ -91,7 +92,7 @@ move(
     cards    => [ [ 'a', ['3100'] ] ],
     actions  => [ [ { piece => 'a', move => 1, dir => 0 } ] ],
     before   => { a => { x => 2, y => 13, o => 0, solid => 1 } },
-    final    => { a => { x => 2, y => 12, o => 0, solid => 1 } } );
+    after    => { a => { x => 2, y => 12, o => 0, solid => 1 } } );
 
 move(
     scenario => "Can't move into wall",
@@ -99,7 +100,7 @@ move(
     cards    => [ [ 'a', ['3100'] ] ],
     actions  => [],
     before   => { a => { x => 2, y => 12, o => 0, solid => 1 } },
-    final    => { a => { x => 2, y => 12, o => 0, solid => 1 } } );
+    after    => { a => { x => 2, y => 12, o => 0, solid => 1 } } );
 
 move(
     scenario => "Fall in pit",
@@ -107,7 +108,7 @@ move(
     cards    => [ [ 'a', ['3100'] ] ],
     actions  => [ [ { piece => 'a', move => 1, dir => 3, die => 'fall' } ] ],
     before   => { a => { x => 9, y => 6, o => 3, solid => 1 } },
-    final    => {} );
+    after    => {} );
 
 move(
     scenario => "Fall off board n",
@@ -115,7 +116,7 @@ move(
     cards    => [ [ 'a', ['2100'] ] ],
     actions  => [ [ { piece => 'a', move => 1, dir => 0, die => 'fall' } ] ],
     before   => { a => { x => 0, y => 0, o => 0, solid => 1 } },
-    final    => {} );
+    after    => {} );
 
 move(
     scenario => "Fall off board w",
@@ -123,7 +124,7 @@ move(
     cards    => [ [ 'a', ['2100'] ] ],
     actions  => [ [ { piece => 'a', move => 1, dir => 3, die => 'fall' } ] ],
     before   => { a => { x => 0, y => 0, o => 3, solid => 1 } },
-    final    => {} );
+    after    => {} );
 
 move(
     scenario => "Fall off board s",
@@ -131,7 +132,7 @@ move(
     cards    => [ [ 'a', ['2100'] ] ],
     actions  => [ [ { piece => 'a', move => 1, dir => 2, die => 'fall' } ] ],
     before   => { a => { x => 11, y => 15, o => 2, solid => 1 } },
-    final    => {} );
+    after    => {} );
 
 move(
     scenario => "Fall off board e",
@@ -139,7 +140,7 @@ move(
     cards    => [ [ 'a', ['2100'] ] ],
     actions  => [ [ { piece => 'a', move => 1, dir => 1, die => 'fall' } ] ],
     before   => { a => { x => 11, y => 15, o => 1, solid => 1 } },
-    final    => {} );
+    after    => {} );
 
 move(
     scenario => "Push bot",
@@ -147,7 +148,7 @@ move(
     cards    => [ [ 'a', ['1100'] ] ],
     actions  => [ [ { piece => 'a', move => 1, dir => 1 }, { piece => 'b', move => 1, dir => 1 } ] ],
     before   => { a => { x => 0, y => 0, o => 1, solid => 1 }, b => { x => 1, y => 0, o => 2, solid => 1 } },
-    final    => { a => { x => 1, y => 0, o => 1, solid => 1 }, b => { x => 2, y => 0, o => 2, solid => 1 } }
+    after    => { a => { x => 1, y => 0, o => 1, solid => 1 }, b => { x => 2, y => 0, o => 2, solid => 1 } }
 );
 
 move(
@@ -157,7 +158,7 @@ move(
     actions =>
       [ [ { piece => 'a', move => 1, dir => 0 }, { piece => 'b', move => 1, dir => 0, die => 'fall' } ] ],
     before => { a => { x => 0, y => 1, o => 0, solid => 1 }, b => { x => 0, y => 0, o => 2, solid => 1 } },
-    final  => { a => { x => 0, y => 0, o => 0, solid => 1 } } );
+    after  => { a => { x => 0, y => 0, o => 0, solid => 1 } } );
 
 move(
     scenario => "Push 3 bots",
@@ -173,7 +174,7 @@ move(
         b => { x => 1, y => 0, o => 2, solid => 1 },
         c => { x => 2, y => 0, o => 3, solid => 1 },
         d => { x => 3, y => 0, o => 2, solid => 1 } },
-    final => {
+    after => {
         a => { x => 1, y => 0, o => 1, solid => 1 },
         b => { x => 2, y => 0, o => 2, solid => 1 },
         c => { x => 3, y => 0, o => 3, solid => 1 },
@@ -193,7 +194,7 @@ move(
         b => { x => 1, y => 0, o => 2, solid => 1 },
         c => { x => 3, y => 0, o => 3, solid => 1 },
         d => { x => 5, y => 0, o => 2, solid => 1 } },
-    final => {
+    after => {
         a => { x => 3, y => 0, o => 1, solid => 1 },
         b => { x => 4, y => 0, o => 2, solid => 1 },
         c => { x => 5, y => 0, o => 3, solid => 1 },
@@ -211,7 +212,7 @@ move(
         b => { x => 5, y => 6, o => 1, solid => 1 },
         c => { x => 5, y => 8, o => 3, solid => 1 },
         d => { x => 5, y => 9, o => 0, solid => 1 }, },
-    final => {
+    after => {
         c => { x => 5, y => 8, o => 3, solid => 1 },
         d => { x => 5, y => 9, o => 0, solid => 1 } } );
 
@@ -225,7 +226,7 @@ move(
         b => { x => 6, y => 6, o => 1, solid => 1 },
         c => { x => 6, y => 8, o => 3, solid => 1 },
         d => { x => 6, y => 9, o => 0, solid => 1 }, },
-    final => {
+    after => {
         a => { x => 6, y => 6, o => 2, solid => 1 },
         b => { x => 6, y => 7, o => 1, solid => 1 },
         c => { x => 6, y => 8, o => 3, solid => 1 },
@@ -240,7 +241,7 @@ move(
         a         => { x => 0, y => 0, o => 2, solid   => 1 },
         flag_1    => { x => 0, y => 1, o => 1 },
         a_archive => { x => 0, y => 2, o => 3, archive => 1 }, },
-    final => {
+    after => {
         a         => { x => 0, y => 3, o => 2, solid   => 1 },
         flag_1    => { x => 0, y => 1, o => 1 },
         a_archive => { x => 0, y => 2, o => 3, archive => 1 } } );
@@ -252,13 +253,13 @@ sub move {
         while ( my ( $k, $v ) = each( %{ $a{before} } ) ) {
             $v->{id} = $k;
         }
-        while ( my ( $k, $v ) = each( %{ $a{final} } ) ) {
+        while ( my ( $k, $v ) = each( %{ $a{after} } ) ) {
             $v->{id} = $k;
         }
         $course->{pieces} = $a{before};
         my $actions = $course->do_movement( $a{register}, $a{cards} );
         is_deeply( $actions, $a{actions} );
-        while ( my ( $piece, $data ) = each %{ $a{final} } ) {
+        while ( my ( $piece, $data ) = each %{ $a{after} } ) {
             is_deeply( $course->{pieces}{$piece}, $data, "$piece final position" );
         }
         done_testing();

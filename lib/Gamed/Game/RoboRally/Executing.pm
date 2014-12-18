@@ -63,6 +63,23 @@ sub do_phase {
 }
 
 sub do_touches {
+	my $self = shift;
+	my (@board, @touches);
+	for my $p ($self->{game}{course}{pieces}) {
+		for my $e (@{$board[$p->{x}][$p->{y}]}) {
+			if (defined $e->{flag}) {
+				push @touches, [ $e, $p ];
+			}
+			else {
+				push @touches, [ $p, $e ];
+			}
+		}
+	}
+	@touches = sort { $a->{flag} <=> $b->{flag} } @touches;
+	for my $t (@touches) {
+		if (defined $t->[0]{flag} && defined $t->[1]{bot}) {
+		}
+	}
     return 1;
 }
 
