@@ -55,13 +55,13 @@ touches(
     scenario => "Flags",
     register => 3,
     bots     => {
-        a => { pos => [ 1, 4 ], archive => [ 8, 15 ], damage => 0, flag => 0 },    #flag 1
+        a => { pos => [ 7, 1 ], archive => [ 8, 15 ], damage => 0, flag => 0 },    #flag 1
         b => { pos => [ 9, 7 ], archive => [ 1, 13 ], damage => 0, flag => 0 },    #flag 2
         c => { pos => [ 1, 4 ], archive => [ 8, 15 ], damage => 0, flag => 2 },    #flag 3
     },
     state   => 'GAME OVER',
     touches => {
-        archive => { a => { x => 1, y => 4 }, b => { x => 9, y => 7 }, c => { x => 1, y => 4 } },
+        archive => { a => { x => 7, y => 1 }, b => { x => 9, y => 7 }, c => { x => 1, y => 4 } },
         flag => { a => 1, c => 3 } } );
 
 sub touches {
@@ -72,17 +72,28 @@ sub touches {
 
         my ( %pieces, @bots );
         while ( my ( $k, $v ) = each( %{ $a{bots} } ) ) {
-            $v->{id} = $k;
+            $v->{id}   = $k;
+            $v->{type} = 'bot';
+            ( $v->{x}, $v->{y} ) = @{ delete $v->{pos} };
+            my ( $x, $y ) = @{ delete $v->{archive} };
+            $rally->{public}{course}{pieces}{$k} = $v;
+            $rally->{public}{course}{pieces}{"$k\_archive"} =
+              { id => "$k\_archive", type => 'archive', x => $x, y => $y };
         }
-        $rally->{course}{pieces} = $a{before};
         $rally->{states}{EXECUTING}{register} = $a{register};
         $rally->{states}{EXECUTING}->do_touches;
         if ( defined $a{touches} ) {
-            my $msg = $rally->{players}{0}{sock}{packets}[0];
+            my $msg = $rally->{players}{0}{client}{sock}{packets}[0];
             $a{touches}{cmd}   = 'execute';
             $a{touches}{phase} = 'touches';
             broadcast( $rally, { cmd => 'execute', phase => 'touches' } );
             is_deeply( $msg, $a{touches} );
+            if ( defined $a{touches}{archive} ) {
+                while ( my ( $bot, $pos ) = each %{ $a{touches}{archive} } ) {
+                    is_deeply( $rally->{public}{course}{pieces}{"$bot\_archive"},
+                        { id => "$bot\_archive", type => 'archive', x => $pos->{x}, y => $pos->{y} }, "$bot archive moved" );
+                }
+            }
         }
         else {
             is( $rally->{players}{0}{sock}{packets}, undef );

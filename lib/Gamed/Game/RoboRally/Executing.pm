@@ -64,21 +64,50 @@ sub do_phase {
 
 sub do_touches {
 	my $self = shift;
-	my (@board, @touches);
-	for my $p ($self->{game}{course}{pieces}) {
+	my (@board, @touches, %phase);
+	for my $p (values %{$self->{game}{public}{course}{pieces}}) {
+		if ($p->{type} eq 'bot') {
+			my $tile = $self->{game}{public}{course}{tiles}[$p->{y}][$p->{x}];
+			if ($tile->{t} && ($tile->{t} eq 'upgrade' || $tile->{t} eq 'wrench')) {
+				my $archive = $self->{game}{public}{course}{pieces}{$p->{id} . "_archive"};
+				if ($archive->{x} != $p->{x} || $archive->{y} != $p->{y}) {
+					$archive->{x} = $p->{x};
+					$archive->{y} = $p->{y};
+					$phase{archive}{$p->{id}} = { x => $p->{x}, y => $p->{y} };
+				}
+			}
+		}
+
 		for my $e (@{$board[$p->{x}][$p->{y}]}) {
-			if (defined $e->{flag}) {
+			if ($p->{type} eq 'flag') {
+				push @touches, [ $p, $e ];
+			}
+			elsif ($e->{type} eq 'flag') {
 				push @touches, [ $e, $p ];
 			}
-			else {
-				push @touches, [ $p, $e ];
+		}
+		push @{$board[$p->{x}][$p->{y}]}, $p;
+	}
+	@touches = map $_->[0], sort { $a->[1] <=> $b->[1] } map [$_, $_->[0]{flag} || 0 ], @touches;
+	for my $t (@touches) {
+		my ($flag, $bot) = @$t;
+		if ( $flag->{type} eq 'flag' && $bot->{type} eq 'bot') {
+			my $archive = $self->{game}{public}{course}{pieces}{$bot->{id} . "_archive"};
+			if ($archive->{x} != $bot->{x} || $archive->{y} != $bot->{y}) {
+				$archive->{x} = $bot->{x};
+				$archive->{y} = $bot->{y};
+				$phase{archive}{$bot->{id}} = { x => $bot->{x}, y => $bot->{y} };
+			}
+			if ($bot->{flag} + 1 == $flag->{flag}) {
+				$bot->{flag}++;
+				$phase{flag}{$bot->{id}} = $bot->{flag};
 			}
 		}
 	}
-	@touches = sort { $a->{flag} <=> $b->{flag} } @touches;
-	for my $t (@touches) {
-		if (defined $t->[0]{flag} && defined $t->[1]{bot}) {
-		}
+
+	if (keys %phase) {
+		$phase{phase} = 'touches';
+		$self->{game}->broadcast( execute => \%phase );
 	}
     return 1;
 }
