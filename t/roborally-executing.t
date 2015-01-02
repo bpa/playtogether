@@ -4,17 +4,18 @@ use Test::More;
 use Gamed;
 use Gamed::Test;
 use Data::Dumper;
+use t::RoboRally;
 
 execute(
     'checkmate',
     'Normal movement',
-    [   [ 'hammer_bot',  0, 15, 0, '1200' ],
-        [ 'hulk_x90',    1, 15, 0, '2300' ],
-        [ 'spin_bot',    2, 15, 0, '3400' ],
-        [ 'squash_bot',  3, 15, 0, 'r220' ],
-        [ 'trundle_bot', 4, 15, 0, 'l210' ],
-        [ 'twitch',      5, 15, 0, 'u50' ],
-        [ 'twonky',      6, 14, 0, 'b100' ] ],
+    [   [ 'hammer_bot',  0, 15, N, '1200' ],
+        [ 'hulk_x90',    1, 15, N, '2300' ],
+        [ 'spin_bot',    2, 15, N, '3400' ],
+        [ 'squash_bot',  3, 15, N, 'r220' ],
+        [ 'trundle_bot', 4, 15, N, 'l210' ],
+        [ 'twitch',      5, 15, N, 'u50' ],
+        [ 'twonky',      6, 14, N, 'b100' ] ],
     [
         {   cmd     => 'execute',
             phase   => 'movement',
@@ -60,10 +61,10 @@ sub execute {
 
         for my $p (@$setup) {
             my $player = $rally->{players}{ $p->[0]{in_game_id} };
-            my $piece  = $rally->{course}{pieces}{ $p->[1] };
-            $piece->{x} = $p->[2];
-            $piece->{y} = $p->[3];
-            $piece->{o} = $p->[4];
+            my $piece  = $rally->{public}{course}{pieces}{ $p->[1] };
+            $piece->x = $p->[2];
+            $piece->y = $p->[3];
+            $piece->o = $p->[4];
             my @cards = map { [$_] } $player->{private}{cards}->values;
             unshift @cards, [ @$p[ 5 .. $#$p ] ];
             $player->{private}{cards}->add( @$p[ 5 .. $#$p ] );

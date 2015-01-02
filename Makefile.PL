@@ -7,17 +7,18 @@ WriteMakefile(
     NAME         => 'Gamed',
     VERSION_FROM => 'lib/Gamed.pm',    # finds $VERSION
     PREREQ_PM    => {
-        AnyEvent               => 0,
+        'AnyEvent'             => 0,
         'Authen::Passphrase'   => 0,
         'Config::Properties'   => 0,
         'Data::UUID'           => 0,
-        DBI                    => 0,
+        'DBI'                  => 0,
         'DBD::SQLite'          => 0,
-        EV                     => 0,
+        'EV'                   => 0,
         'File::Slurp'          => 0,
         'JSON::MaybeXS'        => 0,
 	'List::Util'           => 0,
         'Mojolicious::Lite'    => 0,
+        'Struct::Dumb'         => 0,
     },    # e.g., Module::Name => 1.1
     (   $] >= 5.005
         ?    ## Add these new keywords supported since 5.005

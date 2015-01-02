@@ -5,7 +5,7 @@ use Gamed;
 use Gamed::Test;
 use Data::Dumper;
 use Gamed::Game::RoboRally::Course;
-use T::Roborally;
+use t::RoboRally;
 
 my $course = Gamed::Game::RoboRally::Course->new('risky_exchange');
 
@@ -191,12 +191,6 @@ sub run_test {
     my ( $phase, %a ) = @_;
     subtest $a{scenario} => sub {
         my ( %pieces, @bots );
-        while ( my ( $k, $v ) = each( %{ $a{before} } ) ) {
-            $v->{id} = $k;
-        }
-        while ( my ( $k, $v ) = each( %{ $a{after} } ) ) {
-            $v->{id} = $k;
-        }
         $course->{pieces} = $a{before};
         my $actions = $course->$phase();
         @{ $actions->[0] } = sort { $a->{piece} cmp $b->{piece} } @{ $actions->[0] } if $actions->[0];

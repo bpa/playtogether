@@ -66,27 +66,34 @@ sub do_touches {
 	my $self = shift;
 	my (@board, @touches, %phase);
 	for my $p (values %{$self->{game}{public}{course}{pieces}}) {
-		if ($p->{type} eq 'bot') {
-			my $tile = $self->{game}{public}{course}{tiles}[$p->{y}][$p->{x}];
+		if ($p->type eq 'bot') {
+			my $tile = $self->{game}{public}{course}{tiles}[$p->y][$p->x];
 			if ($tile->{t} && ($tile->{t} eq 'upgrade' || $tile->{t} eq 'wrench')) {
-				my $archive = $self->{game}{public}{course}{pieces}{$p->{id} . "_archive"};
-				if ($archive->{x} != $p->{x} || $archive->{y} != $p->{y}) {
-					$archive->{x} = $p->{x};
-					$archive->{y} = $p->{y};
-					$phase{archive}{$p->{id}} = { x => $p->{x}, y => $p->{y} };
+				my $archive = $self->{game}{public}{course}{pieces}{$p->id . "_archive"};
+				if ($archive->x != $p->x || $archive->y != $p->y) {
+					$archive->x = $p->x;
+					$archive->y = $p->y;
+					$phase{archive}{$p->id} = { x => $p->x, y => $p->y };
+				}
+				if ($self->{register} == 5) {
+					my $bot = $self->{game}{public}{bots}{$p->id};
+					if ($bot->{damage} > 0) {
+						$bot->{damage}--;
+						$phase{repair}{$p->id} = $bot->{damage};
+					}
 				}
 			}
 		}
 
-		for my $e (@{$board[$p->{x}][$p->{y}]}) {
-			if ($p->{type} eq 'flag') {
+		for my $e (@{$board[$p->x][$p->y]}) {
+			if ($p->type eq 'flag') {
 				push @touches, [ $p, $e ];
 			}
-			elsif ($e->{type} eq 'flag') {
+			elsif ($e->type eq 'flag') {
 				push @touches, [ $e, $p ];
 			}
 		}
-		push @{$board[$p->{x}][$p->{y}]}, $p;
+		push @{$board[$p->x][$p->y]}, $p;
 	}
 	@touches = map $_->[0], sort { $a->[1] <=> $b->[1] } map [$_, $_->[0]{flag} || 0 ], @touches;
 	for my $t (@touches) {

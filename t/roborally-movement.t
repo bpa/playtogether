@@ -5,14 +5,14 @@ use Gamed;
 use Gamed::Test;
 use Data::Dumper;
 use Gamed::Game::RoboRally::Course;
-use T::Roborally;
+use t::RoboRally;
 
 my $course = Gamed::Game::RoboRally::Course->new('checkmate');
 $course->add_bot( 'a', 1 );
-is_deeply( $course->{course}{pieces}{a}, { x => 5, y => 14, o => 0, solid => 1, id => 'a', type => 'bot', flag => 0 } );
+is_deeply( $course->{course}{pieces}{a}, (bot('a', 5, 14, N ))[1] );
 
 $course->add_bot( 'b', 2 );
-is_deeply( $course->{course}{pieces}{b}, { x => 6, y => 14, o => 0, solid => 1, id => 'b', type => 'bot', flag => 0 } );
+is_deeply( $course->{course}{pieces}{b}, (bot('b', 6, 14, N ))[1] );
 
 move(
     scenario => 'Rotate Right',
@@ -27,87 +27,87 @@ move(
     register => 1,
     cards    => [ [ 'a', ['l100'] ] ],
     actions  => [ [ { piece => 'a', rotate => 'l' } ] ],
-    before   => { a => { x => 5, y => 14, o => 0, solid => 1 } },
-    after    => { a => { x => 5, y => 14, o => 3, solid => 1 } } );
+    before   => { bot('a', 5, 14, N) },
+    after    => { bot('a', 5, 14, W) } );
 
 move(
     scenario => 'U-Turn',
     register => 1,
     cards    => [ [ 'a', ['u100'] ] ],
     actions  => [ [ { piece => 'a', rotate => 'u' } ] ],
-    before   => { a => { x => 5, y => 14, o => 0, solid => 1 } },
-    after    => { a => { x => 5, y => 14, o => 2, solid => 1 } } );
+    before   => { bot('a', 5, 14, N) },
+    after    => { bot('a', 5, 14, S) } );
 
 move(
     scenario => 'Backwards',
     register => 1,
     cards    => [ [ 'a', ['b100'] ] ],
     actions  => [ [ { piece => 'a', move => 1, dir => 2 } ] ],
-    before   => { a => { x => 5, y => 14, o => 0, solid => 1 } },
-    after    => { a => { x => 5, y => 15, o => 0, solid => 1 } } );
+    before   => { bot('a', 5, 14, N) },
+    after    => { bot('a', 5, 15, N) } );
 
 move(
     scenario => 'Move 1',
     register => 1,
     cards    => [ [ 'a', ['1100'] ] ],
     actions  => [ [ { piece => 'a', move => 1, dir => 0 } ] ],
-    before   => { a => { x => 5, y => 14, o => 0, solid => 1 } },
-    after    => { a => { x => 5, y => 13, o => 0, solid => 1 } } );
+    before   => { bot('a', 5, 14, N) },
+    after    => { bot('a', 5, 13, N) } );
 
 move(
     scenario => 'Move 2',
     register => 1,
     cards    => [ [ 'a', ['2100'] ] ],
     actions  => [ [ { piece => 'a', move => 2, dir => 0 } ] ],
-    before   => { a => { x => 5, y => 14, o => 0, solid => 1 } },
-    after    => { a => { x => 5, y => 12, o => 0, solid => 1 } } );
+    before   => { bot('a', 5, 14, N) },
+    after    => { bot('a', 5, 12, N) } );
 
 move(
     scenario => 'Move 3',
     register => 1,
     cards    => [ [ 'a', ['3100'] ] ],
     actions  => [ [ { piece => 'a', move => 3, dir => 0 } ] ],
-    before   => { a => { x => 5, y => 14, o => 0, solid => 1 } },
-    after    => { a => { x => 5, y => 11, o => 0, solid => 1 } } );
+    before   => { bot('a', 5, 14, N) },
+    after    => { bot('a', 5, 11, N) } );
 
 move(
     scenario => 'Moves are ordered',
     register => 1,
     cards    => [ [ 'a', ['1100'] ], [ 'b', ['2200'] ] ],
     actions  => [ [ { piece => 'b', move => 2, dir => 0 } ], [ { piece => 'a', move => 1, dir => 0 } ] ],
-    before   => { a => { x => 5, y => 14, o => 0, solid => 1 }, b => { x => 6, y => 14, o => 0, solid => 1 } },
-    after    => { a => { x => 5, y => 13, o => 0, solid => 1 }, b => { x => 6, y => 12, o => 0, solid => 1 } } );
+    before   => { bot('a', 5, 14, N), bot('b', 6, 14, N) },
+    after    => { bot('a', 5, 13, N), bot('b', 6, 12, N) } );
 
 move(
     scenario => 'Move 3 into wall 2 away',
     register => 1,
     cards    => [ [ 'a', ['3100'] ] ],
     actions  => [ [ { piece => 'a', move => 2, dir => 0 } ] ],
-    before   => { a => { x => 2, y => 14, o => 0, solid => 1 } },
-    after    => { a => { x => 2, y => 12, o => 0, solid => 1 } } );
+    before   => { bot('a', 2, 14, N) },
+    after    => { bot('a', 2, 12, N) } );
 
 move(
     scenario => 'Move 3 into wall 1 away',
     register => 1,
     cards    => [ [ 'a', ['3100'] ] ],
     actions  => [ [ { piece => 'a', move => 1, dir => 0 } ] ],
-    before   => { a => { x => 2, y => 13, o => 0, solid => 1 } },
-    after    => { a => { x => 2, y => 12, o => 0, solid => 1 } } );
+    before   => { bot('a', 2, 13, N) },
+    after    => { bot('a', 2, 12, N) } );
 
 move(
     scenario => "Can't move into wall",
     register => 1,
     cards    => [ [ 'a', ['3100'] ] ],
     actions  => [],
-    before   => { a => { x => 2, y => 12, o => 0, solid => 1 } },
-    after    => { a => { x => 2, y => 12, o => 0, solid => 1 } } );
+    before   => { bot('a', 2, 12, N) },
+    after    => { bot('a', 2, 12, N) } );
 
 move(
     scenario => "Fall in pit",
     register => 1,
     cards    => [ [ 'a', ['3100'] ] ],
     actions  => [ [ { piece => 'a', move => 1, dir => 3, die => 'fall' } ] ],
-    before   => { a => { x => 9, y => 6, o => 3, solid => 1 } },
+    before   => { bot('a', 9, 6, W) },
     after    => {} );
 
 move(
@@ -115,7 +115,7 @@ move(
     register => 1,
     cards    => [ [ 'a', ['2100'] ] ],
     actions  => [ [ { piece => 'a', move => 1, dir => 0, die => 'fall' } ] ],
-    before   => { a => { x => 0, y => 0, o => 0, solid => 1 } },
+    before   => { bot('a', 0, 0, N) },
     after    => {} );
 
 move(
@@ -123,7 +123,7 @@ move(
     register => 1,
     cards    => [ [ 'a', ['2100'] ] ],
     actions  => [ [ { piece => 'a', move => 1, dir => 3, die => 'fall' } ] ],
-    before   => { a => { x => 0, y => 0, o => 3, solid => 1 } },
+    before   => { bot('a', 0, 0, W) },
     after    => {} );
 
 move(
@@ -131,7 +131,7 @@ move(
     register => 1,
     cards    => [ [ 'a', ['2100'] ] ],
     actions  => [ [ { piece => 'a', move => 1, dir => 2, die => 'fall' } ] ],
-    before   => { a => { x => 11, y => 15, o => 2, solid => 1 } },
+    before   => { bot('a', 11, 15, S) },
     after    => {} );
 
 move(
@@ -139,7 +139,7 @@ move(
     register => 1,
     cards    => [ [ 'a', ['2100'] ] ],
     actions  => [ [ { piece => 'a', move => 1, dir => 1, die => 'fall' } ] ],
-    before   => { a => { x => 11, y => 15, o => 1, solid => 1 } },
+    before   => { bot('a', 11, 15, E) },
     after    => {} );
 
 move(
@@ -147,8 +147,8 @@ move(
     register => 1,
     cards    => [ [ 'a', ['1100'] ] ],
     actions  => [ [ { piece => 'a', move => 1, dir => 1 }, { piece => 'b', move => 1, dir => 1 } ] ],
-    before   => { a => { x => 0, y => 0, o => 1, solid => 1 }, b => { x => 1, y => 0, o => 2, solid => 1 } },
-    after    => { a => { x => 1, y => 0, o => 1, solid => 1 }, b => { x => 2, y => 0, o => 2, solid => 1 } }
+    before   => { bot('a', 0, 0, E), bot('b', 1, 0, S) },
+    after    => { bot('a', 1, 0, E), bot('b', 2, 0, S) }
 );
 
 move(
@@ -157,8 +157,8 @@ move(
     cards    => [ [ 'a', ['1100'] ] ],
     actions =>
       [ [ { piece => 'a', move => 1, dir => 0 }, { piece => 'b', move => 1, dir => 0, die => 'fall' } ] ],
-    before => { a => { x => 0, y => 1, o => 0, solid => 1 }, b => { x => 0, y => 0, o => 2, solid => 1 } },
-    after  => { a => { x => 0, y => 0, o => 0, solid => 1 } } );
+    before => { bot('a', 0, 1, N), bot('b', 0, 0, S) },
+    after  => { bot('a', 0, 0, N) } );
 
 move(
     scenario => "Push 3 bots",
@@ -170,15 +170,15 @@ move(
             { piece => 'c', move => 1, dir => 1 },
             { piece => 'd', move => 1, dir => 1 } ] ],
     before => {
-        a => { x => 0, y => 0, o => 1, solid => 1 },
-        b => { x => 1, y => 0, o => 2, solid => 1 },
-        c => { x => 2, y => 0, o => 3, solid => 1 },
-        d => { x => 3, y => 0, o => 2, solid => 1 } },
+        bot('a', 0, 0, E),
+        bot('b', 1, 0, S),
+        bot('c', 2, 0, W),
+        bot('d', 3, 0, S) },
     after => {
-        a => { x => 1, y => 0, o => 1, solid => 1 },
-        b => { x => 2, y => 0, o => 2, solid => 1 },
-        c => { x => 3, y => 0, o => 3, solid => 1 },
-        d => { x => 4, y => 0, o => 2, solid => 1 } } );
+        bot('a', 1, 0, E),
+        bot('b', 2, 0, S),
+        bot('c', 3, 0, W),
+        bot('d', 4, 0, S) } );
 
 move(
     scenario => "Push 3 bots with gaps",
@@ -190,15 +190,15 @@ move(
             { piece => 'c', move => 2, dir => 1 },
             { piece => 'd', move => 1, dir => 1 } ] ],
     before => {
-        a => { x => 0, y => 0, o => 1, solid => 1 },
-        b => { x => 1, y => 0, o => 2, solid => 1 },
-        c => { x => 3, y => 0, o => 3, solid => 1 },
-        d => { x => 5, y => 0, o => 2, solid => 1 } },
+        bot('a', 0, 0, E),
+        bot('b', 1, 0, S),
+        bot('c', 3, 0, W),
+        bot('d', 5, 0, S) },
     after => {
-        a => { x => 3, y => 0, o => 1, solid => 1 },
-        b => { x => 4, y => 0, o => 2, solid => 1 },
-        c => { x => 5, y => 0, o => 3, solid => 1 },
-        d => { x => 6, y => 0, o => 2, solid => 1 } } );
+        bot('a', 3, 0, E),
+        bot('b', 4, 0, S),
+        bot('c', 5, 0, W),
+        bot('d', 6, 0, S) } );
 
 move(
     scenario => "Push bots with pit shielding 2nd",
@@ -208,13 +208,13 @@ move(
         [   { piece => 'a', move => 2, dir => 2, die => 'fall' },
             { piece => 'b', move => 1, dir => 2, die => 'fall' } ] ],
     before => {
-        a => { x => 5, y => 5, o => 2, solid => 1 },
-        b => { x => 5, y => 6, o => 1, solid => 1 },
-        c => { x => 5, y => 8, o => 3, solid => 1 },
-        d => { x => 5, y => 9, o => 0, solid => 1 }, },
+        bot('a', 5, 5, S),
+        bot('b', 5, 6, E),
+        bot('c', 5, 8, W),
+        bot('d', 5, 9, N), },
     after => {
-        c => { x => 5, y => 8, o => 3, solid => 1 },
-        d => { x => 5, y => 9, o => 0, solid => 1 } } );
+        bot('c', 5, 8, W),
+        bot('d', 5, 9, N) } );
 
 move(
     scenario => "Push bot column into wall",
@@ -222,15 +222,15 @@ move(
     cards    => [ [ 'a', ['3100'] ] ],
     actions  => [ [ { piece => 'a', move => 1, dir => 2 }, { piece => 'b', move => 1, dir => 2 } ] ],
     before   => {
-        a => { x => 6, y => 5, o => 2, solid => 1 },
-        b => { x => 6, y => 6, o => 1, solid => 1 },
-        c => { x => 6, y => 8, o => 3, solid => 1 },
-        d => { x => 6, y => 9, o => 0, solid => 1 }, },
+        bot('a', 6, 5, S),
+        bot('b', 6, 6, E),
+        bot('c', 6, 8, W),
+        bot('d', 6, 9, N), },
     after => {
-        a => { x => 6, y => 6, o => 2, solid => 1 },
-        b => { x => 6, y => 7, o => 1, solid => 1 },
-        c => { x => 6, y => 8, o => 3, solid => 1 },
-        d => { x => 6, y => 9, o => 0, solid => 1 } } );
+        bot('a', 6, 6, S),
+        bot('b', 6, 7, E),
+        bot('c', 6, 8, W),
+        bot('d', 6, 9, N) } );
 
 move(
     scenario => "Can't push archive markers or flags",
@@ -238,24 +238,18 @@ move(
     cards    => [ [ 'a', ['3100'] ] ],
     actions  => [ [ { piece => 'a', move => 3, dir => 2 } ] ],
     before   => {
-        a         => { x => 0, y => 0, o => 2, solid   => 1 },
-        flag_1    => { x => 0, y => 1, o => 1 },
-        a_archive => { x => 0, y => 2, o => 3, archive => 1 }, },
+        bot('a', 0, 0, S),
+        archive('a', 0, 2),
+        flag(1, 0, 1), },
     after => {
-        a         => { x => 0, y => 3, o => 2, solid   => 1 },
-        flag_1    => { x => 0, y => 1, o => 1 },
-        a_archive => { x => 0, y => 2, o => 3, archive => 1 } } );
+        bot('a', 0, 3, S),
+        flag(1, 0, 1),
+        archive('a', 0, 2) } );
 
 sub move {
     my %a = @_;
     subtest $a{scenario} => sub {
         my ( %pieces, @bots );
-        while ( my ( $k, $v ) = each( %{ $a{before} } ) ) {
-            $v->{id} = $k;
-        }
-        while ( my ( $k, $v ) = each( %{ $a{after} } ) ) {
-            $v->{id} = $k;
-        }
         $course->{pieces} = $a{before};
         my $actions = $course->do_movement( $a{register}, $a{cards} );
         is_deeply( $actions, $a{actions} );
