@@ -97,7 +97,6 @@ sub do_move {
     my ( $self, $register, $id, $priority, $move, $optional ) = @_;
     my $piece = $self->{pieces}{$id};
     return () unless $piece;
-    $piece->o ||= 0;
     if ( $move =~ /[rlu]/o ) {
         $piece->o = ( $piece->o + $rotations{$move} ) % 4;
         return [ { piece => $id, rotate => $move } ];
@@ -108,12 +107,17 @@ sub do_move {
         $dir  = ( $dir + 2 ) % 4;
         $move = 1;
     }
+	$self->_push($move, $dir, $piece->x, $piece->y);
+}
+
+sub _push {
+	my ($self, $move, $dir, $x, $y) = @_;
     my $d = $movement[$dir];
     my ( $xy, $z ) = $dir % 2 == 0 ? qw/y x/ : qw/x y/;
+	my ( $loc, $track ) = $dir % 2 == 0 ? ($y, $x) : ( $x, $y );
 
     my @actions;
-    my @pieces = grep { $_->solid && $_->$z == $piece->$z } values %{ $self->{pieces} };
-    my $loc = $piece->$xy;
+    my @pieces = grep { $_->solid && $_->$z == $track } values %{ $self->{pieces} };
 
     while ($move) {
         my $ind = firstind { $_->$xy == $loc } @pieces;
@@ -122,7 +126,7 @@ sub do_move {
             $move--;
             next;
         }
-        $piece = splice @pieces, $ind, 1;
+        my $piece = splice @pieces, $ind, 1;
         $move = $self->max_movement( $piece->x, $piece->y, $move, $dir, \@pieces );
         if ($move) {
             $piece->$xy += $d * $move;
@@ -251,7 +255,16 @@ sub move_conveyors {
 
 sub do_pushers {
     my ( $self, $register ) = @_;
-    return;
+    my @actions;
+    for my $p ( values %{ $self->{pieces} } ) {
+        next unless $p->solid;
+        my $tile = $self->{tiles}[ $p->y ][ $p->x ];
+        next unless $tile->{t} && $tile->{t} eq 'pusher';
+		next unless $tile->{r} & 1 << ($register - 1);
+        my $actions = $self->_push(1, $tile->{o}, $p->x, $p->y);
+        push @actions, @$actions if $actions;
+    }
+    return @actions ? \@actions : ();
 }
 
 sub do_gears {
