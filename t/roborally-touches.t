@@ -6,6 +6,7 @@ use Gamed;
 use Gamed::Test;
 use Data::Dumper;
 use Gamed::Game::RoboRally;
+use t::RoboRally;
 
 touches(
     scenario => "Nothing",
@@ -49,7 +50,7 @@ touches(
             d => { x => 1, y => 4 },
             e => { x => 9, y => 7 } },
         repair  => { a => 0, c => 1, d => 1, f => 1 },
-        options => { c => 'Brakes' } } );
+        options => { c => ['Brakes'] } } );
 
 touches(
     scenario => "Flags",
@@ -67,18 +68,29 @@ touches(
 sub touches {
     my (%a) = @_;
     subtest $a{scenario} => sub {
-        my $rally =
-          Gamed::Test::Player->new('1')->create( 'RoboRally', 'test', { course => 'risky_exchange' } );
+        my $rally = Gamed::Test::Player->new('1')->create( 'RoboRally', 'test', { course => 'risky_exchange' } );
+		$rally->{option_cards} = bless { cards => ['Brakes'] }, 'Gamed::Object::Deck';
+		while( my ($k, $v) = each %{$rally->{players}}) {
+			$v->{public}{bot} = 'a';
+			$v->{public}{flag} = 0;
+			$v->{public}{damage} = 0;
+			$rally->{public}{bots}{a}{player} = $k;
+		}
+
+		for my $b (qw/b c d e f/) {
+			$rally->{players}{$b}{public}{bot} = $b;
+			$rally->{players}{$b}{public}{flag} = 0;
+			$rally->{players}{$b}{public}{damage} = 0;
+			$rally->{public}{bots}{$b}{player} = $b;
+		}
 
         my ( %pieces, @bots );
         while ( my ( $k, $v ) = each( %{ $a{bots} } ) ) {
-            $v->{id}   = $k;
-            $v->{type} = 'bot';
-            ( $v->{x}, $v->{y} ) = @{ delete $v->{pos} };
-            my ( $x, $y ) = @{ delete $v->{archive} };
-            $rally->{public}{course}{pieces}{$k} = $v;
-            $rally->{public}{course}{pieces}{"$k\_archive"} =
-              { id => "$k\_archive", type => 'archive', x => $x, y => $y };
+			my $player = $rally->{players}{$rally->{public}{bots}{$k}{player}};
+			$player->{public}{damage} = $v->{damage};
+			$player->{public}{flag} = $v->{flag};
+            $rally->{public}{course}{pieces}{$k} = (bot($k, $v->{pos}[0], $v->{pos}[1], N))[1];
+            $rally->{public}{course}{pieces}{"$k\_archive"} = (archive($k, $v->{archive}[0], $v->{archive}[1]))[1];
         }
         $rally->{states}{EXECUTING}{register} = $a{register};
         $rally->{states}{EXECUTING}->do_touches;
@@ -90,14 +102,15 @@ sub touches {
             is_deeply( $msg, $a{touches} );
             if ( defined $a{touches}{archive} ) {
                 while ( my ( $bot, $pos ) = each %{ $a{touches}{archive} } ) {
-                    is_deeply( $rally->{public}{course}{pieces}{"$bot\_archive"},
-                        { id => "$bot\_archive", type => 'archive', x => $pos->{x}, y => $pos->{y} }, "$bot archive moved" );
+                    my $archive = $rally->{public}{course}{pieces}{"$bot\_archive"};
+                    is_deeply( { x => $archive->x, y => $archive->y }, { x => $pos->{x}, y => $pos->{y} }, "$bot archive moved" );
                 }
             }
         }
         else {
             is( $rally->{players}{0}{sock}{packets}, undef );
         }
+		delete $Gamed::instance{test};
         done_testing();
       }
 }

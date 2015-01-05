@@ -9,7 +9,7 @@ my %TYPE = (
 
 sub build {
     my ( $self, $type ) = @_;
-    $type ||= 'full';
+    $type ||= 'movement';
     $self->{type} = exists $TYPE{$type} ? $type : 'movement';
 }
 

@@ -7,10 +7,15 @@ use File::Slurp;
 use File::Spec::Functions 'catdir';
 use List::Util 'min';
 use Struct::Dumb;
-use Data::Dumper;
 
-struct Piece => [qw/id type x y o solid flag/];
+struct Piece => [qw/id type x y o solid/];
 *{Gamed::Game::RoboRally::Course::Piece::TO_JSON} = sub {
+	my $p = shift;
+	return { id => $p->[0], type => $p->[1], x => $p->[2], y => $p->[3], o => $p->[4], solid => $p->[5] };
+};
+
+struct Flag => [qw/id type x y o solid flag/];
+*{Gamed::Game::RoboRally::Course::Flag::TO_JSON} = sub {
 	my $p = shift;
 	return { id => $p->[0], type => $p->[1], x => $p->[2], y => $p->[3], o => $p->[4], solid => $p->[5], flag => $p->[6] };
 };
@@ -44,7 +49,12 @@ sub new {
     }
 
 	for my $p (values $course->{pieces}) {
-		$p = Piece($p->{id}, $p->{type}, $p->{x}, $p->{y}, $p->{o} || 0, $p->{solid} || 0, $p->{flag} || 0 );
+		if ($p->{type} eq 'flag') {
+			$p = Flag($p->{id}, $p->{type}, $p->{x}, $p->{y}, $p->{o} || 0, 0, $p->{flag} || 0 );
+		}
+		else {
+			$p = Piece($p->{id}, $p->{type}, $p->{x}, $p->{y}, $p->{o} || 0, $p->{solid} || 0);
+		}
 	}
 
     $self{tiles}  = $course->{tiles};
@@ -57,8 +67,8 @@ sub new {
 sub add_bot {
     my ( $self, $bot, $num ) = @_;
     my $loc = $self->{start}{$num};
-    $self->{course}{pieces}{$bot} = Piece($bot, 'bot', $loc->[0], $loc->[1], 0, 1, 0);
-    $self->{course}{pieces}{"$bot\_archive"} = Piece($bot, 'archive', $loc->[0], $loc->[1], 0, 0, 0);
+    $self->{course}{pieces}{$bot} = Piece($bot, 'bot', $loc->[0], $loc->[1], 0, 1);
+    $self->{course}{pieces}{"$bot\_archive"} = Piece($bot, 'archive', $loc->[0], $loc->[1], 0, 0);
 }
 
 sub pieces { return $_[0]->{course}{pieces} }

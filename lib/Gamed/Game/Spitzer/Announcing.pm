@@ -65,7 +65,6 @@ my %action = (
         }
     },
     call => sub {
-        use Data::Dumper;
         my ( $self, $player, $msg, $player_data ) = @_;
         my $game = $self->{game};
         my $call = $msg->{call};

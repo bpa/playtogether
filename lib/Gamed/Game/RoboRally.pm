@@ -22,6 +22,8 @@ on 'create' => sub {
     $msg->{course} ||= 'checkmate';
     $self->{public}{course} = Gamed::Game::RoboRally::Course->new( $msg->{course} );
 	$self->{movement_cards} = Gamed::Game::RoboRally::Decks->new('movement');
+	$self->{option_cards}   = Gamed::Game::RoboRally::Decks->new('options');
+	$self->{option_cards}->reset->shuffle;
     $self->{min_players}    = 2;
     $self->{max_players}    = 8;
 

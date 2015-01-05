@@ -37,6 +37,7 @@ sub on_leave_state {
 	my $pos = 1;
     my @players = shuffle values %{ $game->{players } };
     for my $p ( @players ) {
+        $p->{public}{flag}   = 0;
         $p->{public}{lives}  = 3;
         $p->{public}{damage} = 0;
         $p->{public}{locked} = [];
