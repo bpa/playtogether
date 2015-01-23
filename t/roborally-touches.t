@@ -6,7 +6,7 @@ use Gamed;
 use Gamed::Test;
 use Data::Dumper;
 use Gamed::Game::RoboRally;
-use t::RoboRally;
+use Gamed::Game::RoboRally::Pieces;
 
 touches(
     scenario => "Nothing",
@@ -89,8 +89,8 @@ sub touches {
 			my $player = $rally->{players}{$rally->{public}{bots}{$k}{player}};
 			$player->{public}{damage} = $v->{damage};
 			$player->{public}{flag} = $v->{flag};
-            $rally->{public}{course}{pieces}{$k} = (bot($k, $v->{pos}[0], $v->{pos}[1], N))[1];
-            $rally->{public}{course}{pieces}{"$k\_archive"} = (archive($k, $v->{archive}[0], $v->{archive}[1]))[1];
+            $rally->{public}{course}{pieces}{$k} = Bot($k, $v->{pos}[0], $v->{pos}[1], N);
+            $rally->{public}{course}{pieces}{"$k\_archive"} = Archive($k, $v->{archive}[0], $v->{archive}[1]);
         }
         $rally->{states}{EXECUTING}{register} = $a{register};
         $rally->{states}{EXECUTING}->do_touches;
@@ -103,7 +103,7 @@ sub touches {
             if ( defined $a{touches}{archive} ) {
                 while ( my ( $bot, $pos ) = each %{ $a{touches}{archive} } ) {
                     my $archive = $rally->{public}{course}{pieces}{"$bot\_archive"};
-                    is_deeply( { x => $archive->x, y => $archive->y }, { x => $pos->{x}, y => $pos->{y} }, "$bot archive moved" );
+                    is_deeply( { x => $archive->{x}, y => $archive->{y} }, { x => $pos->{x}, y => $pos->{y} }, "$bot archive moved" );
                 }
             }
         }

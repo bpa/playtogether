@@ -62,9 +62,9 @@ sub execute {
         for my $p (@$setup) {
             my $player = $rally->{players}{ $p->[0]{in_game_id} };
             my $piece  = $rally->{public}{course}{pieces}{ $p->[1] };
-            $piece->x = $p->[2];
-            $piece->y = $p->[3];
-            $piece->o = $p->[4];
+            $piece->{x} = $p->[2];
+            $piece->{y} = $p->[3];
+            $piece->{o} = $p->[4];
             my @cards = map { [$_] } $player->{private}{cards}->values;
             unshift @cards, [ @$p[ 5 .. $#$p ] ];
             $player->{private}{cards}->add( @$p[ 5 .. $#$p ] );
