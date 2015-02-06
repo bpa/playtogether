@@ -11,7 +11,7 @@ use List::Util 'shuffle';
 use JSON::MaybeXS;
 
 sub new {
-	bless { name => 'Joining' }, shift;
+    bless { name => 'Joining' }, shift;
 }
 
 sub on_enter_state {
@@ -24,8 +24,10 @@ sub on_enter_state {
     opendir( my $dh, $dir );
     for my $file ( grep { !/^\./ && /\.json$/ } readdir($dh) ) {
         eval {
+            my $bot = substr( $file, 0, -5 );
             my $data = $json->decode( read_file( catdir( $dir, $file ) ) );
-            $game->{public}{bots}{ substr( $file, 0, -5 ) } = $data;
+            $game->{public}{bots}{ $bot } = $data;
+            $game->{public}{course}->add_bot($bot);
         };
     }
     closedir($dh);
@@ -34,18 +36,18 @@ sub on_enter_state {
 sub on_leave_state {
     my ( $self, $game ) = @_;
 
-	my $pos = 1;
-    my @players = shuffle values %{ $game->{players } };
-    for my $p ( @players ) {
-        $p->{public}{flag}   = 0;
-        $p->{public}{lives}  = 3;
-        $p->{public}{damage} = 0;
-        $p->{public}{locked} = [];
-		$p->{public}{number} = $pos;
-		$game->{public}{course}->add_bot($p->{public}{bot}, $pos);
-		$pos++;
+    my $pos     = 1;
+    my @players = shuffle values %{ $game->{players} };
+    for my $p (@players) {
+        $p->{bot}{flag}   = 0;
+        $p->{bot}{lives}  = 3;
+        $p->{bot}{damage} = 0;
+        $p->{bot}{locked} = [];
+        $p->{bot}{number} = $pos;
+        $game->{public}{course}->place($p->{bot}, $pos);
+        $pos++;
     }
-	$game->broadcast( pieces => { %{$game->{public}{course}->pieces} } );
+    $game->broadcast( pieces => { %{ $game->{public}{course}->pieces } } );
 }
 
 on 'join'         => "Gamed::State::WaitingForPlayers";
@@ -66,7 +68,8 @@ on 'bot' => sub {
         && !defined $game->{public}{bots}{ $msg->{bot} }{player} )
     {
         $game->{public}{bots}{ $msg->{bot} }{player} = $player->{in_game_id};
-        $player_data->{public}{bot} = $msg->{bot};
+        $player_data->{public}{bot}                  = $msg->{bot};
+        $player_data->{bot}                          = $game->{public}{course}{pieces}{ $msg->{bot} };
         $self->{game}->broadcast( bot => { bot => $msg->{bot}, player => $player->{in_game_id} } );
     }
     else {

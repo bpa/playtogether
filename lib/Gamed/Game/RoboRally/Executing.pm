@@ -43,12 +43,12 @@ sub execute {
 
 sub do_movement {
     my ( $self, $phase ) = @_;
-	my $current = $self->{register} - 1;
-	my @register;
-	for my $p ( values %{ $self->{game}{players} } ) {
-		push @register, [ $p->{public}{bot} => $p->{private}{registers}[$current] ];
-		$p->{public}{registers}[$current] = $p->{private}{registers}[$current];
-	}
+    my $current = $self->{register} - 1;
+    my @register;
+    for my $p ( values %{ $self->{game}{players} } ) {
+        push @register, [ $p->{bot} => $p->{private}{registers}[$current] ];
+        $p->{public}{registers}[$current] = $p->{private}{registers}[$current];
+    }
     my $actions = $self->{game}{public}{course}->do_movement( $current, \@register );
     $self->{game}->broadcast( execute => { phase => $phase, actions => $actions } ) if $actions;
     return 1;
@@ -62,87 +62,55 @@ sub do_phase {
     return 1;
 }
 
+#TODO Rewrite with course keeping pieces in tiles in addition to hash
 sub do_touches {
-	my $self = shift;
-	my (@board, @touches, %phase);
-	for my $p (values %{$self->{game}{public}{course}{pieces}}) {
-		for my $e (@{$board[$p->{x}][$p->{y}]}) {
-			if ($p->{type} eq 'flag') {
-				push @touches, [ $p, $e ];
-			}
-			elsif ($e->{type} eq 'flag') {
-				push @touches, [ $e, $p ];
-			}
-		}
-		push @{$board[$p->{x}][$p->{y}]}, $p;
-	}
+    my $self = shift;
+    my $tiles = $self->{game}{public}{course}{tiles};
+    my ( @board, @touches, %phase );
+    for my $p ( values %{ $self->{game}{public}{course}{pieces} } ) {
+        if ($p->{type} eq 'flag') {
+            push @{ $board[ $p->{x} ][ $p->{y} ] }, $p->{flag};
+        }
+    }
 
-	@touches = map $_->[0], sort { $a->[1] <=> $b->[1] } map [$_, $_->[0]->{flag} || 0 ], @touches;
-	for my $t (@touches) {
-		my ($flag, $bot) = @$t;
-		if ( $flag->{type} eq 'flag' && $bot->{type} eq 'bot') {
-			my $archive = $self->{game}{public}{course}{pieces}{$bot->{id} . "_archive"};
-			if ($archive->{x} != $bot->{x} || $archive->{y} != $bot->{y}) {
-				$archive->{x} = $bot->{x};
-				$archive->{y} = $bot->{y};
-				$phase{archive}{$bot->{id}} = { x => $bot->{x}, y => $bot->{y} };
-			}
-			my $p = $self->{game}{players}{$self->{game}{public}{bots}{$bot->{id}}{player}};
-			if ($p->{public}{flag} + 1 == $flag->{flag}) {
-				$p->{public}{flag}++;
-				$phase{flag}{$bot->{id}} = $p->{public}{flag};
-			}
-			if ($self->{register} == 5) {
-				if ($p->{public}{damage} > 0) {
-					$p->{public}{damage}--;
-					$phase{repair}{$bot->{id}} = $p->{public}{damage};
-				}
-			}
-		}
-	}
+    for my $bot ( values %{ $self->{game}{public}{course}{pieces} } ) {
+        if ($bot->{active} && $bot->{type} eq 'bot') {
+            my @flags;
+            if ($board[$bot->{x}][$bot->{y}]) {
+                @flags = sort { $a <=> $b } @{$board[$bot->{x}][$bot->{y}]};
+                for my $flag (@flags) {
+                    if ( $bot->{flag} + 1 == $flag ) {
+                        $bot->{flag}++;
+                        $phase{flag}{ $bot->{id} } = $bot->{flag};
+                    }
+                }
+            }
+            my $tile = $tiles->[$bot->{y}][$bot->{x}]->{t};
+            if (@flags || $tile eq 'upgrade' || $tile eq 'wrench') {
+                my $archive = $self->{game}{public}{course}{pieces}{ $bot->{id} . "_archive" };
+                if ( $archive->{x} != $bot->{x} || $archive->{y} != $bot->{y} ) {
+                    $archive->{x} = $bot->{x};
+                    $archive->{y} = $bot->{y};
+                    $phase{archive}{ $bot->{id} } = { x => $bot->{x}, y => $bot->{y} };
+                }
+            }
+        }
+    }
 
-	for my $player (values %{$self->{game}{players}}) {
-		my $p = $self->{game}{public}{course}{pieces}{$player->{public}{bot}};
-		if ($p) {
-			my $tile = $self->{game}{public}{course}{tiles}[$p->{y}][$p->{x}];
-			if ($tile->{t} && ($tile->{t} eq 'upgrade' || $tile->{t} eq 'wrench')) {
-				my $archive = $self->{game}{public}{course}{pieces}{$p->{id} . "_archive"};
-				if ($archive->{x} != $p->{x} || $archive->{y} != $p->{y}) {
-					$archive->{x} = $p->{x};
-					$archive->{y} = $p->{y};
-					$phase{archive}{$p->{id}} = { x => $p->{x}, y => $p->{y} };
-				}
-				if ($self->{register} == 5) {
-					if ($player->{public}{damage} > 0) {
-						$player->{public}{damage}--;
-						$phase{repair}{$p->{id}} = $player->{public}{damage};
-					}
-					if ($tile->{t} eq 'upgrade') {
-						my $card = $self->{game}{option_cards}->deal;
-						if ($card) {
-							push @{$phase{options}{$p->{id}}}, $card;
-							push @{$player->{public}{options}}, $card;
-						}
-					}
-				}
-			}
-		}
-	}
-
-	if (keys %phase) {
-		$phase{phase} = 'touches';
-		$self->{game}->broadcast( execute => \%phase );
-	}
+    if ( keys %phase ) {
+        $phase{phase} = 'touches';
+        $self->{game}->broadcast( execute => \%phase );
+    }
     return 1;
 }
 
 sub do_cleanup {
     my $self = shift;
 
-    $self->{phase} = -1; # The next step after running this is to increment phase on success
+    $self->{phase} = -1;    # The next step after running this is to increment phase on success
 
     if ( ++$self->{register} > 5 ) {
-        $self->{game}->change_state("PROGRAMMING");
+        $self->{game}->change_state("CLEANUP");
         return;
     }
 

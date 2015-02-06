@@ -162,16 +162,10 @@ conveyor(
 $course = Gamed::Game::RoboRally::Course->new('risky_exchange');
 
 conveyor(
-    scenario => "Archive markers don't move",
-    before   => { archive( 'a', 0, 1 ) },
-    after    => { archive( 'a', 0, 1 ) },
-    actions  => undef );
-
-conveyor(
-    scenario => "Flags move through bots",
-    before   => { bot( 'a', 3, 3, N ), flag( 1, 2, 3 ) },
-    after    => { bot( 'a', 3, 3, N ), flag( 1, 3, 3 ) },
-    actions  => [ { piece => 'flag_1', move => 1, dir => 1 } ] );
+    scenario => "Flags and archive markers move through bots",
+    before   => { bot( 'a', 3, 3, N ), flag( 1, 2, 3 ), archive ('a', 2, 3) },
+    after    => { bot( 'a', 3, 3, N ), flag( 1, 3, 3 ), archive ('a', 3, 3) },
+    actions  => [ { piece => 'a_archive', move => 1, dir => 1 }, { piece => 'flag_1', move => 1, dir => 1 } ] );
 
 conveyor(
     scenario => "Flags move through bot column",

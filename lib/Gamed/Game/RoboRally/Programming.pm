@@ -4,6 +4,7 @@ use Gamed::Handler;
 use Gamed::Object::Bag;
 use List::Util qw/shuffle/;
 use parent 'Gamed::State';
+use Data::Dumper;
 
 sub new {
     my ( $pkg, %opts ) = @_;
@@ -15,9 +16,9 @@ sub on_enter_state {
 
     $game->{movement_cards}->reset->shuffle;
     for my $p ( values %{ $game->{players} } ) {
-		if ($p->{public}{lives} > 0) {
+		if ($p->{bot}{lives} > 0) {
 			$p->{public}{ready} = 0;
-			my $cards = 9 - $p->{public}{damage};
+			my $cards = 9 - $p->{bot}{damage};
 			$p->{private}{cards} = Gamed::Object::Bag->new( $game->{movement_cards}->deal($cards) );
 		}
 		else {
@@ -53,7 +54,7 @@ on 'program' => sub {
 			$player->err("Invalid program");
 			return;
 		}
-		push @cards, @$r unless $player_data->{public}{locked}[$i];
+		push @cards, @$r unless $player_data->{bot}{locked}[$i];
 	}
 
 	for my $c (@cards) {
@@ -78,7 +79,7 @@ on ready => sub {
 
     $player_data->{public}{ready} = 1;
     $game->broadcast( ready => { player => $player->{in_game_id} } );
-    $game->change_state('EXECUTING')
+    $game->change_state('ANNOUNCING')
     	unless grep { !$_->{public}{ready} } values %{ $game->{players} };
 };
 
@@ -93,16 +94,16 @@ on 'quit' => sub {
         $game->change_state('GAME_OVER');
     }
     else {
-        $game->change_state( 'EXECUTING' )
+        $game->change_state( 'ANNOUNCING' )
           unless grep { !$_->{public}{ready} } values %{ $game->{players} };
     }
 };
 
 sub locked_but_not_matching {
 	my ($i, $register, $player_data) = @_;
-	return unless $player_data->{public}{locked}[$i];
+	return unless $player_data->{bot}{locked}[$i];
 
-	my $locked = $player_data->{public}{registers}[$i];
+	my $locked = $player_data->{bot}{registers}[$i];
 
 	return 1 unless @$register == @$locked;
 	for my $j ( 0 .. $#$register ) {
@@ -120,7 +121,7 @@ sub handle_time_up {
 
 		my $cards = Gamed::Object::Bag->new($p->{private}{cards}->values);
 		for my $i ( 0 .. 4) {
-			$cards->remove($p->{private}{registers}[$i]) unless $p->{public}{locked}[$i];
+			$cards->remove($p->{private}{registers}[$i]) unless $p->{bot}{locked}[$i];
 		}
 
 		my @available = shuffle $cards->values;
@@ -128,8 +129,8 @@ sub handle_time_up {
 			$p->{private}{registers}[$i] ||= [];
 			my $r = $p->{private}{registers}[$i];
 			if (@$r == 0) { 
-				if ($p->{public}{locked}[$i]) {
-					push @$r, @{$p->{public}{registers}[$i]};
+				if ($p->{bot}{locked}[$i]) {
+					push @$r, @{$p->{bot}{registers}[$i]};
 				}
 				else {
 					push @$r, shift @available;

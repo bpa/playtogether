@@ -8,101 +8,86 @@ use Gamed::Game::RoboRally::Course;
 use t::RoboRally;
 
 cleanup(
-    'Died by damage',
+    'Damage related cleanup',
     before => {
-        lives     => 3,
-        locked    => [ 0, 0, 1, 1, 1 ],
-        registers => [ ['r90'], ['l60'], ['r70'], ['3840'], ['u20'] ],
-        damage    => 10,
-        active    => 0
+        a => {
+            lives     => 2,
+            locked    => [ 0, 0, 1, 1, 1 ],
+            registers => [ ['r90'], ['l60'], ['r70'], ['3840'], ['u20'] ],
+            damage    => 10,
+            active    => 0
+        }
     },
-    after => {
-        lives     => 2,
-        locked    => [],
-        registers => [],
-        damage    => 2,
-        active    => 1
-    } );
+    cleanup => { a => { locked => [], registers => [], damage => 2, active => 1 } },
+    after   => {
+        a => {
+            lives     => 2,
+            locked    => [],
+            registers => [],
+            damage    => 2,
+            active    => 1
+        } } );
 
 cleanup(
-    'Died by pit',
+    'Died by falling',
     before => {
-        lives  => 3,
-        damage => 0,
-        active => 0
+        a => { lives => 2, damage => 0, active => 0 },
+        b => { lives => 1, damage => 0, active => 0 },
+        c => { lives => 0, damage => 0, active => 0 }
     },
+    cleanup =>
+      { a => { damage => 2, active => 1 }, b => { damage => 2, active => 1 }, c => { damage => 0, active => 1 } },
     after => {
-        lives  => 2,
-        active => 1,
-        damage => 2
-    } );
+        a => { lives => 2, active => 1, damage => 2 },
+        b => { lives => 1, active => 1, damage => 2 },
+        c => { lives => 0, damage => 0, active => 0 } } );
 
 cleanup(
-    'Last life',
+    "Repair & Upgrade",
     before => {
-        lives  => 1,
-        active => 0
+        a => { x => 0, y => 0, damage => 1 },    #wrench
+        b => { x => 5, y => 5, damage => 2 },    #floor
+        c => { x => 7, y => 7, damage => 2 },    #upgrade
+        d => { x => 1, y => 4, damage => 2 },    #flag 3
+        e => { x => 9, y => 7, damage => 0 },    #flag 2
+        f => {                                   #wrench
+            x         => 11,
+            y         => 11,
+            damage    => 7,
+            locked    => [ 0, 0, 1, 1, 1 ],
+            registers => [ ['r90'], ['l60'], ['r70'], ['3840'], ['u20'] ],
+        }
     },
     after => {
-        lives  => 0,
-        active => 0,
-    } );
-
-cleanup(
-    'Already dead',
-    before => {
-        lives  => 0,
-        active => 0
+        a => { x => 0, y => 0, damage => 0 },
+        b => { x => 5, y => 5, damage => 2 },
+        c => { x => 7, y => 7, damage => 1, options => ['Brakes'] },
+        d => { x => 1, y => 4, damage => 1 },
+        e => { x => 9, y => 7, damage => 0 },
+        f => {
+            x         => 11,
+            y         => 11,
+            damage    => 6,
+            locked    => [ 0, 0, 0, 1, 1 ],
+            registers => [ [], [], [], ['3840'], ['u20'] ],
+        }
     },
-    after => {
-        lives  => 0,
-        active => 0,
-    } );
+    broadcast => {
+        repair  => { a => 0, c => 1, d => 1, f => 1 },
+        options => { c => ['Brakes'] } } );
 
-cleanup(
-    'Power up',
-    before => {
-        lives   => 2,
-        active  => 1,
-        damage  => 1,
-        powered => 0,
-    },
-    after => {
-        lives   => 2,
-        active  => 0,
-        damage  => 1,
-        powered => 1,
-    },
-);
-
-#First death, due to pit
-$rally->{players}{1}{public}{damage} = 0;
-delete $rally->{board}{pieces}{twitch};
-
-#Third and final death, due to pit
-$rally->{players}{2}{public}{damage} = 4;
-$rally->{players}{2}{public}{lives}  = 1;
-delete $rally->{board}{pieces}{zoom_bot};
-
-$rally->{state}->on_enter_state($rally);
-
-for my $p ( $p1, $p2 ) {
-    is( $rally->{players}{ $p->{in_game_id} }{public}{lives}, 2 );
-    is_deeply( $rally->{players}{ $p->{in_game_id} }{private}{registers}, [] );
-    $p->got_one( {
-            cmd   => 'programming',
-            cards => sub { $_[0]->values == 7 }
-        } );
-}
-is( $rally->{players}{2}{public}{lives}, 0 );
-is_deeply( $rally->{players}{2}{private}{registers}, [] );
-$p3->got_one( { cmd => 'programming', cards => [] } );
-
-done();
+done_testing();
 
 sub cleanup {
-    my ($scenario, %a) = @_;
+    my ( $scenario, %a ) = @_;
     subtest $scenario => sub {
-        my $course = Gamed::Game::RoboRally::Course->new('risky_exchange');
-    }
+        my $rally = Gamed::Game::RoboRally::Course->new('risky_exchange');
+        #$rally->{state}->on_enter_state($rally);
+        $rally->{option_cards} = bless { cards => ['Brakes'] }, 'Gamed::Object::Deck';
+        SKIP: {
+            skip "Tests not implemented", 1;
+            fail();
+        }
+        done_testing();
+      }
 }

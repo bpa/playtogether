@@ -8,10 +8,13 @@ use Gamed::Game::RoboRally::Course;
 use t::RoboRally;
 
 my $course = Gamed::Game::RoboRally::Course->new('checkmate');
-$course->add_bot( 'a', 1 );
+$course->add_bot( 'a' );
+$course->place( $course->{course}{pieces}{a}, 1 );
 is_deeply( $course->{course}{pieces}{a}, (bot('a', 5, 14, N ))[1] );
 
-$course->add_bot( 'b', 2 );
+$course->add_bot( 'b' );
+$course->place( $course->{course}{pieces}{b}, 2 );
+is_deeply( $course->{course}{pieces}{a}, (bot('a', 5, 14, N ))[1] );
 is_deeply( $course->{course}{pieces}{b}, (bot('b', 6, 14, N ))[1] );
 
 move(
@@ -251,7 +254,8 @@ sub move {
     subtest $a{scenario} => sub {
         my ( %pieces, @bots );
         $course->{pieces} = $a{before};
-        my $actions = $course->do_movement( $a{register}, $a{cards} );
+	my @cards = map { [ $a{before}{$_->[0]} => $_->[1] ] } @{$a{cards}};
+        my $actions = $course->do_movement( $a{register}, \@cards );
         is_deeply( $actions, $a{actions} );
         while ( my ( $piece, $data ) = each %{ $a{after} } ) {
             is_deeply( $course->{pieces}{$piece}, $data, "$piece final position" );

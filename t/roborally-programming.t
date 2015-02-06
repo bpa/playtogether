@@ -83,10 +83,10 @@ subtest 'locked registers' => sub {
     $p1->reset;
     $p2->reset;
 
-    $rally->{players}{0}{public}{damage}    = 5;
-    $rally->{players}{0}{public}{locked}    = [ 0, 0, 0, 0, 1 ];
-    $rally->{players}{0}{public}{registers} = [ [], [], [], [], ['u20'] ];
-    $rally->{players}{1}{public}{damage}    = 2;
+    $rally->{players}{0}{bot}{damage}    = 5;
+    $rally->{players}{0}{bot}{locked}    = [ 0, 0, 0, 0, 1 ];
+    $rally->{players}{0}{bot}{registers} = [ [], [], [], [], ['u20'] ];
+    $rally->{players}{1}{bot}{damage}    = 2;
 
     $rally->{state}->on_enter_state($rally);
 
@@ -118,7 +118,7 @@ subtest 'dead' => sub {
     my $rally = setup();
     for my $p ( $p1, $p2, $p3, $p4 ) {
         $p->reset;
-        $rally->{players}{ $p->{in_game_id} }{public}{lives} = $p->{in_game_id};
+        $rally->{players}{$p->{in_game_id}}{bot}{lives} = $p->{in_game_id};
     }
 
     $rally->{state}->on_enter_state($rally);
@@ -167,13 +167,13 @@ subtest 'time up with locked' => sub {
     $p1->reset;
     $p2->reset;
 
-    $rally->{players}{0}{public}{damage}    = 5;
-    $rally->{players}{0}{public}{locked}    = [ 0, 0, 0, 0, 1 ];
-    $rally->{players}{0}{public}{registers} = [ [], [], [], [], ['u20'] ];
+    $rally->{players}{0}{bot}{damage}    = 5;
+    $rally->{players}{0}{bot}{locked}    = [ 0, 0, 0, 0, 1 ];
+    $rally->{players}{0}{bot}{registers} = [ [], [], [], [], ['u20'] ];
 
     # Simulating a player that has had 'Fire Control' used on them
-    $rally->{players}{1}{public}{locked} = [ 0, 0, 1, 0, 0 ];
-    $rally->{players}{1}{public}{registers} = [ [], [], ['3840'], [], [] ];
+    $rally->{players}{1}{bot}{locked} = [ 0, 0, 1, 0, 0 ];
+    $rally->{players}{1}{bot}{registers} = [ [], [], ['3840'], [], [] ];
 
     $rally->{state}->on_enter_state($rally);
     $p1->reset;
