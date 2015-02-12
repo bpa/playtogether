@@ -20,7 +20,7 @@ use Gamed::Player;
 use File::Slurp;
 
 get '/' => sub {
-    shift->render_static('index.html');
+    shift->reply->static('index.html');
 };
 
 websocket '/websocket' => sub {
@@ -77,11 +77,8 @@ sub on_disconnect {
 
 $Gamed::Login::secret = read_file( catdir( dirname(__FILE__), '.secret' ) );
 
-#app->secrets( [ $gamed::Login::secret ] );
+app->secrets( [ $Gamed::Login::secret ] );
 my $daemon = Mojo::Server::Daemon->new( app => app, listen => ['http://*:3000'] );
-$daemon->app->home->parse( dirname(__FILE__), 'Gamed' );
-$daemon->app->static->paths->[0]   = $daemon->app->home->rel_dir('public');
-$daemon->app->renderer->paths->[0] = $daemon->app->home->rel_dir('public');
 $daemon->run;
 
 AE::cv->recv;

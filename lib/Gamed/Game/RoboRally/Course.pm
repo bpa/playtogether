@@ -64,6 +64,7 @@ sub place {
     my $loc = $self->{start}{$num};
     $bot->{x} = $loc->[0];
     $bot->{y} = $loc->[1];
+    $bot->{active} = 1;
     $self->{course}{pieces}{$bot->{id} . "_archive"} = Archive( $bot->{id}, $loc->[0], $loc->[1] );
 }
 
@@ -181,6 +182,7 @@ sub move_conveyors {
     my ( $self, $type ) = @_;
     my ( @new, %actions, @replace );
     for my $p ( values %{ $self->{pieces} } ) {
+        next unless $p->{active};
         my $x    = $p->{x};
         my $y    = $p->{y};
         my $tile = $self->{tiles}[$y][$x];

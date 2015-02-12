@@ -5,7 +5,9 @@ use warnings;
 
 use FindBin;
 use File::Slurp;
-use lib "$FindBin::Bin/../lib";
+use Cwd 'abs_path';
+use File::Spec::Functions 'catdir';
+use lib abs_path(catdir($FindBin::Bin, "..", "lib"));
 
 BEGIN {
     my $secret_file = "$FindBin::Bin/../lib/Gamed/.secret";

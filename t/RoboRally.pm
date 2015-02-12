@@ -8,7 +8,9 @@ use Gamed::Game::RoboRally::Pieces;
 
 sub bot {
     my ( $id, $x, $y, $o ) = @_;
-    return $id => Bot( $id, $x, $y, $o );
+    my $bot = Bot( $id, $x, $y, $o );
+    $bot->{active} = 1;
+    return $id => $bot;
 }
 
 sub archive {

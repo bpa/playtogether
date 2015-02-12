@@ -162,7 +162,8 @@ sub play {
     while (1) {
         my @ready = $select->can_read($timeout);
         if (@ready) {
-            $socket->recv( $buf, 4096 );
+            my $read = $socket->recv( $buf, 4096 );
+            last unless length($buf); #Other end is disconnected if we can't get data when can_read returns something
             my @messages = $json->incr_parse($buf);
             for my $msg (@messages) {
 				call $msg->{cmd}, $msg;
