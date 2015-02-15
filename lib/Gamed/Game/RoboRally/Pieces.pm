@@ -22,15 +22,19 @@ sub Piece {
 
 sub Bot {
     return {
-        id     => $_[0],
-        x      => $_[1],
-        y      => $_[2],
-        o      => $_[3],
-        type   => 'bot',
-        solid  => 1,
-        flag   => 0,
-        active => 0,
-        damage => 0
+        id        => $_[0],
+        x         => $_[1],
+        y         => $_[2],
+        o         => $_[3],
+        type      => 'bot',
+        active    => 0,
+        damage    => 0,
+        flag      => 0,
+        lives     => 3,
+        solid     => 1,
+        locked    => [],
+        options   => [],
+        registers => [],
     };
 }
 

@@ -46,7 +46,7 @@ sub do_movement {
     my $current = $self->{register} - 1;
     my @register;
     for my $p ( values %{ $self->{game}{players} } ) {
-        push @register, [ $p->{bot} => $p->{private}{registers}[$current] ];
+        push @register, [ $p->{public}{bot} => $p->{private}{registers}[$current] ];
         $p->{public}{registers}[$current] = $p->{private}{registers}[$current];
     }
     my $actions = $self->{game}{public}{course}->do_movement( $current, \@register );

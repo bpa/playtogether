@@ -26,7 +26,7 @@ sub on_enter_state {
         eval {
             my $bot = substr( $file, 0, -5 );
             my $data = $json->decode( read_file( catdir( $dir, $file ) ) );
-            $game->{public}{bots}{ $bot } = $data;
+            $game->{public}{bots}{$bot} = $data;
             $game->{public}{course}->add_bot($bot);
         };
     }
@@ -39,12 +39,12 @@ sub on_leave_state {
     my $pos     = 1;
     my @players = shuffle values %{ $game->{players} };
     for my $p (@players) {
-        $p->{bot}{flag}   = 0;
-        $p->{bot}{lives}  = 3;
-        $p->{bot}{damage} = 0;
-        $p->{bot}{locked} = [];
-        $p->{bot}{number} = $pos;
-        $game->{public}{course}->place($p->{bot}, $pos);
+        $p->{public}{bot}{flag}   = 0;
+        $p->{public}{bot}{lives}  = 3;
+        $p->{public}{bot}{damage} = 0;
+        $p->{public}{bot}{locked} = [];
+        $p->{public}{bot}{number} = $pos;
+        $game->{public}{course}->place( $p->{public}{bot}, $pos );
         $pos++;
     }
     $game->broadcast( pieces => { %{ $game->{public}{course}->pieces } } );
@@ -68,8 +68,7 @@ on 'bot' => sub {
         && !defined $game->{public}{bots}{ $msg->{bot} }{player} )
     {
         $game->{public}{bots}{ $msg->{bot} }{player} = $player->{in_game_id};
-        $player_data->{public}{bot}                  = $msg->{bot};
-        $player_data->{bot}                          = $game->{public}{course}{pieces}{ $msg->{bot} };
+        $player_data->{public}{bot} = $game->{public}{course}{pieces}{ $msg->{bot} };
         $self->{game}->broadcast( bot => { bot => $msg->{bot}, player => $player->{in_game_id} } );
     }
     else {

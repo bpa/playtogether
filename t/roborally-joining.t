@@ -22,7 +22,7 @@ subtest 'two players' => sub {
     is( $rally->{state}{name}, 'Programming' );
 
     for my $p ( values %{ $rally->{players} } ) {
-        is( $p->{bot}{lives}, 3 );
+        is( $p->{public}{bot}{lives}, 3 );
     }
 
     done();

@@ -10,42 +10,32 @@ sub new {
 
 sub on_enter_state {
     my ( $self, $game ) = @_;
-    $game->change_state('PROGRAMMING');
 
-#    if ( $self->{register} == 5 ) {
-#        if ( $p->{public}{damage} > 0 ) {
-#            $p->{public}{damage}--;
-#            $phase{repair}{ $bot->{id} } = $p->{public}{damage};
-#        }
-#    }
-#
-#    for my $player ( values %{ $self->{game}{players} } ) {
-#        my $p = $self->{game}{public}{course}{pieces}{ $player->{public}{bot} };
-#        if ($p) {
-#            my $tile = $self->{game}{public}{course}{tiles}[ $p->{y} ][ $p->{x} ];
-#            if ( $tile->{t} && ( $tile->{t} eq 'upgrade' || $tile->{t} eq 'wrench' ) ) {
-#                my $archive = $self->{game}{public}{course}{pieces}{ $p->{id} . "_archive" };
-#                if ( $archive->{x} != $p->{x} || $archive->{y} != $p->{y} ) {
-#                    $archive->{x} = $p->{x};
-#                    $archive->{y} = $p->{y};
-#                    $phase{archive}{ $p->{id} } = { x => $p->{x}, y => $p->{y} };
-#                }
-#                if ( $self->{register} == 5 ) {
-#                    if ( $player->{public}{damage} > 0 ) {
-#                        $player->{public}{damage}--;
-#                        $phase{repair}{ $p->{id} } = $player->{public}{damage};
-#                    }
-#                    if ( $tile->{t} eq 'upgrade' ) {
-#                        my $card = $self->{game}{option_cards}->deal;
-#                        if ($card) {
-#                            push @{ $phase{options}{ $p->{id} } }, $card;
-#                            push @{ $player->{public}{options} }, $card;
-#                        }
-#                    }
-#                }
-#            }
-#        }
-#    }
+    my @flags;
+    for my $p (values %{$game->{public}{course}{pieces}}) {
+        $flags[$p->{y}][$p->{x}] = 1 if $p->{type} eq 'flag';
+    }
+    my %cleanup;
+    for my $player ( values %{ $game->{players} } ) {
+        my $p    = $player->{public}{bot};
+        my $tile = $game->{public}{course}{tiles}[ $p->{y} ][ $p->{x} ];
+        if ( $tile->{t} && ( $tile->{t} eq 'upgrade' || $tile->{t} eq 'wrench' ) || $flags[$p->{y}][$p->{x}]) {
+            if ( $p->{damage} > 0 ) {
+                $p->{damage}--;
+                $cleanup{repair}{ $p->{id} } = $p->{damage};
+            }
+            if ( $tile->{t} eq 'upgrade' ) {
+                my $card = $self->{game}{option_cards}->deal;
+                if ($card) {
+                    push @{ $cleanup{options}{ $p->{id} } }, $card;
+                    push @{ $p->{options} }, $card;
+                }
+            }
+        }
+    }
+    $game->broadcast( cleanup => \%cleanup );
+
+    $game->change_state('PROGRAMMING');
 }
 
 1;

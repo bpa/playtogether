@@ -36,7 +36,7 @@ conveyor(
 conveyor(
     scenario => "Conveyed off board",
     before   => { bot( 'a', 3, 0, N ) },
-    after    => {},
+    after    => { dead( 'a', N, 2) },
     actions  => [ { piece => 'a', move => 1, dir => 0, die => 'fall' } ] );
 
 conveyor(

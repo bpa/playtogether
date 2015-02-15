@@ -16,9 +16,9 @@ sub on_enter_state {
 
     $game->{movement_cards}->reset->shuffle;
     for my $p ( values %{ $game->{players} } ) {
-		if ($p->{bot}{lives} > 0) {
+		if ($p->{public}{bot}{lives} > 0) {
 			$p->{public}{ready} = 0;
-			my $cards = 9 - $p->{bot}{damage};
+			my $cards = 9 - $p->{public}{bot}{damage};
 			$p->{private}{cards} = Gamed::Object::Bag->new( $game->{movement_cards}->deal($cards) );
 		}
 		else {
@@ -54,7 +54,7 @@ on 'program' => sub {
 			$player->err("Invalid program");
 			return;
 		}
-		push @cards, @$r unless $player_data->{bot}{locked}[$i];
+		push @cards, @$r unless $player_data->{public}{bot}{locked}[$i];
 	}
 
 	for my $c (@cards) {
@@ -101,9 +101,9 @@ on 'quit' => sub {
 
 sub locked_but_not_matching {
 	my ($i, $register, $player_data) = @_;
-	return unless $player_data->{bot}{locked}[$i];
+	return unless $player_data->{public}{bot}{locked}[$i];
 
-	my $locked = $player_data->{bot}{registers}[$i];
+	my $locked = $player_data->{public}{bot}{registers}[$i];
 
 	return 1 unless @$register == @$locked;
 	for my $j ( 0 .. $#$register ) {

@@ -24,11 +24,18 @@ sub new {
     my $text = read_file( catdir( $Gamed::public, "g", "RoboRally", "courses", "$name.json" ) );
     die "No course named " . $name . " known" unless $text;
     my $course = $json->decode($text);
-    my %self = ( course => $course );
+    my %self   = (
+        course => $course,
+        tiles  => $course->{tiles},
+        pieces => $course->{pieces},
+        w      => $course->{width},
+        h      => $course->{height} );
+
     for my $y ( 0 .. $#{ $course->{tiles} } ) {
         my $row = $course->{tiles}[$y];
         for my $x ( 0 .. $#$row ) {
             my $tile = $row->[$x];
+            $tile->{pieces} = [];
             $tile->{w} ||= 0;
             $tile->{o} ||= 0;
             $tile->{t} ||= 'floor';
@@ -45,39 +52,57 @@ sub new {
         else {
             $p = Piece( $p->{id}, $p->{type}, $p->{x}, $p->{y}, $p->{o} || 0, $p->{solid} || 0 );
         }
+        push @{$course->{tiles}[$p->{y}][$p->{x}]{pieces}}, $p;
     }
 
-    $self{tiles}  = $course->{tiles};
-    $self{pieces} = $course->{pieces};
-    $self{w}      = $course->{width};
-    $self{h}      = $course->{height};
     bless \%self, $pkg;
+}
+
+sub remove(&$) {
+    my $f = \&{ shift @_ };
+    for my $ind ( 0 .. $#{$_[0]} ) {
+        local $_ = $_[0][$ind];
+        if ($f->()) {
+            return splice @{$_[0]}, $ind, 1;
+        }
+    }
+    return;
+}
+
+sub died {
+    my ($self, $bot) = @_;
+    $bot->{lives}--;
+    $bot->{active} = 0;
+    $self->_move($bot, 0, 0);
 }
 
 sub add_bot {
     my ( $self, $bot ) = @_;
-    $self->{course}{pieces}{$bot} = Bot( $bot, 0, 0, N );
+    my $piece = Bot( $bot, 0, 0, N );
+    $self->{course}{pieces}{$bot} = $piece;
+    push @{$self->{tiles}[0][0]{pieces}}, $piece;
 }
 
 sub place {
     my ( $self, $bot, $num ) = @_;
     my $loc = $self->{start}{$num};
-    $bot->{x} = $loc->[0];
-    $bot->{y} = $loc->[1];
+    $self->_move($bot, $loc->[0], $loc->[1]);
     $bot->{active} = 1;
-    $self->{course}{pieces}{$bot->{id} . "_archive"} = Archive( $bot->{id}, $loc->[0], $loc->[1] );
+    my $archive = Archive( $bot->{id}, $loc->[0], $loc->[1] );
+    $self->{course}{pieces}{ $bot->{id} . "_archive" } = $archive;
+    push @{$self->{tiles}[$loc->[1]][$loc->[0]]{pieces}}, $archive;
+}
+
+sub _move {
+    my ($self, $piece, $x, $y) = @_;
+    my $tile = $self->{tiles}[$piece->{y}][$piece->{x}];
+    remove { $_->{id} eq $piece->{id} } $tile->{pieces};
+    push @{$self->{tiles}[$y][$x]{pieces}}, $piece;
+    $piece->{x} = $x;
+    $piece->{y} = $y;
 }
 
 sub pieces { return $_[0]->{course}{pieces} }
-
-sub firstind(&@) {
-    my $f = \&{ shift @_ };
-    for my $ind ( 0 .. $#_ ) {
-        local $_ = $_[$ind];
-        return $ind if $f->();
-    }
-    return -1;
-}
 
 sub do_movement {
     my ( $self, $register, $cards ) = @_;
@@ -115,25 +140,27 @@ sub _push {
     my @pieces = grep { $_->{solid} && $_->{$z} == $track } values %{ $self->{pieces} };
 
     while ($move) {
-        my $ind = firstind { $_->{$xy} == $loc } @pieces;
+        my $piece = remove { $_->{$xy} == $loc } \@pieces;
         $loc += $d;
-        if ( $ind == -1 ) {
+        unless ( $piece ) {
             $move--;
             next;
         }
-        my $piece = splice @pieces, $ind, 1;
         $move = $self->max_movement( $piece->{x}, $piece->{y}, $move, $dir, \@pieces );
         if ($move) {
+            my $tile = $self->{tiles}[ $piece->{y} ][ $piece->{x} ];
+            remove { $_->{id} eq $piece->{id} } $tile->{pieces};
             $piece->{$xy} += $d * $move;
             my %action = ( piece => $piece->{id}, move => $move, dir => $dir );
-            my $tile = $self->{tiles}[ $piece->{y} ][ $piece->{x} ];
+            $tile = $self->{tiles}[ $piece->{y} ][ $piece->{x} ];
+            push @{$tile->{pieces}}, $piece;
             if (   $piece->{x} < 0
                 || $piece->{y} < 0
                 || $piece->{x} >= $self->{w}
                 || $piece->{y} >= $self->{h}
                 || $tile->{t} eq 'pit' )
             {
-                delete $self->{pieces}{ $piece->{id} };
+                $self->died($piece);
                 $action{die} = 'fall';
             }
             push @actions, \%action;
@@ -183,8 +210,8 @@ sub move_conveyors {
     my ( @new, %actions, @replace );
     for my $p ( values %{ $self->{pieces} } ) {
         next unless $p->{active};
-        my $x    = $p->{x};
-        my $y    = $p->{y};
+        my $x = $p->{x};
+        my $y = $p->{y};
         my $tile = $self->{tiles}[$y][$x];
         my $dir  = $tile->{o};
         if ( $tile->{t} =~ $type ) {
@@ -237,8 +264,13 @@ sub move_conveyors {
     }
     for my $p ( values %actions ) {
         my $piece = $self->{pieces}{ $p->{piece} };
-        $piece->{x} = delete $p->{x};
-        $piece->{y} = delete $p->{y};
+        my $x = delete $p->{x};
+        my $y = delete $p->{y};
+        if ($p->{die}) {
+            $self->died($piece);
+            next;
+        }
+        $self->_move($piece, $x, $y);
         $piece->{o} = delete $p->{o} || $piece->{o};
     }
     return [ %actions ? [ values %actions ] : () ];
