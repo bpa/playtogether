@@ -1,5 +1,6 @@
 package SocketMock;
 
+use Test::More;
 use Test::Builder;
 use Data::Dumper;
 my $tb = Test::Builder->new;
@@ -18,12 +19,12 @@ sub send {
 }
 
 sub got_one {
+    local $Test::Builder::Level = $Test::Builder::Level + 1;
     my ( $self, $hash, $desc ) = @_;
     $hash ||= {};
     $desc ||= 'gotOne';
 
     if ( @{ $self->{packets} } == 1 ) {
-        local $Test::Builder::Level = $Test::Builder::Level + 1;
         $self->got( $hash, $desc );
     }
     else {
@@ -33,6 +34,7 @@ sub got_one {
 }
 
 sub got {
+    local $Test::Builder::Level = $Test::Builder::Level + 1;
     my ( $self, $hash, $desc ) = @_;
     my $msg  = shift @{ $self->{packets} };
     my $pass = 1;
@@ -58,8 +60,8 @@ sub got {
             }
         }
     }
-    $pass ? $tb->ok( 1, $desc ) : $tb->is_eq( $tb->explain($msg),
-        $tb->explain($hash), $desc );
+    $pass ? $tb->ok( 1, $desc ) : $tb->is_eq( $tb->explain($msg), $tb->explain($hash), $desc );
+    $pass ? $tb->ok( 1, $desc ) : is_deeply( $msg, $hash, $desc );
 }
 
 1;

@@ -24,7 +24,7 @@ sub on_enter_state {
     }
 
     my @players = values %{ $game->{players} };
-    my $armies  = $countries / @players;
+    my $armies  = int($countries / @players);
     $armies++ unless $countries % @players == 0;
 
     for my $p (@players) {
@@ -67,7 +67,6 @@ sub on_enter_state {
     }
 
     $game->broadcast( placing => { countries => $game->{public}{countries} } );
-
 }
 
 on 'ready' => sub {

@@ -35,10 +35,10 @@ sub generate_armies {
     for my $p ( values %{ $game->{players} } ) {
         if ( $p->{countries} ) {
             if ( $p->{countries} > 11 ) {
-                $p->{armies} += int( $p->{countries} / 3 );
+                $p->{private}{armies} += int( $p->{countries} / 3 );
             }
             else {
-                $p->{armies} += 3;
+                $p->{private}{armies} += 3;
             }
 
             #for my $c ( values %{ $game->{board}{continents} } ) {
@@ -50,9 +50,9 @@ sub generate_armies {
                         last;
                     }
                 }
-                $p->{armies} += $c->{bonus} if $holds_region;
+                $p->{private}{armies} += $c->{bonus} if $holds_region;
             }
-            $p->{client}->send( armies => { armies => $p->{armies} } );
+            $p->{client}->send( armies => { armies => $p->{private}{armies} } );
         }
     }
 }

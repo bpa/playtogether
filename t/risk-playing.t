@@ -24,88 +24,70 @@ subtest 'moving' => sub {
         'Eastern Australia' => { owner => 0, armies => 2 },
         'Western Australia' => { owner => 1, armies => 3 },
         'New Guinea'        => { owner => 1, armies => 1 },
-        Madagascar          => { owner => 1, armies => 1 }
-    );
+        Madagascar          => { owner => 1, armies => 1 } );
 
     #Normal move
-    $p2->broadcast(
-        {
+    $p2->broadcast( {
             cmd    => 'move',
             from   => ind('Western Australia'),
             to     => ind('New Guinea'),
             armies => 2,
         },
-        {
-            cmd    => 'move',
+        {   cmd    => 'move',
             result => [
                 { country => ind('Western Australia'), armies => 1, owner => 1 },
-                { country => ind('New Guinea'),        armies => 3, owner => 1 }
-            ]
-        }
-    );
+                { country => ind('New Guinea'),        armies => 3, owner => 1 } ] } );
 
     #Can't move last guy or more than you have
-    $p2->game(
-        {
+    $p2->game( {
             cmd    => 'move',
             from   => ind('Western Australia'),
             to     => ind('New Guinea'),
             armies => 1
         },
-        { reason => 'Not enough armies' }
-    );
-    $p2->game(
-        {
+        { reason => 'Not enough armies' } );
+    $p2->game( {
             cmd    => 'move',
             from   => ind('New Guinea'),
             to     => ind('Western Australia'),
             armies => 3
         },
-        { reason => 'Not enough armies' }
-    );
-    $p2->game(
-        {
+        { reason => 'Not enough armies' } );
+    $p2->game( {
             cmd    => 'move',
             from   => ind('New Guinea'),
             to     => ind('Western Australia'),
             armies => 4
         },
-        { reason => 'Not enough armies' }
-    );
-    $p2->game(
-        {
+        { reason => 'Not enough armies' } );
+    $p2->game( {
             cmd    => 'move',
             from   => ind('Western Australia'),
             to     => ind('New Guinea'),
             armies => 4
         },
-        { reason => 'Not enough armies' }
-    );
+        { reason => 'Not enough armies' } );
 
     #Can't move to same country
     $p1->game( { cmd => 'move', from => 0, to => 0, armies => 1 }, { reason => 'Invalid destination' } );
 
     #Can't move to non-bordering country
-    $p2->game(
-        {
+    $p2->game( {
             cmd    => 'move',
             from   => ind('Western Australia'),
             to     => ind('Madagascar'),
             armies => 1
         },
-        { reason => 'Invalid destination' }
-    );
+        { reason => 'Invalid destination' } );
 
     #Can't move someone elses armies
-    $p1->game(
-        {
+    $p1->game( {
             cmd    => 'move',
             from   => ind('Western Australia'),
             to     => ind('New Guinea'),
             armies => 1
         },
-        { reason => 'Not owner' }
-    );
+        { reason => 'Not owner' } );
 
     done();
 };
@@ -113,62 +95,46 @@ subtest 'moving' => sub {
 subtest 'attack with one army' => sub {
     my $risk = setup(
         'Western Australia' => { owner => 0, armies => 5 },
-        'New Guinea'        => { owner => 1, armies => 5 }
-    );
+        'New Guinea'        => { owner => 1, armies => 5 } );
 
     #Attacker wins
     @not_so_random_numbers = ( 5, 1 );
-    $p1->broadcast(
-        {
+    $p1->broadcast( {
             cmd    => 'move',
             from   => ind('Western Australia'),
             to     => ind('New Guinea'),
             armies => 1
         },
-        {
-            cmd    => 'attack',
+        {   cmd    => 'attack',
             result => [
                 { country => ind('Western Australia'), armies => 5, owner => '0' },
-                { country => ind('New Guinea'),        armies => 4, owner => '1' }
-            ]
-        }
-    );
+                { country => ind('New Guinea'),        armies => 4, owner => '1' } ] } );
 
     #Tie
     @not_so_random_numbers = ( 5, 5 );
-    $p1->broadcast(
-        {
+    $p1->broadcast( {
             cmd    => 'move',
             from   => ind('Western Australia'),
             to     => ind('New Guinea'),
             armies => 1
         },
-        {
-            cmd    => 'attack',
+        {   cmd    => 'attack',
             result => [
                 { country => ind('Western Australia'), armies => 4, owner => '0' },
-                { country => ind('New Guinea'),        armies => 4, owner => '1' }
-            ]
-        }
-    );
+                { country => ind('New Guinea'),        armies => 4, owner => '1' } ] } );
 
     #Attacker loses
     @not_so_random_numbers = ( 1, 5 );
-    $p1->broadcast(
-        {
+    $p1->broadcast( {
             cmd    => 'move',
             from   => ind('Western Australia'),
             to     => ind('New Guinea'),
             armies => 1
         },
-        {
-            cmd    => 'attack',
+        {   cmd    => 'attack',
             result => [
                 { country => ind('Western Australia'), armies => 3, owner => '0' },
-                { country => ind('New Guinea'),        armies => 4, owner => '1' }
-            ]
-        }
-    );
+                { country => ind('New Guinea'),        armies => 4, owner => '1' } ] } );
 
     done();
 };
@@ -176,26 +142,20 @@ subtest 'attack with one army' => sub {
 subtest 'attack order' => sub {
     my $risk = setup(
         'Western Australia' => { owner => 0, armies => 10 },
-        'New Guinea'        => { owner => 1, armies => 10 }
-    );
+        'New Guinea'        => { owner => 1, armies => 10 } );
 
     #Attacker wins
     @not_so_random_numbers = ( 2, 3, 5, 2, 3 );
-    $p1->broadcast(
-        {
+    $p1->broadcast( {
             cmd    => 'move',
             from   => ind('Western Australia'),
             to     => ind('New Guinea'),
             armies => 3
         },
-        {
-            cmd    => 'attack',
+        {   cmd    => 'attack',
             result => [
                 { country => ind('Western Australia'), armies => 10, owner => '0' },
-                { country => ind('New Guinea'),        armies => 8,  owner => '1' }
-            ]
-        }
-    );
+                { country => ind('New Guinea'),        armies => 8,  owner => '1' } ] } );
 
     done();
 };
@@ -203,80 +163,59 @@ subtest 'attack order' => sub {
 subtest 'valid attacks with more than one army' => sub {
     my $risk = setup(
         'Western Australia' => { owner => 0, armies => 10 },
-        'New Guinea'        => { owner => 1, armies => 10 }
-    );
+        'New Guinea'        => { owner => 1, armies => 10 } );
 
     #Attacker wins
     @not_so_random_numbers = ( 5, 3, 4, 2 );
-    $p1->broadcast(
-        {
+    $p1->broadcast( {
             cmd    => 'move',
             from   => ind('Western Australia'),
             to     => ind('New Guinea'),
             armies => 2
         },
-        {
-            cmd    => 'attack',
+        {   cmd    => 'attack',
             result => [
                 { country => ind('Western Australia'), armies => 10, owner => '0' },
-                { country => ind('New Guinea'),        armies => 8,  owner => '1' }
-            ]
-        }
-    );
+                { country => ind('New Guinea'),        armies => 8,  owner => '1' } ] } );
 
     #Attacker wins & ties
     @not_so_random_numbers = ( 5, 5, 5, 4 );
-    $p1->broadcast(
-        {
+    $p1->broadcast( {
             cmd    => 'move',
             from   => ind('Western Australia'),
             to     => ind('New Guinea'),
             armies => 2
         },
-        {
-            cmd    => 'attack',
+        {   cmd    => 'attack',
             result => [
                 { country => ind('Western Australia'), armies => 9, owner => '0' },
-                { country => ind('New Guinea'),        armies => 7, owner => '1' }
-            ]
-        }
-    );
+                { country => ind('New Guinea'),        armies => 7, owner => '1' } ] } );
 
     #Attacker ties & loses
     @not_so_random_numbers = ( 3, 5, 5, 4 );
-    $p1->broadcast(
-        {
+    $p1->broadcast( {
             cmd    => 'move',
             from   => ind('Western Australia'),
             to     => ind('New Guinea'),
             armies => 2
         },
-        {
-            cmd    => 'attack',
+        {   cmd    => 'attack',
             result => [
                 { country => ind('Western Australia'), armies => 7, owner => '0' },
-                { country => ind('New Guinea'),        armies => 7, owner => '1' }
-            ]
-        }
-    );
+                { country => ind('New Guinea'),        armies => 7, owner => '1' } ] } );
 
     #Attacker loses
     @not_so_random_numbers = ( 3, 2, 5, 4 );
-    $p1->broadcast(
-        {
+    $p1->broadcast( {
             cmd    => 'move',
             from   => ind('Western Australia'),
             to     => ind('New Guinea'),
             armies => 2
         },
-        {
-            cmd    => 'attack',
+        {   cmd    => 'attack',
             result => [
                 { country => ind('Western Australia'), armies => 5, owner => '0' },
-                { country => ind('New Guinea'),        armies => 7, owner => '1' }
-            ]
-        }
-    );
+                { country => ind('New Guinea'),        armies => 7, owner => '1' } ] } );
 
     done();
 };
@@ -288,102 +227,83 @@ subtest 'bad attacks' => sub {
         'Western Australia' => { owner => 0, armies => 3 },
         'Indonesia'         => { owner => 1, armies => 1 },
         'New Guinea'        => { owner => 1, armies => 1 },
-        Madagascar          => { owner => 1, armies => 1 }
-    );
+        Madagascar          => { owner => 1, armies => 1 } );
 
     #Can't attack with no one
-    $p1->game(
-        {
+    $p1->game( {
             cmd    => 'move',
             from   => ind('Siam'),
             to     => ind('Indonesia'),
             armies => 0
         },
-        { reason => 'Not enough armies' }
-    );
+        { reason => 'Not enough armies' } );
 
     #Can't attack with last guy or more than you have
-    $p1->game(
-        {
+    $p1->game( {
             cmd    => 'move',
             from   => ind('Western Australia'),
             to     => ind('New Guinea'),
             armies => 3
         },
-        { reason => 'Not enough armies' }
-    );
+        { reason => 'Not enough armies' } );
 
-    $p2->game(
-        {
+    $p2->game( {
             cmd    => 'move',
             from   => ind('New Guinea'),
             to     => ind('Western Australia'),
             armies => 1
         },
-        { reason => 'Not enough armies' }
-    );
+        { reason => 'Not enough armies' } );
 
-    $p2->game(
-        {
+    $p2->game( {
             cmd    => 'move',
             from   => ind('New Guinea'),
             to     => ind('Western Australia'),
             armies => 3
         },
-        { reason => 'Not enough armies' }
-    );
+        { reason => 'Not enough armies' } );
 
-    $p2->game(
-        {
+    $p2->game( {
             cmd    => 'move',
             from   => ind('New Guinea'),
             to     => ind('Western Australia'),
             armies => 4
         },
-        { reason => 'Not enough armies' }
-    );
+        { reason => 'Not enough armies' } );
 
-    $p1->game(
-        {
+    $p1->game( {
             cmd    => 'move',
             from   => ind('Western Australia'),
             to     => ind('New Guinea'),
             armies => 4
         },
-        { reason => 'Not enough armies' }
-    );
+        { reason => 'Not enough armies' } );
 
     #Can't attack to non-bordering country
-    $p1->game(
-        {
+    $p1->game( {
             cmd    => 'move',
             from   => ind('Western Australia'),
             to     => ind('Madagascar'),
             armies => 1
         },
-        { reason => 'Invalid destination' }
-    );
+        { reason => 'Invalid destination' } );
 
     #Can't attack unless you own from
-    $p1->game(
-        {
+    $p1->game( {
             cmd    => 'move',
             from   => ind('New Guinea'),
             to     => ind('Eastern Australia'),
             armies => 1
         },
-        { reason => 'Not owner' }
-    );
+        { reason => 'Not owner' } );
 
-    $p2->game(
-        {
+    $p2->game( {
             cmd    => 'move',
             from   => ind('Eastern Australia'),
             to     => ind('New Guinea'),
             armies => 0
         },
-        { reason => 'Not owner' }
-    );
+        { reason => 'Not owner' } );
 
     done();
 };
@@ -444,13 +364,13 @@ subtest 'produce armies for countries' => sub {
     my $i;
     for my $p ( values %{ $risk->{players} } ) {
         $p->{countries} = 30 + $i++;
-        $p->{armies}    = 0;
+        $p->{private}{armies} = 0;
     }
 
     $risk->{states}{PLAYING}->generate_armies($risk);
 
     for $i ( 0 .. 2 ) {
-        is( $risk->{players}{$i}{armies}, 10 );
+        is( $risk->{players}{$i}{private}{armies}, 10 );
     }
 
     done();
@@ -515,12 +435,11 @@ subtest 'produce armies for continents' => sub {
 subtest 'win game' => sub {
     my $risk = setup(
         'Western Australia' => { owner => 0, armies => 9 },
-        'Eastern Australia' => { owner => 1, armies => 1 }
-    );
+        'Eastern Australia' => { owner => 1, armies => 1 } );
 
     for my $i ( 0 .. 39 ) {
-        $risk->{public}{countries}[$i]{owner}  = 0;
-        $risk->{public}{countries}[$i]{armies} = 1;
+        $risk->{public}{countries}[$i]{owner} = 0;
+        $risk->{public}{countries}[$i]{private}{armies} = 1;
     }
 
     $risk->{players}{0}{countries} = 41;
@@ -528,24 +447,18 @@ subtest 'win game' => sub {
     $risk->{players}{2}{countries} = 0;
 
     @not_so_random_numbers = ( 5, 5, 4, 4 );
-    $p1->game(
-        {
+    $p1->game( {
             cmd    => 'move',
             from   => ind('Western Australia'),
             to     => ind('Eastern Australia'),
             armies => 8
-        }
-    );
+        } );
     broadcast(
         $risk,
-        {
-            cmd    => 'attack',
+        {   cmd    => 'attack',
             result => [
                 { country => ind('Western Australia'), armies => 1, owner => '0' },
-                { country => ind('Eastern Australia'), armies => 8, owner => '0' }
-            ]
-        }
-    );
+                { country => ind('Eastern Australia'), armies => 8, owner => '0' } ] } );
 
     broadcast( $risk, { cmd => 'defeated', player => 1 } );
     broadcast( $risk, { cmd => 'victory',  player => 0 } );
@@ -584,22 +497,22 @@ sub setup {
     $p1->broadcast( { cmd => 'ready' } );
     $p2->broadcast( { cmd => 'ready' } );
     $p3->game( { cmd => 'ready' } );
-    broadcast( $risk, { cmd   => 'ready' } );
-    broadcast( $risk, { cmd   => 'armies' } );
+    broadcast( $risk, { cmd => 'ready' } );
+    broadcast( $risk, { cmd => 'armies' } );
     broadcast( $risk, { cmd => 'placing' } );
     is( $risk->{state}{name}, 'Placing' );
 
     $p1->broadcast( { cmd => 'ready' } );
     $p2->broadcast( { cmd => 'ready' } );
     $p3->game( { cmd => 'ready' } );
-    broadcast( $risk, { cmd   => 'ready' } );
+    broadcast( $risk, { cmd => 'ready' } );
     broadcast( $risk, { cmd => 'playing' } );
     is( $risk->{state}{name}, 'Playing' );
 
     for my $i ( 0 .. 2 ) {
-        $risk->{public}{countries}[$i]{owner}   = $i;
-        $risk->{public}{countries}[$i]{armies}  = 1;
-        $risk->{players}{$i}{countries} = 14;
+        $risk->{public}{countries}[$i]{owner}           = $i;
+        $risk->{public}{countries}[$i]{private}{armies} = 1;
+        $risk->{players}{$i}{countries}                 = 14;
     }
 
     while ( my ( $k, $v ) = each %country ) {
@@ -616,12 +529,12 @@ sub clear_board {
 
     #This is a completely invalid state, but useful
     for my $i ( 0 .. 41 ) {
-        $risk->{public}{countries}[$i]{owner}  = 0;
-        $risk->{public}{countries}[$i]{armies} = 1;
+        $risk->{public}{countries}[$i]{owner} = 0;
+        $risk->{public}{countries}[$i]{private}{armies} = 1;
     }
     for my $p ( values %{ $risk->{players} } ) {
         $p->{countries} = 1;
-        $p->{armies}    = 0;
+        $p->{private}{armies} = 0;
     }
 }
 
