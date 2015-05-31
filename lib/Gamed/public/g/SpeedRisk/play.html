@@ -1,2 +1,28 @@
 <div ng-controller="SpeedRiskCtl">
+  <nav class="navbar navbar-default navbar-fixed-bottom">
+    <div class="container">
+      <button ng-show="ready" class="btn btn-success" ng-click="toggleReady()">Ready</button>
+      <button ng-hide="ready" class="btn btn-danger" ng-click="toggleReady()">Not Ready</button>
+      Armies to leave: <select ng-model="defense" ng-init="defense=1" convert-to-number>
+        <option value="1">1</option>
+        <option value="2">2</option>
+        <option value="3">3</option>
+        <option value="4">4</option>
+        <option value="5">5</option>
+        <option value="6">6</option>
+        <option value="7">7</option>
+        <option value="8">8</option>
+        <option value="9">9</option>
+        <option value="10">10</option>
+      </select>
+      <button class="btn btn-danger pull-right" ng-click="quit()">Quit</button>
+    </div>
+  </nav>
 </div>
+<script type="text/ng-template" id="quit.html">
+  Are you Sure you want to quit?
+  <div class="modal-footer">
+    <button class="btn btn-primary" ng-click="ok()">OK</button>
+    <button class="btn btn-warning" ng-click="cancel()">Cancel</button>
+  </div>
+</script>
