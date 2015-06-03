@@ -1,6 +1,7 @@
 <div ng-controller="SpeedRiskCtl">
   <nav class="navbar navbar-default navbar-fixed-bottom">
     <div class="container">
+      <span>Armies: {{private.armies + 0}}</span>
       <button ng-show="ready" class="btn btn-success" ng-click="toggleReady()">Ready</button>
       <button ng-hide="ready" class="btn btn-danger" ng-click="toggleReady()">Not Ready</button>
       Armies to leave: <select ng-model="defense" ng-init="defense=1" convert-to-number>
