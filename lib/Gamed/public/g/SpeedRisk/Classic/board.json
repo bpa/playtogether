@@ -83,7 +83,7 @@
          ],
          "name" : "Eastern US",
          "sprite": { "x": 133, "y": 114 },
-         "token":  { "x": 169, "y": 143 }
+         "token":  { "x": 169, "y": 133 }
       },
       {
          "borders" : [
@@ -93,7 +93,7 @@
          ],
          "name" : "Northwest Territory",
          "sprite": { "x": 79, "y": 52 },
-         "token": { "x": 115, "y": 77 }
+         "token": { "x": 115, "y": 67 }
       },
       {
          "borders" : [
@@ -102,7 +102,7 @@
          ],
          "name" : "Western US",
          "sprite": { "x": 100, "y": 112 },
-         "token": { "x": 129, "y": 135 }
+         "token": { "x": 129, "y": 125 }
       },
       {
          "borders" : [
@@ -112,7 +112,7 @@
          ],
          "name" : "Ontario",
          "sprite": { "x": 150, "y": 84 },
-         "token": { "x": 166, "y": 109 }
+         "token": { "x": 166, "y": 99 }
       },
       {
          "borders" : [
@@ -120,7 +120,7 @@
          ],
          "name" : "Central America",
          "sprite": { "x": 114, "y": 148 },
-         "token": { "x": 152, "y": 180 }
+         "token": { "x": 152, "y": 170 }
       },
       {
          "borders" : [
@@ -129,7 +129,7 @@
          ],
          "name" : "Alberta",
          "sprite": { "x": 87, "y": 84 },
-         "token": { "x": 121, "y": 104 }
+         "token": { "x": 121, "y": 94 }
       },
       {
          "borders" : [
@@ -139,7 +139,7 @@
          ],
          "name" : "Greenland",
          "sprite": { "x": 99, "y": 1 },
-         "token": { "x": 199, "y": 50 }
+         "token": { "x": 199, "y": 40 }
       },
       {
          "borders" : [
@@ -149,7 +149,7 @@
          ],
          "name" : "Alaska",
          "sprite": { "x": 12, "y": 49 },
-         "token": { "x": 56, "y": 74 }
+         "token": { "x": 56, "y": 64 }
       },
       {
          "borders" : [
@@ -157,7 +157,7 @@
          ],
          "name" : "Quebec",
          "sprite": { "x": 180, "y": 76 },
-         "token": { "x": 203, "y": 104 }
+         "token": { "x": 203, "y": 94 }
       },
       {
          "borders" : [
@@ -166,7 +166,7 @@
          ],
          "name" : "Brazil",
          "sprite": { "x": 196, "y": 198 },
-         "token": { "x": 239, "y": 231 }
+         "token": { "x": 239, "y": 221 }
       },
       {
          "borders" : [
@@ -175,12 +175,12 @@
          ],
          "name" : "Venezuela",
          "sprite": { "x": 180, "y": 184 },
-         "token": { "x": 206, "y": 203 }
+         "token": { "x": 206, "y": 193 }
       },
       {
          "name" : "Argentina",
          "sprite": { "x": 189, "y": 240 },
-         "token": { "x": 209, "y": 279 }
+         "token": { "x": 209, "y": 269 }
       },
       {
          "borders" : [
@@ -189,7 +189,7 @@
          ],
          "name" : "Peru",
          "sprite": { "x": 177, "y": 199 },
-         "token": { "x": 209, "y": 240 }
+         "token": { "x": 209, "y": 230 }
       },
       {
          "borders" : [
@@ -198,7 +198,7 @@
          ],
          "name" : "Iceland",
          "sprite": { "x": 282, "y": 65 },
-         "token": { "x": 294, "y": 74 }
+         "token": { "x": 294, "y": 64 }
       },
       {
          "borders" : [
@@ -208,7 +208,7 @@
          ],
          "name" : "Southern Europe",
          "sprite": { "x": 332, "y": 113 },
-         "token": { "x": 360, "y": 130 }
+         "token": { "x": 360, "y": 120 }
       },
       {
          "borders" : [
@@ -220,7 +220,7 @@
          ],
          "name" : "Ukraine",
          "sprite": { "x": 362, "y": 29 },
-         "token": { "x": 400, "y": 96 }
+         "token": { "x": 400, "y": 86 }
       },
       {
          "borders" : [
@@ -230,7 +230,7 @@
          ],
          "name" : "Scandinavia",
          "sprite": { "x": 333, "y": 50 },
-         "token": { "x": 360, "y": 78 }
+         "token": { "x": 360, "y": 68 }
       },
       {
          "borders" : [
@@ -239,7 +239,7 @@
          ],
          "name" : "Great Britain",
          "sprite": { "x": 306, "y": 88 },
-         "token": { "x": 318, "y": 104 }
+         "token": { "x": 318, "y": 94 }
       },
       {
          "borders" : [
@@ -248,7 +248,7 @@
          ],
          "name" : "Western Europe",
          "sprite": { "x": 304, "y": 108 },
-         "token": { "x": 322, "y": 131 }
+         "token": { "x": 322, "y": 121 }
       },
       {
          "borders" : [
@@ -257,7 +257,7 @@
          ],
          "name" : "Northern Europe",
          "sprite": { "x": 325, "y": 90 },
-         "token": { "x": 351, "y": 111 }
+         "token": { "x": 351, "y": 101 }
       },
       {
          "borders" : [
@@ -266,7 +266,7 @@
          ],
          "name" : "Egypt",
          "sprite": { "x": 340, "y": 143 },
-         "token": { "x": 370, "y": 163 }
+         "token": { "x": 370, "y": 153 }
       },
       {
          "borders" : [
@@ -274,12 +274,12 @@
          ],
          "name" : "Congo",
          "sprite": { "x": 341, "y": 189 },
-         "token": { "x": 365, "y": 225 }
+         "token": { "x": 365, "y": 215 }
       },
       {
          "name" : "Madagascar",
          "sprite": { "x": 403, "y": 231 },
-         "token": { "x": 412, "y": 248 }
+         "token": { "x": 412, "y": 238 }
       },
       {
          "borders" : [
@@ -287,7 +287,7 @@
          ],
          "name" : "South Africa",
          "sprite": { "x": 349, "y": 242 },
-         "token": { "x": 371, "y": 263 }
+         "token": { "x": 371, "y": 253 }
       },
       {
          "borders" : [
@@ -298,7 +298,7 @@
          ],
          "name" : "East Africa",
          "sprite": { "x": 362, "y": 166 },
-         "token": { "x": 391, "y": 202 }
+         "token": { "x": 391, "y": 192 }
       },
       {
          "borders" : [
@@ -308,7 +308,7 @@
          ],
          "name" : "North Africa",
          "sprite": { "x": 293, "y": 136 },
-         "token": { "x": 329, "y": 179 }
+         "token": { "x": 329, "y": 169 }
       },
       {
          "borders" : [
@@ -318,7 +318,7 @@
          ],
          "name" : "Afghanistan",
          "sprite": { "x": 409, "y": 75 },
-         "token": { "x": 440, "y": 121 }
+         "token": { "x": 440, "y": 111 }
       },
       {
          "borders" : [
@@ -327,7 +327,7 @@
          ],
          "name" : "Mongolia",
          "sprite": { "x": 484, "y": 98 },
-         "token": { "x": 529, "y": 121 }
+         "token": { "x": 529, "y": 111 }
       },
       {
          "borders" : [
@@ -337,12 +337,12 @@
          ],
          "name" : "Ural",
          "sprite": { "x": 432, "y": 43 },
-         "token": { "x": 455, "y": 90 }
+         "token": { "x": 455, "y": 80 }
       },
       {
          "name" : "Japan",
          "sprite": { "x": 560, "y": 120 },
-         "token": { "x": 581, "y": 143 }
+         "token": { "x": 581, "y": 133 }
       },
       {
          "borders" : [
@@ -350,7 +350,7 @@
          ],
          "name" : "Irkutsk",
          "sprite": { "x": 482, "y": 81 },
-         "token": { "x": 535, "y": 97 }
+         "token": { "x": 535, "y": 87 }
       },
       {
          "borders" : [
@@ -358,7 +358,7 @@
          ],
          "name" : "India",
          "sprite": { "x": 433, "y": 142 },
-         "token": { "x": 468, "y": 168 }
+         "token": { "x": 468, "y": 158 }
       },
       {
          "borders" : [
@@ -366,7 +366,7 @@
          ],
          "name" : "Siam",
          "sprite": { "x": 489, "y": 157 },
-         "token": { "x": 507, "y": 179 }
+         "token": { "x": 507, "y": 169 }
       },
       {
          "borders" : [
@@ -375,7 +375,7 @@
          ],
          "name" : "Yakutsk",
          "sprite": { "x": 519, "y": 42 },
-         "token": { "x": 558, "y": 74 }
+         "token": { "x": 558, "y": 64 }
       },
       {
          "borders" : [
@@ -386,7 +386,7 @@
          ],
          "name" : "Siberia",
          "sprite": { "x": 455, "y": 8 },
-         "token": { "x": 495, "y": 70 }
+         "token": { "x": 495, "y": 60 }
       },
       {
          "borders" : [
@@ -395,7 +395,7 @@
          ],
          "name" : "China",
          "sprite": { "x": 451, "y": 124 },
-         "token": { "x": 503, "y": 145 }
+         "token": { "x": 503, "y": 135 }
       },
       {
          "borders" : [
@@ -405,7 +405,7 @@
          ],
          "name" : "Kamchatka",
          "sprite": { "x": 0, "y": 32 },
-         "token": { "x": 613, "y": 72 }
+         "token": { "x": 613, "y": 62 }
       },
       {
          "borders" : [
@@ -413,7 +413,7 @@
          ],
          "name" : "Middle East",
          "sprite": { "x": 372, "y": 127 },
-         "token": { "x": 410, "y": 159 }
+         "token": { "x": 410, "y": 149 }
       },
       {
          "borders" : [
@@ -422,7 +422,7 @@
          ],
          "name" : "New Guinea",
          "sprite": { "x": 562, "y": 208 },
-         "token": { "x": 585, "y": 223 }
+         "token": { "x": 585, "y": 213 }
       },
       {
          "borders" : [
@@ -431,7 +431,7 @@
          ],
          "name" : "Indonesia",
          "sprite": { "x": 498, "y": 174 },
-         "token": { "x": 532, "y": 211 }
+         "token": { "x": 532, "y": 201 }
       },
       {
          "borders" : [
@@ -439,12 +439,12 @@
          ],
          "name" : "Western Australia",
          "sprite": { "x": 529, "y": 228 },
-         "token": { "x": 554, "y": 259 }
+         "token": { "x": 554, "y": 249 }
       },
       {
          "name" : "Eastern Australia",
          "sprite": { "x": 569, "y": 227 },
-         "token": { "x": 584, "y": 260 }
+         "token": { "x": 584, "y": 250 }
       }
    ]
 }
