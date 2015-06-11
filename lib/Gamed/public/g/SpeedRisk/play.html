@@ -20,6 +20,9 @@
                     <option value="10">10</option>
                 </select>
             </span>
+			<span class="well well-sm">Current theme: 
+				<select ng-options="t.id as t.name for t in availableThemes" ng-change="changeTheme()" ng-model="theme"></select>
+			</span>
             <button class="btn btn-danger pull-right" ng-click="quit()">Quit</button>
         </div>
     </nav>
