@@ -1,6 +1,5 @@
 package Gamed::Game::SpeedRisk;
 
-our $DEV = 1;
 use File::Basename;
 use File::Spec::Functions 'catdir';
 use Gamed::Handler;
@@ -36,7 +35,8 @@ on 'create' => sub {
 
 on 'join' => sub {
     my ( $self, $player, $msg ) = @_;
-    my $theme = ( keys %{ $self->{public}{themes} } )[ rand keys %{ $self->{public}{themes} } ];
+	my @available = grep { not defined $self->{public}{themes}{$_} } keys %{ $self->{public}{themes} };
+    my $theme = $available[ rand @available ];
     $self->{public}{themes}{$theme} = $player->{in_game_id};
     $self->{players}{ $player->{in_game_id} }{public}{theme} = $theme;
 };

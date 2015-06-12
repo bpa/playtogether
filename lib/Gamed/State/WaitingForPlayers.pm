@@ -43,6 +43,7 @@ on 'list_players' => sub {
 
 on 'ready' => sub {
     my ( $self, $client, $msg, $player_data ) = @_;
+	return if $player_data->{public}{ready};
     my $game = $self->{game};
     if ( keys %{ $game->{players} } >= $self->{min} ) {
         $player_data->{public}{ready} = 1;
@@ -56,9 +57,10 @@ on 'ready' => sub {
 };
 
 on 'not ready' => sub {
-    my ( $self, $player, $msg ) = @_;
+    my ( $self, $player, $msg, $player_data ) = @_;
+	return unless $player_data->{public}{ready};
     my $game = $self->{game};
-    $game->{players}{ $player->{in_game_id} }{public}{ready} = 0;
+    $player_data->{public}{ready} = 0;
     $game->broadcast( 'not ready' => { player => $player->{in_game_id} } );
 };
 
