@@ -52,6 +52,17 @@ sub generate_armies {
                 }
                 $p->{private}{armies} += $c->{bonus} if $holds_region;
             }
+			my $country = $game->{board}{map};
+            while (my ($name, $c) = each %{ $game->{board}{regions} } ) {
+                my $holds_region = 1;
+                for my $t ( @{ $c->{territories} } ) {
+                    if ( $country->{$t}{owner} != $p->{public}{id} ) {
+                        $holds_region = 0;
+                        last;
+                    }
+                }
+                $p->{private}{armies} += $c->{bonus} if $holds_region;
+            }
             $p->{client}->send( armies => { armies => $p->{private}{armies} } );
         }
     }
@@ -85,7 +96,7 @@ on 'move' => sub {
         return;
     }
 
-    if ( !$a || $a >= $from->{armies} ) {
+    if ( $a < 1 || $a >= $from->{armies} ) {
         $player->err("Not enough armies");
         return;
     }
