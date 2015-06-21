@@ -7,18 +7,22 @@ our @EXPORT = qw/N E S W bot archive flag dead/;
 use Gamed::Game::RoboRally::Pieces;
 
 sub bot {
-    my ( $id, $x, $y, $o ) = @_;
+    my ( $id, $x, $y, $o, $opts ) = @_;
     my $bot = Bot( $id, $x, $y, $o );
-    $bot->{active} = 1;
+	$opts ||= {};
+    $opts->{active} = 1 unless exists $opts->{active};
+	while (my ($k, $v) = each(%$opts) ) {
+		$bot->{$k} = $v;
+	}
     return $id => $bot;
 }
 
 sub dead {
-    my ( $id, $o, $lives ) = @_;
-    my $bot = Bot( $id, 0, 0, $o );
-    $bot->{active} = 0;
-    $bot->{lives} = $lives || 3;
-    return $id => $bot;
+    my ( $id, $lives, $opts ) = @_;
+	$opts ||= {};
+	$opts->{active} = 0;
+    $opts->{lives} = $lives || 3;
+    return bot( $id, 0, 0, N, $opts );
 }
 
 sub archive {

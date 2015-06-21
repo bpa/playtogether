@@ -39,10 +39,6 @@ sub on_leave_state {
     my $pos     = 1;
     my @players = shuffle values %{ $game->{players} };
     for my $p (@players) {
-        $p->{public}{bot}{flag}   = 0;
-        $p->{public}{bot}{lives}  = 3;
-        $p->{public}{bot}{damage} = 0;
-        $p->{public}{bot}{locked} = [];
         $p->{public}{bot}{number} = $pos;
         $game->{public}{course}->place( $p->{public}{bot}, $pos );
         $pos++;

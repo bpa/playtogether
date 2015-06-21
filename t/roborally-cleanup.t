@@ -10,83 +10,80 @@ use t::RoboRally;
 cleanup(
     "Repair & Upgrade",
     before => {
-        a => { x => 0, y => 0, damage => 1 },    #wrench
-        b => { x => 5, y => 5, damage => 2 },    #floor
-        c => { x => 7, y => 7, damage => 2 },    #upgrade
-        d => { x => 1, y => 4, damage => 2 },    #flag 3
-        e => { x => 9, y => 7, damage => 0 },    #flag 2
+        bot('a', 0, 0, N, { damage => 1 }),    #wrench
+        bot('b', 5, 5, N, { damage => 2 }),    #floor
+        bot('c', 7, 7, N, { damage => 2 }),    #upgrade
+        bot('d', 1, 4, N, { damage => 2 }),    #flag 3
+        bot('e', 9, 7, N, { damage => 0 }),    #flag 2
     },
     after => {
-        a => { x => 0, y => 0, damage => 0 },
-        b => { x => 5, y => 5, damage => 2 },
-        c => { x => 7, y => 7, damage => 1, options => ['Brakes'] },
-        d => { x => 1, y => 4, damage => 1 },
-        e => { x => 9, y => 7, damage => 0 },
+        bot('a', 0, 0, N, { damage => 0 }),
+        bot('b', 5, 5, N, { damage => 2 }),
+        bot('c', 7, 7, N, { damage => 1, options => ['Brakes'] }),
+        bot('d', 1, 4, N, { damage => 1 }),
+        bot('e', 9, 7, N, { damage => 0 }),
     },
-    broadcast => {
-        repair  => { a => 0, c => 1, d => 1 },
-        options => { c => ['Brakes'] } } );
+    broadcast => { repair  => { a => 1, c => 1, d => 1 }, options => { c => ['Brakes'] } } );
 
 cleanup(
     'Damage related cleanup',
+	died => [ 'a' ],
     before => {
-        a => {
-            lives     => 2,
-            locked    => [ 0, 0, 1, 1, 1 ],
+        dead('a', 2, {
+            locked    => [ 1, 1, 1, 1, 1 ],
             registers => [ ['r90'], ['l60'], ['r70'], ['3840'], ['u20'] ],
             damage    => 10,
-            active    => 0
-        },
-        f => {    #wrench
-            x         => 11,
-            y         => 11,
+        } ),
+		archive('a', 7, 9),
+        bot('f', 11, 11, N, {    #wrench
             damage    => 7,
             locked    => [ 0, 0, 1, 1, 1 ],
             registers => [ ['r90'], ['l60'], ['r70'], ['3840'], ['u20'] ],
-        }
+        } ),
     },
-    broadcast => { a => { locked => [], registers => [], damage => 2, active => 1 } },
     after     => {
-        a => {
-            lives     => 2,
-            locked    => [],
-            registers => [],
-            damage    => 2,
-            active    => 1
-        },
-        f => {
-            x         => 11,
-            y         => 11,
+        dead('a', 2, { damage => 2 }),
+		archive('a', 7, 9),
+        bot('f', 11, 11, N, {
             damage    => 6,
             locked    => [ 0, 0, 0, 1, 1 ],
-            registers => [ [], [], [], ['3840'], ['u20'] ],
-        } } );
+            registers => [ [], [], [], ['3840'], ['u20'] ] } ),
+	},
+    broadcast => [ 
+		  { repair => { f => 1 }, options => {} },
+		  { cmd => 'placing', bot => 'a' },
+		] );
 
 cleanup(
     'Died by falling',
+	died => [ 'c', 'b', 'a' ],
     before => {
-        a => { lives => 2, damage => 0, active => 0 },
-        b => { lives => 1, damage => 0, active => 0 },
-        c => { lives => 0, damage => 0, active => 0 }
+        dead('a', 2),
+        dead('b', 1),
+        dead('c', 0),
     },
-    broadcast =>
-      { a => { damage => 2, active => 1 }, b => { damage => 2, active => 1 }, c => { damage => 0, active => 1 } },
     after => {
-        a => { lives => 2, active => 1, damage => 2 },
-        b => { lives => 1, active => 1, damage => 2 },
-        c => { lives => 0, damage => 0, active => 0 } } );
+        dead('a', 2, { damage => 2 }),
+        dead('b', 1, { damage => 2 }),
+        dead('c', 0),
+	},
+    broadcast => [
+      { repair => {}, options => {}},
+	  { cmd => 'placing', bot => 'b' },
+	] );
 
 done_testing();
 
 sub cleanup {
     my ( $scenario, %a ) = @_;
+    local $Test::Builder::Level = $Test::Builder::Level + 1;
     subtest $scenario => sub {
         my $p1 = Gamed::Test::Player->new('a');
         my $rally = $p1->create( 'RoboRally', 'test', { course => 'risky_exchange' } );
         $rally->{public}{bots}{a} = {};
         $rally->{public}{course}->add_bot('a');
         $p1->broadcast( { cmd => 'bot', 'bot' => 'a' } );
-        for my $p (grep { $_ ne 'a' } keys %{$a{before}}) {
+        for my $p (grep { $_ ne 'a' && !/_archive/ } keys %{$a{before}}) {
             my $p1 = Gamed::Test::Player->new($p);
             $p1->join('test');
             $rally->{public}{bots}{$p} = {};
@@ -104,8 +101,14 @@ sub cleanup {
         $rally->change_state('CLEANUP');
         $rally->handle( $p1, { cmd => 1 } );
 
-        $a{broadcast}{cmd} = 'cleanup';
-        $p1->got( $a{broadcast} );
+		my $msg = ref($a{broadcast}) eq 'ARRAY' ? $a{broadcast} : [ $a{broadcast} ];
+        $msg->[0]{cmd} = 'cleanup';
+		while (my ($name, $bot) = each (%{$a{after}})) {
+        	$msg->[0]{bots}{$name} = $bot if $bot->{type} eq 'bot';
+		}
+		for my $m (@$msg) {
+        	$p1->got( $m );
+		}
 
         $p1->{sock}{packets} = [];
         $p1->{game} = Gamed::Lobby->new;
