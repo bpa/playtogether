@@ -12,9 +12,9 @@ use File::Basename;
 use List::Util 'max';
 
 my $game_dir = "lib/Gamed/public/g/SpeedRisk";
-#write_theme_json( read_themes() );
-#make_themes('Classic');
-#make_themes('Ultimate');
+write_theme_json( read_themes() );
+make_themes('Classic');
+make_themes('Ultimate');
 pack_image_dir("resources/RoboRally", "lib/Gamed/public/g/RoboRally", "images");
 
 sub make_themes {
@@ -71,7 +71,7 @@ sub write_theme_json {
 	for my $theme (@_) {
 		my %info;
 		while (my ($k, $v) = each %$theme) {
-			$info{$k} = $v if $k =~ /text/ || $k =~ /-[xy]/;
+			$info{$k} = $v if $k =~ /text/ || $k =~ /-[xy]/ || $k =~ /name/;
 		}
 		$data{$theme->{id}} = \%info;
 	}
