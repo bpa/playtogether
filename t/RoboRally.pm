@@ -21,7 +21,7 @@ sub dead {
     my ( $id, $lives, $opts ) = @_;
 	$opts ||= {};
 	$opts->{active} = 0;
-    $opts->{lives} = $lives || 3;
+    $opts->{lives} = $lives || 2;
     return bot( $id, 0, 0, N, $opts );
 }
 

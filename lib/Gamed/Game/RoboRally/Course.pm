@@ -73,7 +73,7 @@ sub died {
     my ($self, $bot) = @_;
     $bot->{lives}--;
     $bot->{active} = 0;
-    $self->_move($bot, 0, 0);
+    $self->move($bot, 0, 0);
 }
 
 sub add_bot {
@@ -86,20 +86,26 @@ sub add_bot {
 sub place {
     my ( $self, $bot, $num ) = @_;
     my $loc = $self->{start}{$num};
-    $self->_move($bot, $loc->[0], $loc->[1]);
+    $self->move($bot, $loc->[0], $loc->[1]);
     $bot->{active} = 1;
     my $archive = Archive( $bot->{id}, $loc->[0], $loc->[1] );
     $self->{course}{pieces}{ $bot->{id} . "_archive" } = $archive;
     push @{$self->{tiles}[$loc->[1]][$loc->[0]]{pieces}}, $archive;
 }
 
-sub _move {
+sub move {
     my ($self, $piece, $x, $y) = @_;
     my $tile = $self->{tiles}[$piece->{y}][$piece->{x}];
     remove { $_->{id} eq $piece->{id} } $tile->{pieces};
     push @{$self->{tiles}[$y][$x]{pieces}}, $piece;
     $piece->{x} = $x;
     $piece->{y} = $y;
+}
+
+sub tile {
+    my ($self, $x, $y) = @_;
+    return if $x < 0 || $y < 0 || $x >= $self->{w} || $y >= $self->{h};
+    return $self->{tiles}[$y][$x];
 }
 
 sub pieces { return $_[0]->{course}{pieces} }
@@ -270,7 +276,7 @@ sub move_conveyors {
             $self->died($piece);
             next;
         }
-        $self->_move($piece, $x, $y);
+        $self->move($piece, $x, $y);
         $piece->{o} = delete $p->{o} || $piece->{o};
     }
     return [ %actions ? [ values %actions ] : () ];
