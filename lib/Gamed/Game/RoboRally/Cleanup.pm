@@ -2,6 +2,7 @@ package Gamed::Game::RoboRally::Cleanup;
 
 use Gamed::Handler;
 use parent 'Gamed::State';
+use Data::Dumper;
 
 sub new {
     my ( $pkg, %opts ) = @_;
@@ -22,7 +23,7 @@ sub on_enter_state {
 
     for my $player ( values %{ $game->{players} } ) {
         my $bot = $player->{public}{bot};
-		$cleanup{bots}{$bot->{id}} = $bot;
+		$cleanup{pieces}{$bot->{id}} = $bot;
 
 		if ($bot->{active}) {
 			my $action = $self->tile_actions($bot, \@flags);
@@ -50,7 +51,7 @@ sub on_enter_state {
 		$self->clear_registers($bot);
     }
 
-    $game->broadcast( cleanup => \%cleanup );
+    $game->broadcast( repairs => \%cleanup );
 
 	if (@{$self->{placing}}) {
 		my $bot = shift @{$self->{placing}};
@@ -58,6 +59,17 @@ sub on_enter_state {
 		$game->broadcast( placing => { bot => $bot->{id} } );
 	}
 
+    my $need_input = 0;
+    for my $piece (@{ $game->{deaths}}) {
+        if ($piece->{type} eq 'bot') {
+            if (!$need_input) {
+                $self->{placing} = $piece->{id};
+                $game->{players}{$game->{public}{bots}{$piece->{id}}{player}}{client}->send('place');
+            }
+            $need_input = 1;
+        }
+    }
+    $game->change_state('PROGRAMMING') unless $need_input;
    	$game->change_state('PROGRAMMING') unless @{$self->{placing}} || $self->{repairs};
 }
 
@@ -123,4 +135,35 @@ sub clear_registers {
 		$bot->{registers}[$r]{program} = [] unless $bot->{registers}[$r]{damaged};
 	}
 }
+
+on 'place' => sub {
+    my ( $self, $player, $msg, $player_data ) = @_;
+
+    if ($player_data->{public}{bot}{id} ne $self->{placing}) {
+        $player->err('Not your turn');
+        return;
+    }
+
+    my $game = $self->{game};
+    my $course = $game->{public}{course};
+    $msg->{piece} = $player_data->{public}{bot}{id};
+    my $bot = $game->{public}{course}{pieces}{$msg->{piece}};
+    my $tile = $course->tile($msg->{x}, $msg->{y});
+    if (!defined $tile || grep { $_->{solid} } @{ $tile->{pieces} }) {
+        $player->err("Invalid Placement");
+        return;
+    }
+
+    my $archive = $course->{pieces}{$bot->{id} . "_archive"};
+    if ($msg->{x} != $archive->{x} || $msg->{y} != $archive->{y}) {
+        $player->err("Invalid Placement");
+        return;
+    }
+
+    $bot->{damage} = 2;
+    $bot->{active} = 1;
+    $game->{public}{course}->move($bot, $msg->{x}, $msg->{y});
+    $self->{game}->broadcast( place => $msg );
+};
+
 1;
