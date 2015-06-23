@@ -54,7 +54,7 @@ sub got {
 			}
         }
         else {
-            if ( !exists($msg->{$k}) || $msg->{$k} ne $v ) {
+            if ( !exists($msg->{$k}) || ($msg->{$k} && $msg->{$k} ne $v) ) {
                 $pass = 0;
                 last;
             }
