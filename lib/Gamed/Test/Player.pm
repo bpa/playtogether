@@ -92,6 +92,7 @@ sub got_one {
 
 sub send {
     my ( $self, $cmd, $msg ) = @_;
+    $msg = { $cmd => $msg } unless ref($msg);
     $msg->{cmd} = $cmd;
 	#print (($self->{user} ? $self->{user}{name} : '?'), " got ", $json->encode($msg), "\n");
     $self->{sock}->send($msg);

@@ -25,6 +25,7 @@ sub handle {
 sub send {
     my ( $self, $cmd, $msg ) = @_;
 	return unless defined $self->{sock};
+    $msg = { $cmd => $msg } unless ref($msg);
     $msg->{cmd} = $cmd;
     $self->{sock}->send( $json->encode($msg) );
 }
