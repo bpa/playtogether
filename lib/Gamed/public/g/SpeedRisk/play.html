@@ -1,7 +1,7 @@
 <div ng-controller="SpeedRiskCtl">
-    <nav class="navbar navbar-default navbar-fixed-bottom">
-        <div class="container">
-            <span class="btn" ng-class="stateMap[state].class">{{stateMap[state].text}}</span>
+	<nav class="navbar navbar-default navbar-fixed-bottom"  id="speedRiskControls">
+		<div class="container">
+				<span class="btn" ng-class="stateMap[state].class">{{stateMap[state].text}}</span>
             <span ng-hide="stateMap[state].hide">
                 <button ng-show="ready" class="btn btn-success" ng-click="toggleReady()">Ready</button>
                 <button ng-hide="ready" class="btn btn-danger" ng-click="toggleReady()">Not Ready</button>
@@ -23,9 +23,15 @@
 			<span class="well well-sm">Current theme: 
 				<select ng-options="t.id as t.name for t in availableThemes" ng-change="changeTheme()" ng-model="theme"></select>
 			</span>
-            <button class="btn btn-danger pull-right" ng-click="quit()">Quit</button>
-        </div>
-    </nav>
+			<button class="btn btn-danger pull-right" ng-click="quit()">Quit</button>
+		</div>
+	</nav>
+	<div ng-show="board==='Ultimate'"  style="float:right;width:320px;padding:5px;font-weight: bold">
+		Bonus Regions
+		<a target="bonusView" href="g/SpeedRisk/{{board}}/board.png">
+			<img src="g/SpeedRisk/{{board}}/board.png" style="width:310px;">
+		</a>
+	</div>
 </div>
 <script type="text/ng-template" id="quit.html">
     Are you Sure you want to quit?
