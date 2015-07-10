@@ -21,7 +21,7 @@ on 'create' => sub {
     $msg->{board} ||= 'Classic';
     $self->{board}                = Gamed::Game::SpeedRisk::Board->new( $msg->{board} );
     $self->{public}{countries}    = $self->{board}{territories};
-    $self->{min_players}          = 2;
+    $self->{min_players}          = 3;
     $self->{max_players}          = $self->{board}{players};
     $self->{public}{rules}{board} = $msg->{board};
     opendir( my $dh, catdir( $Gamed::public, "g", "SpeedRisk", $msg->{board} ) );

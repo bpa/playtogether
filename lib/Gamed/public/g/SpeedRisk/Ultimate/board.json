@@ -1,7 +1,7 @@
 {
    "players" : 12,
    "army_generation_period" : 35,
-   "starting_armies" : [ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12 ],
+   "starting_armies" : [ 0, 0, 50, 45, 40, 35, 30, 25, 20, 15, 10, 10, 10 ],
    "continents" : {
       "Europe" : {
          "regions" : [
