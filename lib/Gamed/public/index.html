@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" ng-app="playtogether">
+<html lang="en">
   <head ng-controller="LocCtl">
     <title>Play together</title>
     <link rel="stylesheet" href="css/bootstrap.min.css">
@@ -12,13 +12,12 @@
     <script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.2.23/angular-route.min.js"></script>
     <script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.2.23/angular-touch.min.js"></script>
     <script src="js/ui-bootstrap-tpls-0.11.0.min.js"></script>
-    <script src="js/app.js"></script>
-    <script src="js/pixi.js"></script>
-    <script src="g/HiLo/controller.js"></script>
-    <script src="g/Rook/controller.js"></script>
-    <script src="g/Spitzer/controller.js"></script>
-    <script src="g/SpeedRisk/controller.js"></script>
-    <script src="g/RoboRally/controller.js"></script>
+    <script src="js/require.js"></script>
+    <script>
+      require(["g/games"], function() {
+        angular.bootstrap(document, ['playtogether']);
+      });
+    </script>
   </head>
   <body>
     <div ng-view></div>
