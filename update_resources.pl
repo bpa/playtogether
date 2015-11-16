@@ -139,8 +139,8 @@ sub wrap_image {
 	my ($image, $file) = @_;
 	return
           { filename         => $file,
-            rotated          => 'false',
-            trimmed          => 'false',
+            rotated          => JSON::false,
+            trimmed          => JSON::false,
             spriteSourceSize => {
                 x => 0,
                 y => 0,
