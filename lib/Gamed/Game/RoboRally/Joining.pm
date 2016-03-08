@@ -43,7 +43,7 @@ sub on_leave_state {
         $game->{public}{course}->place( $p->{public}{bot}, $pos );
         $pos++;
     }
-    $game->broadcast( pieces => { %{ $game->{public}{course}->pieces } } );
+    $game->broadcast( 'pieces', pieces => $game->{public}{course}->pieces );
 }
 
 on 'join'         => "Gamed::State::WaitingForPlayers";

@@ -1,6 +1,7 @@
 use strict;
 use warnings;
 use Test::More;
+use Test::Deep qw/cmp_details deep_diag ignore/;
 use Gamed;
 use Gamed::Test;
 use Data::Dumper;
@@ -47,7 +48,7 @@ cleanup(
         } ),
 		archive('a', 7, 9),
         bot('f', 11, 11, N, {    #wrench
-            registers => [ und('r90'), und('l60'), dmg('r70'), dmg('3840'), dmg('u20') ],
+            registers => [ 'r90', 'l60', dmg('r70'), dmg('3840'), dmg('u20') ],
             damage    => 7,
         } ),
     },
@@ -55,14 +56,14 @@ cleanup(
         dead('a', 2, { damage => 2 }),
 		archive('a', 7, 9),
         bot('f', 11, 11, N, {
-            registers => [ und(), und(), dmg('r70'), dmg('3840'), dmg('u20') ],
-            damage    => 7,
+            registers => [ undef, undef, undef, dmg('3840'), dmg('u20') ],
+            damage    => 6,
             }),
 	},
     messages => [
-        { p => 'all', recv => { cmd => 'repairs', repair => { f => 1 }, options => { } } },
-        { p => 'all', recv => { cmd => 'placing', bot => 'a' } },
-        { p => 'f', recv => { cmd => 'repair', repair => 1 } }, ] );
+        { p => 'all', recv => { cmd => 'repairs', repair => { f => 1 }, options => { }, pieces => ignore() } },
+        #{ p => 'all', recv => { cmd => 'placing', bot => 'a' } } ] );
+        { p => 'all', recv => { cmd => 'place' } } ] );
 
 cleanup(
     'Died by falling',
@@ -78,17 +79,16 @@ cleanup(
         dead('c', 0),
 	},
     messages => [
-      { p => 'all', recv => {repair => {}, options => {}} },
-	  { p => 'all', recv => { cmd => 'placing', bot => 'b' }},
-	] );
+        { p => 'all', recv => { cmd => 'repairs', repair => {}, options => {}, pieces => ignore() } },
+        { p => 'all', recv => { cmd => 'placing', bot => 'b' } },
+      ]);
 
 cleanup(
     'Cleanup registers',
     deaths => [ 'a' ],
     before => {
         dead('a', 2, {
-                locked    => [ 1, 1, 1, 1, 1 ],
-                registers => [ ['r90'], ['l60'], ['r70'], ['3840'], ['u20'] ],
+                registers => [ dmg('r90'), dmg('l60'), dmg('r70'), dmg('3840'), dmg('u20') ],
                 damage    => 10,
             }
         ),
@@ -96,16 +96,14 @@ cleanup(
         bot( 'b', 7, 7, S ),    #upgrade
         bot('c', 11, 11, N,     #wrench
             {   damage    => 7,
-                locked    => [ 0, 0, 1, 1, 1 ],
-                registers => [ ['r90'], ['l60'], ['r70'], ['3840'], ['u20'] ] } )
+                registers => [ 'r90', 'l60', dmg('r70'), dmg('3840'), dmg('u20') ] } )
     },
     after => {
         bot( 'a', 3, 14, N, { damage  => 2, lives => 2 } ),
         bot( 'b', 7, 7,  S, { options => ['Brakes'] } ),
         bot('c', 11, 11, N,
             {   damage    => 6,
-                locked    => [ 0, 0, 0, 1, 1 ],
-                registers => [ undef, undef, undef, ['3840'], ['u20'] ],
+                registers => [ undef, undef, undef, dmg('3840'), dmg('u20') ],
             } ) },
     messages => [ {
             p    => 'all',
@@ -115,9 +113,9 @@ cleanup(
                     bot( 'b', 7, 7, S, { options => ['Brakes'] } ),
                     bot('c', 11, 11, N,
                         {   damage    => 6,
-                            registers => [ undef, undef, undef, ['3840'], ['u20'] ],
-                            locked    => [ 0, 0, 0, 1, 1 ] } )
-                },
+                            registers => [ undef, undef, undef, dmg('3840'), dmg('u20') ],
+                        } ),
+                  },
                 options => { b => ['Brakes'] }
             },
             msg => 'Initial'
@@ -216,28 +214,23 @@ sub dmg {
     return { damaged => 1, program => [ $program ] };
 }
 
-sub und {
-    my $program = shift;
-    return { damaged => 0, program => $program ? [ $program ] : [] };
-}
-
 sub cleanup {
     my ( $scenario, %a ) = @_;
-    local $Test::Builder::Level = $Test::Builder::Level + 1;
     subtest $scenario => sub {
+        local $Test::Builder::Level = $Test::Builder::Level - 1;
         my $p1 = Gamed::Test::Player->new('a');
         my $rally = $p1->create( 'RoboRally', 'test', { course => 'risky_exchange' } );
         $rally->{public}{bots}{a} = {};
         $rally->{public}{course}->add_bot('a');
         my %player = ( a => $p1 );
-        $p1->broadcast( { cmd => 'bot', 'bot' => 'a' } );
+        $p1->broadcast( { cmd => 'bot', 'bot' => 'a', player => 0 } );
         for my $p ( grep { $_ ne 'a' && !/_archive/ } keys %{ $a{before} } ) {
             my $p1 = Gamed::Test::Player->new($p);
             $player{$p} = $p1;
             $p1->join('test');
             $rally->{public}{bots}{$p} = {};
             $rally->{public}{course}->add_bot($p);
-            $p1->broadcast( { cmd => 'bot', 'bot' => $p } );
+            $p1->broadcast( { cmd => 'bot', 'bot' => $p }, { cmd => 'bot', 'bot' => $p, player => ignore() } );
         }
         while ( my ( $k, $v ) = each %{ $a{before} } ) {
             my $bot = $rally->{public}{course}{pieces}{$k};
@@ -254,6 +247,7 @@ sub cleanup {
         for my $msg ( @{ $a{messages} } ) {
             if ( $msg->{recv} ) {
                 if ( $msg->{p} eq 'all' ) {
+                   print Dumper $msg->{recv};
                     broadcast( $rally, $msg->{recv}, $msg->{msg} );
                 }
                 else {
@@ -266,7 +260,11 @@ sub cleanup {
         }
 
         while ( my ( $id, $bot ) = each( %{ $a{after} } ) ) {
-            is_deeply( $rally->{public}{course}{pieces}{$id}, $bot, $id );
+            my ($ok, $stack) = cmp_details( $rally->{public}{course}{pieces}{$id}, $bot);
+            ok($ok, $id);
+            if (!$ok) {
+              diag deep_diag($stack);
+            }
         }
 
         delete $Gamed::instance{test};

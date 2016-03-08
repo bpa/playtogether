@@ -2,6 +2,7 @@ package SocketMock;
 
 use Test::More;
 use Test::Builder;
+use Test::Deep::NoTest qw/cmp_details deep_diag/;
 use Data::Dumper;
 my $tb = Test::Builder->new;
 $Data::Dumper::Terse = 1;
@@ -28,8 +29,8 @@ sub got_one {
         $self->got( $hash, $desc );
     }
     else {
-        $tb->is_eq( scalar @{ $self->{packets} }, 1, "$desc Received response" );
-        print STDERR Dumper $self->{packets} if @{ $self->{packets} };
+        $tb->is_eq( scalar @{ $self->{packets} }, 1, "$desc Received too many responses" );
+        #print STDERR Dumper $self->{packets} if @{ $self->{packets} };
     }
 }
 
@@ -37,31 +38,11 @@ sub got {
     local $Test::Builder::Level = $Test::Builder::Level + 1;
     my ( $self, $hash, $desc ) = @_;
     my $msg  = shift @{ $self->{packets} };
-    my $pass = 1;
-    while ( my ( $k, $v ) = each(%$hash) ) {
-        if ( ref($v) eq 'CODE' ) {
-            if ( !$tb->ok( $v->( $msg->{$k} ), $k ) ) {
-                $pass = 0;
-                last;
-            }
-        }
-        elsif ( ref($v) eq 'ARRAY' ) {
-			my ($exp) = $tb->explain($msg->{$k});
-			my ($want) = $tb->explain($v);
-			if ( $exp ne $want ) {
-				$pass = 0;
-				last;
-			}
-        }
-        else {
-            if ( !exists($msg->{$k}) || ($msg->{$k} && $msg->{$k} ne $v) ) {
-                $pass = 0;
-                last;
-            }
-        }
+    my ($ok, $stack) = cmp_details($msg, $hash);
+    unless($tb->ok($ok, $desc)) {
+        my $diag = deep_diag($stack);
+        $tb->diag($diag);
     }
-    $pass ? $tb->ok( 1, $desc ) : $tb->is_eq( $tb->explain($msg), $tb->explain($hash), $desc );
-    $pass ? $tb->ok( 1, $desc ) : is_deeply( $msg, $hash, $desc );
 }
 
 1;

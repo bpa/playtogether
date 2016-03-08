@@ -1,6 +1,7 @@
 use strict;
 use warnings;
 use Test::More;
+use Test::Deep;
 use Gamed;
 use Gamed::Test;
 use Data::Dumper;
@@ -15,12 +16,12 @@ subtest 'two players' => sub {
     is( $rally->{players}{0}{private}{cards}->values, 9, "player 1 was dealt 9 cards" );
     $p1->got_one(
         {   cmd   => 'programming',
-            cards => sub { @{ $_[0] } == 9 }
+            cards => code(sub { @{ $_[0] } == 9 })
         } );
     is( $rally->{players}{1}{private}{cards}->values, 9, "player 2 was dealt 9 cards" );
     $p2->got_one(
         {   cmd   => 'programming',
-            cards => sub { @{ $_[0] } == 9 }
+            cards => code(sub { @{ $_[0] } == 9 })
         } );
 
     done();
@@ -43,36 +44,36 @@ subtest 'programming' => sub {
     is_deeply( $rally->{players}{0}{private}{registers}, [] );
 
     #Program must be array of arrays
-    $p1->game( { cmd => 'program', registers => [ $hand[0] ] }, { reason => "Invalid program" } );
+    $p1->game( { cmd => 'program', registers => [ $hand[0] ] }, { cmd => 'error', reason => "Invalid program" } );
 
     #Bad format errors before invalid cards
-    $p1->game( { cmd => 'program', registers => ['3100'] }, { reason => "Invalid program" } );
+    $p1->game( { cmd => 'program', registers => ['3100'] }, { cmd => 'error', reason => "Invalid program" } );
 
     #Must hold card to use
-    $p1->game( { cmd => 'program', registers => [ ['3100'] ] }, { reason => "Invalid card" } );
+    $p1->game( { cmd => 'program', registers => [ ['3100'] ] }, { cmd => 'error', reason => "Invalid card" } );
 
     #No options to use multiple cards in a register
     $p1->game( { cmd => 'program', registers => [ [ $hand[0], $hand[1] ] ] },
-        { reason => "Invalid program" } );
+        { cmd => 'error', reason => "Invalid program" } );
 
     #Can't lock in programming without all registers programmed
     $p1->game( { cmd => 'program', registers => [ [ $hand[0] ], [ $hand[1] ], [ $hand[2] ], [ $hand[3] ] ] },
-        { cmd => 'program' } );
-    $p1->game( { cmd => 'ready' }, { reason => 'Programming incomplete' } );
+        { cmd => 'program', registers => ignore() } );
+    $p1->game( { cmd => 'ready' }, { cmd => 'error', reason => 'Programming incomplete' } );
 
     #No phantom 6th register
     $p1->game(
         {   cmd => 'program',
             registers =>
               [ [ $hand[0] ], [ $hand[1] ], [ $hand[2] ], [ $hand[3] ], [ $hand[4] ], [ $hand[5] ] ] },
-        { reason => "Invalid program" } );
+        { cmd => 'error', reason => "Invalid program" } );
 
     #Happy path
     program( $rally, $p1, [ 0, 1, 2, 3, 4 ] );
 
     #Lock program
     program( $rally, $p1, [ 0, 1, 2, 3, 4 ] );
-    $p1->broadcast( { cmd => 'ready' } );
+    $p1->broadcast( { cmd => 'ready' }, { cmd => 'ready', player => 0 } );
     program( $rally, $p1, [0], 'Registers are already programmed' );
 
     done();
@@ -95,11 +96,11 @@ subtest 'locked registers' => sub {
 
     $p1->got_one(
         {   cmd   => 'programming',
-            cards => sub { @{ $_[0] } == 4 }
+            cards => code(sub { @{ $_[0] } == 4 })
         } );
     $p2->got_one(
         {   cmd   => 'programming',
-            cards => sub { @{ $_[0] } == 7 }
+            cards => code(sub { @{ $_[0] } == 7 })
         } );
 
     # Add a card to simulate 'Extra Memory' option
@@ -107,7 +108,7 @@ subtest 'locked registers' => sub {
     my @hand = $rally->{players}{0}{private}{cards}->values;
 
     # Register 5 is locked
-    program( $rally, $p1, [ 0, 1, 2, 3, 4 ], { reason => "Invalid program" } );
+    program( $rally, $p1, [ 0, 1, 2, 3, 4 ], { cmd => 'error', reason => "Invalid program" } );
     program( $rally, $p1, [ 0, 1, 2, 3, 'u20' ] );
     program( $rally, $p1, [ 0, 1, 2, 3 ] );
 
@@ -130,7 +131,7 @@ subtest 'dead' => sub {
         is_deeply( $rally->{players}{ $p->{in_game_id} }{private}{registers}, [] );
         $p->got_one(
             {   cmd   => 'programming',
-                cards => sub { @{ $_[0] } == 9 }
+                cards => code(sub { @{ $_[0] } == 9 })
             } );
     }
 
@@ -207,11 +208,10 @@ sub program {
     }
     $player->handle( { cmd => 'program', registers => \@program } );
     if ($reason) {
-        $player->got_one($reason);
+        $player->got_one({ cmd => 'error', reason => $reason }, $reason);
     }
     else {
-        $player->got_one( { cmd => 'program' } );
-        is_deeply( $rally->{players}{ $player->{in_game_id} }{private}{registers}, \@program );
+        $player->got_one( { cmd => 'program', registers => $rally->{players}{ $player->{in_game_id} }{private}{registers} } );
     }
 }
 
@@ -221,17 +221,17 @@ sub setup {
     $p2->join('test');
     $p3->join('test');
     $p4->join('test');
-    $p1->broadcast( { cmd => 'bot', 'bot' => 'twonky' } );
-    $p1->broadcast( { cmd => 'ready' } );
-    $p2->broadcast( { cmd => 'bot', 'bot' => 'twitch' } );
-    $p2->broadcast( { cmd => 'ready' } );
-    $p3->broadcast( { cmd => 'bot', 'bot' => 'zoom_bot' } );
-    $p3->broadcast( { cmd => 'ready' } );
-    $p4->broadcast( { cmd => 'bot', bot   => 'spin_bot' } );
+    $p1->broadcast( { cmd => 'bot', 'bot' => 'twonky' }, { cmd => 'bot', 'bot' => 'twonky', player => 0 } );
+    $p1->broadcast( { cmd => 'ready' }, { cmd => 'ready', player => 0 } );
+    $p2->broadcast( { cmd => 'bot', 'bot' => 'twitch' }, { cmd => 'bot', 'bot' => 'twitch', player => 1 } );
+    $p2->broadcast( { cmd => 'ready' }, { cmd => 'ready', player => 1 } );
+    $p3->broadcast( { cmd => 'bot', 'bot' => 'zoom_bot' }, { cmd => 'bot', 'bot' => 'zoom_bot', player => 2 } );
+    $p3->broadcast( { cmd => 'ready' }, { cmd => 'ready', player => 2 } );
+    $p4->broadcast( { cmd => 'bot', bot   => 'spin_bot' }, { cmd => 'bot', 'bot' => 'spin_bot', player => 3 } );
     $p4->game( { cmd => 'ready' } );
     broadcast( $rally, { cmd => 'ready', player => 3 }, "Got ready" );
     is( $rally->{state}{name}, 'Programming' );
-    broadcast( $rally, { cmd => 'pieces' }, "Got pieces" );
+    broadcast( $rally, { cmd => 'pieces', pieces => ignore() }, "Got pieces" );
 
     return $rally;
 }

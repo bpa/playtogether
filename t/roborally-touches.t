@@ -2,6 +2,7 @@ use strict;
 use warnings;
 
 use Test::More;
+use Test::Deep;
 use Gamed;
 use Gamed::Test;
 use Data::Dumper;
@@ -47,11 +48,12 @@ touches(
 
 sub touches {
     my (%a) = @_;
+    local $Test::Builder::Level = $Test::Builder::Level + 1;
     subtest $a{scenario} => sub {
         my $rally = Gamed::Test::Player->new('a')->create( 'RoboRally', 'test', { course => 'risky_exchange' } );
         my ( %pieces, @bots );
         my $id = 0;
-        @bots = keys $rally->{public}{bots};
+        @bots = keys %{ $rally->{public}{bots} };
         while (my ($k, $v) = each %{$rally->{public}{course}{pieces}}) {
             delete $rally->{public}{course}{pieces}{$k} if $v->{type} eq 'bot';
         }
@@ -72,8 +74,7 @@ sub touches {
             my $msg = $rally->{players}{0}{client}{sock}{packets}[0];
             $a{touches}{cmd}   = 'execute';
             $a{touches}{phase} = 'touches';
-            broadcast( $rally, { cmd => 'execute', phase => 'touches' } );
-            is_deeply( $msg, $a{touches} );
+            broadcast( $rally, $a{touches} );
             if ( defined $a{touches}{archive} ) {
                 while ( my ( $bot, $pos ) = each %{ $a{touches}{archive} } ) {
                     my $archive = $rally->{public}{course}{pieces}{"$bot\_archive"};

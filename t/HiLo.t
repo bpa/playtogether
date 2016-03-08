@@ -2,16 +2,17 @@ use strict;
 use warnings;
 
 use Test::More;
+use Test::Deep;
 use Gamed::Test;
 
 my $one = Gamed::Test::Player->new('test');
 my $two = Gamed::Test::Player->new('test2');
 
-$one->game( { cmd => 'create', game => "HiLo", name => "test" }, { cmd => 'create' } );
-$two->got_one( { cmd => 'create' } );
+$one->game( { cmd => 'create', game => "HiLo", name => "test" }, { cmd => 'create', game => 'HiLo', name => 'test' } );
+$two->got_one( { cmd => 'create', game => 'HiLo', name => 'test' } );
 $two->game( { cmd => 'create', game => "HiLo", name => "test" },
     { cmd => 'error', reason => "A game named 'test' already exists." } );
-$one->broadcast( { cmd => 'join', name => 'test' }, { cmd => 'join' } );
+$one->broadcast( { cmd => 'join', name => 'test' }, { cmd => 'join', game => 'HiLo', player => ignore(), name => 'test' } );
 $two->game( { cmd => 'join', name => 'test' },  { cmd => 'error', reason => "Game full" } );
 $two->game( { cmd => 'join', name => 'test2' }, { cmd => 'error', reason => "No game named 'test2' exists" } );
 $two->game(

@@ -1,6 +1,7 @@
 use strict;
 use warnings;
 use Test::More;
+use Test::Deep;
 use Gamed;
 use Gamed::Test;
 use Data::Dumper;
@@ -11,16 +12,16 @@ my $p3 = Gamed::Test::Player->new('3');
 my $p4 = Gamed::Test::Player->new('4');
 
 subtest 'two players' => sub {
-    my $risk = $p1->create( 'SpeedRisk', 'test', { board => 'Classic' } );
-    $p2->join('test');
-    $p1->broadcast( { cmd => 'ready' } );
+    my $risk = $p1->create( 'SpeedRisk', 'test', { board => 'Classic' }, { player => { theme => ignore() } } );
+    $p2->join('test', { player => { theme => ignore() } });
+    $p1->broadcast( { cmd => 'ready' }, { cmd => 'ready', player => 0 } );
     $p2->game( { cmd => 'ready' } );
     broadcast( $risk, { cmd => 'ready', player => 1 }, "Got ready" );
     is( $risk->{state}{name}, 'Placing' );
 
     my %player_countries;
-    $p1->got( { cmd => 'armies' } );
-    $p1->got_one( { cmd => 'placing' } );
+    $p1->got( { cmd => 'armies', armies => ignore() } );
+    $p1->got_one( { cmd => 'placing', countries => ignore() } );
     my $msg = pop @{ $p2->{sock}{packets} };
     is( ~~ @{ $msg->{countries} }, 42 );
     for my $c ( 0 .. 41 ) {
@@ -46,10 +47,10 @@ subtest 'two players' => sub {
 subtest 'all ready starts game' => sub {
     my $risk = placing_with_3();
 
-    $p1->broadcast( { cmd => 'ready' } );
-    $p2->broadcast( { cmd => 'ready' } );
+    $p1->broadcast( { cmd => 'ready' }, { cmd => 'ready', player => 0 } );
+    $p2->broadcast( { cmd => 'ready' }, { cmd => 'ready', player => 1 } );
     $p3->game( { cmd => 'ready' } );
-    broadcast( $risk, { cmd => 'ready' } );
+    broadcast( $risk, { cmd => 'ready', player => 2 } );
     broadcast( $risk, { cmd => 'playing' } );
     is( $risk->{state}{name}, 'Playing' );
 
@@ -60,9 +61,9 @@ subtest 'can start with dropped player' => sub {
     my $risk = placing_with_3();
 
     $p1->quit();
-    $p2->broadcast( { cmd => 'ready' } );
+    $p2->broadcast( { cmd => 'ready' }, { cmd => 'ready', player => 1 } );
     $p3->game( { cmd => 'ready' } );
-    broadcast( $risk, { cmd => 'ready' } );
+    broadcast( $risk, { cmd => 'ready', player => 2 } );
     broadcast( $risk, { cmd => 'playing' } );
     is( $risk->{state}{name}, 'Playing' );
 
@@ -72,8 +73,8 @@ subtest 'can start with dropped player' => sub {
 subtest 'drop unready player starts game' => sub {
     my $risk = placing_with_3();
 
-    $p2->broadcast( { cmd => 'ready' } );
-    $p3->broadcast( { cmd => 'ready' } );
+    $p2->broadcast( { cmd => 'ready' }, { cmd => 'ready', player => 1 } );
+    $p3->broadcast( { cmd => 'ready' }, { cmd => 'ready', player => 2 } );
     $p1->quit();
 
     broadcast( $risk, { cmd => 'playing' } );
@@ -128,15 +129,15 @@ subtest 'place' => sub {
 done_testing();
 
 sub placing_with_3 {
-    my $risk = $p1->create( 'SpeedRisk', 'test', { board => 'Classic' } );
-    $p2->join('test');
-    $p3->join('test');
-    $p1->broadcast( { cmd => 'ready' } );
-    $p2->broadcast( { cmd => 'ready' } );
+    my $risk = $p1->create( 'SpeedRisk', 'test', { board => 'Classic' }, { player => { theme => ignore() } } );
+    $p2->join('test', { player => { theme => ignore() } });
+    $p3->join('test', { player => { theme => ignore() } });
+    $p1->broadcast( { cmd => 'ready' }, { cmd => 'ready', player => 0 } );
+    $p2->broadcast( { cmd => 'ready' }, { cmd => 'ready', player => 1 } );
     $p3->game( { cmd => 'ready' } );
-    broadcast( $risk, { cmd => 'ready' } );
-    broadcast( $risk, { cmd => 'armies' } );
-    broadcast( $risk, { cmd => 'placing' } );
+    broadcast( $risk, { cmd => 'ready', player => 2 } );
+    broadcast( $risk, { cmd => 'armies', armies => ignore() } );
+    broadcast( $risk, { cmd => 'placing', countries => ignore() } );
     is( $risk->{state}{name}, 'Placing' );
     return $risk;
 }

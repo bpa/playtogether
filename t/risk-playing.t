@@ -10,6 +10,7 @@ BEGIN {
 }
 
 use Test::More;
+use Test::Deep;
 use Gamed;
 use Gamed::Test;
 use Data::Dumper;
@@ -25,7 +26,6 @@ subtest 'moving' => sub {
         'Western Australia' => { owner => 1, armies => 3 },
         'New Guinea'        => { owner => 1, armies => 1 },
         Madagascar          => { owner => 1, armies => 1 } );
-
     #Normal move
     $p2->broadcast( {
             cmd    => 'move',
@@ -45,31 +45,31 @@ subtest 'moving' => sub {
             to     => ind('New Guinea'),
             armies => 1
         },
-        { reason => 'Not enough armies' } );
+        { cmd => 'error', reason => 'Not enough armies' } );
     $p2->game( {
             cmd    => 'move',
             from   => ind('New Guinea'),
             to     => ind('Western Australia'),
             armies => 3
         },
-        { reason => 'Not enough armies' } );
+        { cmd => 'error', reason => 'Not enough armies' } );
     $p2->game( {
             cmd    => 'move',
             from   => ind('New Guinea'),
             to     => ind('Western Australia'),
             armies => 4
         },
-        { reason => 'Not enough armies' } );
+        { cmd => 'error', reason => 'Not enough armies' } );
     $p2->game( {
             cmd    => 'move',
             from   => ind('Western Australia'),
             to     => ind('New Guinea'),
             armies => 4
         },
-        { reason => 'Not enough armies' } );
+        { cmd => 'error', reason => 'Not enough armies' } );
 
     #Can't move to same country
-    $p1->game( { cmd => 'move', from => 0, to => 0, armies => 1 }, { reason => 'Invalid destination' } );
+    $p1->game( { cmd => 'move', from => 0, to => 0, armies => 1 }, { cmd => 'error', reason => 'Invalid destination' } );
 
     #Can't move to non-bordering country
     $p2->game( {
@@ -78,7 +78,7 @@ subtest 'moving' => sub {
             to     => ind('Madagascar'),
             armies => 1
         },
-        { reason => 'Invalid destination' } );
+        { cmd => 'error', reason => 'Invalid destination' } );
 
     #Can't move someone elses armies
     $p1->game( {
@@ -87,7 +87,7 @@ subtest 'moving' => sub {
             to     => ind('New Guinea'),
             armies => 1
         },
-        { reason => 'Not owner' } );
+        { cmd => 'error', reason => 'Not owner' } );
 
     done();
 };
@@ -236,7 +236,7 @@ subtest 'bad attacks' => sub {
             to     => ind('Indonesia'),
             armies => 0
         },
-        { reason => 'Not enough armies' } );
+        { cmd => 'error', reason => 'Not enough armies' } );
 
     #Can't attack with last guy or more than you have
     $p1->game( {
@@ -245,7 +245,7 @@ subtest 'bad attacks' => sub {
             to     => ind('New Guinea'),
             armies => 3
         },
-        { reason => 'Not enough armies' } );
+        { cmd => 'error', reason => 'Not enough armies' } );
 
     $p2->game( {
             cmd    => 'move',
@@ -253,7 +253,7 @@ subtest 'bad attacks' => sub {
             to     => ind('Western Australia'),
             armies => 1
         },
-        { reason => 'Not enough armies' } );
+        { cmd => 'error', reason => 'Not enough armies' } );
 
     $p2->game( {
             cmd    => 'move',
@@ -261,7 +261,7 @@ subtest 'bad attacks' => sub {
             to     => ind('Western Australia'),
             armies => 3
         },
-        { reason => 'Not enough armies' } );
+        { cmd => 'error', reason => 'Not enough armies' } );
 
     $p2->game( {
             cmd    => 'move',
@@ -269,7 +269,7 @@ subtest 'bad attacks' => sub {
             to     => ind('Western Australia'),
             armies => 4
         },
-        { reason => 'Not enough armies' } );
+        { cmd => 'error', reason => 'Not enough armies' } );
 
     $p1->game( {
             cmd    => 'move',
@@ -277,7 +277,7 @@ subtest 'bad attacks' => sub {
             to     => ind('New Guinea'),
             armies => 4
         },
-        { reason => 'Not enough armies' } );
+        { cmd => 'error', reason => 'Not enough armies' } );
 
     #Can't attack to non-bordering country
     $p1->game( {
@@ -286,7 +286,7 @@ subtest 'bad attacks' => sub {
             to     => ind('Madagascar'),
             armies => 1
         },
-        { reason => 'Invalid destination' } );
+        { cmd => 'error', reason => 'Invalid destination' } );
 
     #Can't attack unless you own from
     $p1->game( {
@@ -295,7 +295,7 @@ subtest 'bad attacks' => sub {
             to     => ind('Eastern Australia'),
             armies => 1
         },
-        { reason => 'Not owner' } );
+        { cmd => 'error', reason => 'Not owner' } );
 
     $p2->game( {
             cmd    => 'move',
@@ -303,7 +303,7 @@ subtest 'bad attacks' => sub {
             to     => ind('New Guinea'),
             armies => 0
         },
-        { reason => 'Not owner' } );
+        { cmd => 'error', reason => 'Not owner' } );
 
     done();
 };
@@ -355,7 +355,7 @@ subtest 'produce armies for countries' => sub {
     $risk->{players}{2}{countries} = 12;
 
     $risk->{states}{PLAYING}->generate_armies($risk);
-    broadcast( $risk, { cmd => 'army timer' } );
+    broadcast( $risk, { cmd => 'army timer', seconds => ignore() } );
 
     $p1->got( { cmd => 'armies', armies => 3 } );
     $p2->got( { cmd => 'armies', armies => 3 } );
@@ -400,11 +400,11 @@ subtest 'produce armies for continents' => sub {
     $risk->{public}{countries}[ ind('North Africa') ]{owner} = 2;
 
     $risk->{states}{PLAYING}->generate_armies($risk);
-    broadcast( $risk, { cmd => 'army timer' } );
+    broadcast( $risk, { cmd => 'army timer', seconds => ignore() } );
 
-    $p1->got( { armies => 10 }, '3 + Asia (7) = 10' );
-    $p2->got( { armies => 8 },  '3 + Europe(5) = 8' );
-    $p3->got( { armies => 6 },  '3 + Africa(3) = 6' );
+    $p1->got( { cmd => 'armies', armies => 10 }, '3 + Asia (7) = 10' );
+    $p2->got( { cmd => 'armies', armies => 8 },  '3 + Europe(5) = 8' );
+    $p3->got( { cmd => 'armies', armies => 6 },  '3 + Africa(3) = 6' );
 
     clear_board($risk);
     $risk->{public}{countries}[ ind('Iceland') ]{owner}      = 2;
@@ -423,11 +423,11 @@ subtest 'produce armies for continents' => sub {
     $risk->{public}{countries}[ ind('Eastern Australia') ]{owner} = 2;
 
     $risk->{states}{PLAYING}->generate_armies($risk);
-    broadcast( $risk, { cmd => 'army timer' } );
+    broadcast( $risk, { cmd => 'army timer', seconds => ignore() } );
 
-    $p1->got( { armies => 8 }, '3 + N. Am(5) = 8' );
-    $p2->got( { armies => 5 }, '3 + S. Am(2) = 5' );
-    $p3->got( { armies => 5 }, '3 + Austr(2) = 5' );
+    $p1->got( { cmd => 'armies', armies => 8 }, '3 + N. Am(5) = 8' );
+    $p2->got( { cmd => 'armies', armies => 5 }, '3 + S. Am(2) = 5' );
+    $p3->got( { cmd => 'armies', armies => 5 }, '3 + Austr(2) = 5' );
 
     done();
 };
@@ -490,22 +490,22 @@ sub done {
 
 sub setup {
     my %country = @_;
-    my $risk = $p1->create( 'SpeedRisk', 'test', { board => 'Classic' } );
-    $p2->join('test');
-    $p3->join('test');
+    my $risk = $p1->create( 'SpeedRisk', 'test', { board => 'Classic' }, { player => { theme => ignore() } } );
+    $p2->join('test', { player => { theme => ignore() } });
+    $p3->join('test', { player => { theme => ignore() } });
 
-    $p1->broadcast( { cmd => 'ready' } );
-    $p2->broadcast( { cmd => 'ready' } );
+    $p1->broadcast( { cmd => 'ready' }, { cmd => 'ready', player => 0 } );
+    $p2->broadcast( { cmd => 'ready' }, { cmd => 'ready', player => 1 } );
     $p3->game( { cmd => 'ready' } );
-    broadcast( $risk, { cmd => 'ready' } );
-    broadcast( $risk, { cmd => 'armies' } );
-    broadcast( $risk, { cmd => 'placing' } );
+    broadcast( $risk, { cmd => 'ready', player => 2 } );
+    broadcast( $risk, { cmd => 'armies', armies => ignore() } );
+    broadcast( $risk, { cmd => 'placing', countries => ignore() } );
     is( $risk->{state}{name}, 'Placing' );
 
-    $p1->broadcast( { cmd => 'ready' } );
-    $p2->broadcast( { cmd => 'ready' } );
+    $p1->broadcast( { cmd => 'ready' }, { cmd => 'ready', player => 0 } );
+    $p2->broadcast( { cmd => 'ready' }, { cmd => 'ready', player => 1 } );
     $p3->game( { cmd => 'ready' } );
-    broadcast( $risk, { cmd => 'ready' } );
+    broadcast( $risk, { cmd => 'ready', player => 2 } );
     broadcast( $risk, { cmd => 'playing' } );
     is( $risk->{state}{name}, 'Playing' );
 

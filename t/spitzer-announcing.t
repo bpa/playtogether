@@ -2,6 +2,7 @@ use strict;
 use warnings;
 
 use Test::More;
+use Test::Deep;
 use Gamed;
 use Gamed::Test;
 use Gamed::Object;
@@ -76,7 +77,7 @@ sub setup {
     broadcast( $spitzer, { cmd => 'announcing', player => 'n' } );
     for my $p ( $n, $e, $s, $w ) {
         if ( $p->{in_game_id} ne $player->{in_game_id} ) {
-            $p->broadcast( { cmd => 'announce', announcement => 'none' }, { cmd => 'announcing' } );
+            $p->broadcast( { cmd => 'announce', announcement => 'none' }, { cmd => 'announcing', player => ignore() } );
         }
         else {
             last;
@@ -85,16 +86,16 @@ sub setup {
 
     $player->game( { cmd => 'announce', announcement => $opts{announcement}, call => $opts{call} } );
     if ( !$opts{pass} ) {
-        $player->got_one( { cmd => 'error' } );
+        $player->got_one( { cmd => 'error', reason => ignore() } );
         return;
     }
 
 	if ($opts{type}) {
-		broadcast( $spitzer, { cmd => 'announcement', announcement => $opts{announcement}, call => $opts{call}, caller => $opts{caller} } );
+		broadcast( $spitzer, { cmd => 'announcement', announcement => $opts{announcement}, call => $opts{call}, caller => $opts{caller}, player => ignore() } );
 		is ( $spitzer->{type}, $opts{type} );
 	}
 	else {
-		broadcast( $spitzer, { cmd => 'announcing' } );
+		broadcast( $spitzer, { cmd => 'announcing', player => ignore() } );
 	}
     my $name = $opts{name};
     is( $spitzer->{state}{name}, $opts{state}, "$name - state" );

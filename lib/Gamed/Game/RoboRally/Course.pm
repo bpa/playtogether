@@ -45,14 +45,14 @@ sub new {
         }
     }
 
-    for my $p ( values $course->{pieces} ) {
+    for my $p ( values %{ $course->{pieces} } ) {
         if ( $p->{type} eq 'flag' ) {
             $p = Flag( $p->{flag}, $p->{x}, $p->{y} );
         }
         else {
             $p = Piece( $p->{id}, $p->{type}, $p->{x}, $p->{y}, $p->{o} || 0, $p->{solid} || 0 );
         }
-        push @{$course->{tiles}[$p->{y}][$p->{x}]{pieces}}, $p;
+        push @{ $course->{tiles}[ $p->{y} ][ $p->{x} ]{pieces} }, $p;
     }
 
     bless \%self, $pkg;

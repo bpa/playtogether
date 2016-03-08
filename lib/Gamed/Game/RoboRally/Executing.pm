@@ -47,7 +47,7 @@ sub do_movement {
     my @register;
     for my $p ( values %{ $self->{game}{players} } ) {
         push @register, [ $p->{public}{bot} => $p->{private}{registers}[$current] ];
-        $p->{public}{registers}[$current] = $p->{private}{registers}[$current];
+        $p->{public}{bot}{register}[$current]{program} = $p->{private}{registers}[$current];
     }
     my $actions = $self->{game}{public}{course}->do_movement( $current, \@register );
     $self->{game}->broadcast( execute => { phase => $phase, actions => $actions } ) if $actions;

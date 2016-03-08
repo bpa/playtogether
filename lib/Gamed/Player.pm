@@ -25,8 +25,10 @@ sub handle {
 sub send {
     my ( $self, $cmd, $msg ) = @_;
 	return unless defined $self->{sock};
-    $msg = { $cmd => $msg } unless ref($msg);
+    use Data::Dumper;
+    $msg = { $cmd => $msg } if $msg && !ref($msg);
     $msg->{cmd} = $cmd;
+    print Dumper $msg;
     $self->{sock}->send( $json->encode($msg) );
 }
 

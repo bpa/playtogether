@@ -19,6 +19,9 @@ WriteMakefile(
         'List::Util'         => 0,
         'Mojolicious::Lite'  => 0,
     },    # e.g., Module::Name => 1.1
+    BUILD_REQUIRES => {
+        'Hash::Merge' => 0,
+    },
     (   $] >= 5.005
         ?    ## Add these new keywords supported since 5.005
           ( ABSTRACT => 'Modular HTML5 game server',

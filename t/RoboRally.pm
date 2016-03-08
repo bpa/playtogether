@@ -10,6 +10,20 @@ sub bot {
     my ( $id, $x, $y, $o, $opts ) = @_;
     my $bot = Bot( $id, $x, $y, $o );
 	$opts ||= {};
+    my $registers = delete $opts->{registers};
+    if ($registers) {
+        for my $i ( 0 .. $#$registers ) {
+            if ( ref( $registers->[$i] ) eq 'HASH' ) {
+                $bot->{register}[$i] = $registers->[$i];
+            }
+            elsif ( ref( $registers->[$i] ) eq 'ARRAY' ) {
+                $bot->{register}[$i]{program} = $registers->[$i];
+            }
+            elsif ( $registers->[$i] ) {
+                $bot->{register}[$i]{program} = [ $registers->[$i] ];
+            }
+        }
+    }
     $opts->{active} = 1 unless exists $opts->{active};
 	while (my ($k, $v) = each(%$opts) ) {
 		$bot->{$k} = $v;

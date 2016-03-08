@@ -93,7 +93,6 @@ on 'status' => sub {
 
 sub broadcast {
     my ( $self, $cmd, $msg ) = @_;
-    $msg = { $cmd => $msg } unless ref($msg);
     for my $c ( values %{ $self->{players} } ) {
         $c->{client}->send( $cmd, $msg ) if defined $c->{client};
     }

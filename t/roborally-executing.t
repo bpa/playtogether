@@ -1,6 +1,7 @@
 use strict;
 use warnings;
 use Test::More;
+use Test::Deep;
 use Gamed;
 use Gamed::Test;
 use Data::Dumper;
@@ -48,15 +49,15 @@ sub execute {
 
         for my $p (@$setup) {
             $p->[0]->join('test');
-            $p->[0]->broadcast( { cmd => 'bot', 'bot' => $p->[1] } );
+            $p->[0]->broadcast( { cmd => 'bot', 'bot' => $p->[1] }, { cmd => 'bot', bot => $p->[1], player => ignore() } );
         }
         for my $p (@$setup) {
             $p->[0]->game( { cmd => 'ready' } );
             broadcast( $rally, { cmd => 'ready', player => $p->[0]{in_game_id} }, "Got ready" );
         }
 
-        broadcast( $rally, { cmd => 'pieces' } );
-        broadcast_one( $rally, { cmd => 'programming' } );
+        broadcast( $rally, { cmd => 'pieces', pieces => ignore() } );
+        broadcast_one( $rally, { cmd => 'programming', cards => ignore() } );
         is( $rally->{state}{name}, 'Programming' );
 
         for my $p (@$setup) {
@@ -68,21 +69,18 @@ sub execute {
             my @cards = map { [$_] } $player->{private}{cards}->values;
             unshift @cards, [ @$p[ 5 .. $#$p ] ];
             $player->{private}{cards}->add( @$p[ 5 .. $#$p ] );
-            $p->[0]->game( { cmd => 'program', registers => [ @cards[ 0 .. 4 ] ] }, { cmd => 'program' } );
+            $p->[0]->game( { cmd => 'program', registers => [ @cards[ 0 .. 4 ] ] }, { cmd => 'program', registers => ignore() } );
             $p->[0]->game( { cmd => 'ready' } );
             broadcast( $rally, { cmd => 'ready', player => $p->[0]{in_game_id} }, "Got ready" );
         }
 
         for my $register (@expected) {
             for my $phase (@$register) {
-                my $msg = $setup->[0][0]{sock}{packets}[0];
                 if ( ref($phase) ) {
-                    broadcast( $rally, { cmd => 'execute', phase => $phase->{phase} } );
-                    is_deeply( $phase, $msg );
+                    broadcast( $rally, $phase );
                 }
                 else {
-                    broadcast( $rally, { cmd => 'execute', phase => $phase } );
-                    is( $msg->{phase}, $phase );
+                    broadcast( $rally, { cmd => 'execute', phase => $phase, actions => ignore() } );
                 }
             }
         }

@@ -19,7 +19,7 @@ sub on_enter_state {
     for ( 0 .. $#{ $self->{game}{seats} } ) {
         $self->{active_player} = $_ if $self->{game}{seats}[$_] eq $self->{game}{public}{player};
     }
-    for ( values $self->{game}{players} ) {
+    for ( values %{ $self->{game}{players} } ) {
         $_->{taken} = [];
     }
     $self->{game}{public}{trick} = [];

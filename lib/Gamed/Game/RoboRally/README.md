@@ -10,7 +10,7 @@ Game
 
 RoboRally::Course
 -----------------
-* pieces: Bot (see below)
+* pieces: Array of Piece
 * course: raw course data
 * tiles: Array[y][x] of tile data
     + pieces: Array of Piece found on the tile

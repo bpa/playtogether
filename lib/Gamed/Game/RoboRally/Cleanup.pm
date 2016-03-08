@@ -17,7 +17,7 @@ sub on_enter_state {
         $flags[$p->{y}][$p->{x}] = 1 if $p->{type} eq 'flag';
     }
 
-    my %cleanup = ( repair => {}, options => {}, bots => {} );
+    my %cleanup = ( repair => {}, options => {}, pieces => {} );
 	$self->{placing} = [];
 	$self->{repairs} = 0;
 
@@ -36,12 +36,11 @@ sub on_enter_state {
 
 			if ( $action->{upgrade} ) {
 				my $card = $self->upgrade($bot);
-				push @{ $cleanup{options}{ $bot->{id} } }, $card if $card;
+				push (@{ $cleanup{options}{ $bot->{id} } }, $card) if $card;
 			}
 
 			if ( $player->{repair} ) {
 				$self->{repairs} += $player->{repair};
-				$player->{client}->send( repair => $player->{repair} );
 			}
 		}
 		else {
@@ -63,7 +62,7 @@ sub on_enter_state {
     for my $piece (@{ $game->{deaths}}) {
         if ($piece->{type} eq 'bot') {
             if (!$need_input) {
-                $self->{placing} = $piece->{id};
+                push(@{$self->{placing}}, $piece->{id});
                 $game->{players}{$game->{public}{bots}{$piece->{id}}{player}}{client}->send('place');
             }
             $need_input = 1;
@@ -101,21 +100,16 @@ sub repair {
 	my ($self, $bot, $damage) = @_;
 
 	if ( $bot->{damage} > 0 ) {
-		my $damaged_register = 0;
-		for ( 0 .. 4 ) {
-			$damaged_register = 1 if $bot->{register}[$_]{damaged};
-		}
-		if ($bot->{damage} == 1 || !$damaged_register) {
-			$bot->{damage}--;
-			$bot->{repair}--;
-			for ( 0 .. 8 ) {
-				if ($bot->{register}[$_]{damaged}) {
-					$bot->{register}[$_]{damaged} = 0;
-					last;
-				}
-			}
-			return 1;
-		}
+		$bot->{damage}--;
+
+        for ( 0 .. 8 ) {
+            if ($bot->{register}[$_]{damaged}) {
+                $bot->{register}[$_]{damaged} = 0;
+                last;
+            }
+        }
+
+	    return 1;
 	}
 	return 0;
 }
@@ -132,14 +126,14 @@ sub clear_registers {
 	my ($self, $bot) = @_;
 
 	for my $r ( 0 .. 4 ) {
-		$bot->{registers}[$r]{program} = [] unless $bot->{registers}[$r]{damaged};
+		$bot->{register}[$r]{program} = [] unless $bot->{register}[$r]{damaged};
 	}
 }
 
 on 'place' => sub {
     my ( $self, $player, $msg, $player_data ) = @_;
 
-    if ($player_data->{public}{bot}{id} ne $self->{placing}) {
+    if ($player_data->{public}{bot}{id} ne $self->{placing}[0]) {
         $player->err('Not your turn');
         return;
     }

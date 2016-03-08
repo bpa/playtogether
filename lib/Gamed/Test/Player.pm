@@ -3,6 +3,8 @@ package Gamed::Test::Player;
 use JSON::MaybeXS;
 use Data::UUID;
 use Test::Builder;
+use Test::Deep::NoTest;
+use Hash::Merge 'merge';
 use parent 'Gamed::Player';
 
 my $json = JSON::MaybeXS->new(convert_blessed => 1);
@@ -10,15 +12,17 @@ my $tb   = Test::Builder->new;
 my $uuid = Data::UUID->new;
 
 sub new {
+    local $Test::Builder::Level = $Test::Builder::Level + 1;
     my ( $pkg, $name ) = @_;
     $name ||= 'test';
     my $self = bless Gamed::Player->new( { sock => SocketMock->new } ), $pkg;
     $self->handle( { cmd => 'login', name => $name } );
-    $self->{sock}->got( { cmd => 'welcome' } );
+    $self->{sock}->got( { cmd => 'welcome', token => ignore(), username => ignore() } );
     return $self;
 }
 
 sub handle {
+    local $Test::Builder::Level = $Test::Builder::Level + 1;
     my ( $self, $msg ) = @_;
     eval { Gamed::Player::handle( $self, $json->encode($msg) ); };
     $self->err($@) if $@;
@@ -26,7 +30,7 @@ sub handle {
 
 sub create {
     local $Test::Builder::Level = $Test::Builder::Level + 1;
-    my ( $self, $game, $name, $opts ) = @_;
+    my ( $self, $game, $name, $opts, $more ) = @_;
     $opts ||= {};
     $opts->{cmd}  = 'create';
     $opts->{game} = $game;
@@ -35,21 +39,26 @@ sub create {
 	for my $p (values %Gamed::Login::players) {
 		$p->{sock}{packets} = [];
 	}
-    return $self->join($name);
+    return $self->join($name, $more);
 }
 
 sub join {
     local $Test::Builder::Level = $Test::Builder::Level + 1;
-    my ( $self, $name ) = @_;
+    my ( $self, $name, $opts ) = @_;
+    $opts ||= {};
     $self->handle( { cmd => 'join', name => $name } );
-    Gamed::Test::broadcast(
-        $self->{game},
-        {
-            cmd     => 'join',
-            player  => sub { $_[0]->{id} eq $self->{in_game_id} },
-        },
-        "Got join"
-    );
+    my $expected = { 
+            cmd    => 'join',
+            player => {
+                id       => $self->{in_game_id},
+                name     => ignore(),
+                avatar   => ignore(),
+                username => ignore(),
+            },
+            name => ignore(),
+            game => ignore(),
+        };
+    Gamed::Test::broadcast( $self->{game}, merge($expected, $opts), "Got join" );
     return $self->{game};
 }
 
@@ -92,7 +101,7 @@ sub got_one {
 
 sub send {
     my ( $self, $cmd, $msg ) = @_;
-    $msg = { $cmd => $msg } unless ref($msg);
+    $msg = { $cmd => $msg } if $msg && !ref($msg);
     $msg->{cmd} = $cmd;
 	#print (($self->{user} ? $self->{user}{name} : '?'), " got ", $json->encode($msg), "\n");
     $self->{sock}->send($msg);

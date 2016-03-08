@@ -1,6 +1,7 @@
 use strict;
 use warnings;
 use Test::More;
+use Test::Deep;
 use Gamed;
 use Gamed::Test;
 
@@ -28,7 +29,7 @@ subtest 'drop/rejoin with names' => sub {
             seats => [qw/n e s w/],
         },
     );
-    $p3->got( { cmd => 'create' } );
+    $p3->got( { cmd => 'create', game => ignore(), name => ignore() } );
     is( $p1->{in_game_id}, 'n' );
     is( $p2->{in_game_id}, 'e' );
 

@@ -45,8 +45,7 @@ on 'program' => sub {
 		return;
 	}
 
-	for my $i ( 0 .. 4 ) {
-		last unless defined $msg->{registers}[$i];
+	for my $i ( 0 .. $#{$msg->{registers}} ) {
 		my $r = $msg->{registers}[$i];
 		if (ref($r) ne 'ARRAY' 
 		|| locked_but_not_matching( $i, $r, $player_data )
@@ -101,9 +100,9 @@ on 'quit' => sub {
 
 sub locked_but_not_matching {
 	my ($i, $register, $player_data) = @_;
-	return unless $player_data->{public}{bot}{locked}[$i];
+	return unless $player_data->{public}{bot}{register}[$i]{damaged};
 
-	my $locked = $player_data->{public}{bot}{registers}[$i];
+	my $locked = $player_data->{public}{bot}{registers}[$i]{program};
 
 	return 1 unless @$register == @$locked;
 	for my $j ( 0 .. $#$register ) {

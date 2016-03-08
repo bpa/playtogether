@@ -3,6 +3,7 @@ package Gamed::Test;
 use strict;
 use warnings;
 use Gamed::Test::DB;
+use Test::Deep::NoTest;
 require Gamed;
 $Gamed::DEV = 1;
 $Gamed::TEST = 1;
@@ -25,7 +26,6 @@ my $tb = Test::Builder->new;
 
 my $j = JSON::MaybeXS->new(convert_blessed => 1);
 sub json ($) { $j->encode( $_[0] ) }
-sub hash ($) { $j->decode( $_[0] ) }
 
 sub game {
     local $Test::Builder::Level = $Test::Builder::Level + 1;
@@ -62,7 +62,7 @@ sub game {
     $instance->handle( $connections[0], { cmd => 'start_test' } );
     for my $c (@connections) {
         $c->handle( { cmd => 'join', name => $opts->{name} } );
-        broadcast( $instance, { cmd => 'join' } );
+        broadcast( $instance, { cmd => 'join', game => ignore(), name => ignore(), player => ignore() } );
     }
 
     #Switch to state to be tested
