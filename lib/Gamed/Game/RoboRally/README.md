@@ -42,7 +42,7 @@ Piece adding the following fields
 * lives: int
 * damage: int
 * options: Array of option names active on bot
-* register: Array
+* registers: Array
     + damaged: bool
     + program: Array of cards
     

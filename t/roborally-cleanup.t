@@ -62,7 +62,7 @@ cleanup(
 	},
     messages => [
         { p => 'all', recv => { cmd => 'repairs', repair => { f => 1 }, options => { }, pieces => ignore() } },
-        #{ p => 'all', recv => { cmd => 'placing', bot => 'a' } } ] );
+        { p => 'all', recv => { cmd => 'placing', bot => 'a' } },
         { p => 'all', recv => { cmd => 'place' } } ] );
 
 cleanup(
@@ -247,7 +247,6 @@ sub cleanup {
         for my $msg ( @{ $a{messages} } ) {
             if ( $msg->{recv} ) {
                 if ( $msg->{p} eq 'all' ) {
-                   print Dumper $msg->{recv};
                     broadcast( $rally, $msg->{recv}, $msg->{msg} );
                 }
                 else {

@@ -85,8 +85,12 @@ subtest 'locked registers' => sub {
     $p2->reset;
 
     $rally->{players}{0}{public}{bot}{damage}    = 5;
-    $rally->{players}{0}{public}{bot}{locked}    = [ 0, 0, 0, 0, 1 ];
-    $rally->{players}{0}{public}{bot}{registers} = [ [], [], [], [], ['u20'] ];
+    $rally->{players}{0}{public}{bot}{registers} = [
+        { damaged => 0, program => [] },
+        { damaged => 0, program => [] },
+        { damaged => 0, program => [] },
+        { damaged => 0, program => [] },
+        { damaged => 1, program => ['u20'] }];
     $rally->{players}{1}{public}{bot}{damage}    = 2;
 
     $rally->{state}->on_enter_state($rally);
@@ -108,7 +112,7 @@ subtest 'locked registers' => sub {
     my @hand = $rally->{players}{0}{private}{cards}->values;
 
     # Register 5 is locked
-    program( $rally, $p1, [ 0, 1, 2, 3, 4 ], { cmd => 'error', reason => "Invalid program" } );
+    program( $rally, $p1, [ 0, 1, 2, 3, 4 ], "Invalid program");
     program( $rally, $p1, [ 0, 1, 2, 3, 'u20' ] );
     program( $rally, $p1, [ 0, 1, 2, 3 ] );
 
@@ -170,11 +174,21 @@ subtest 'time up with locked' => sub {
 
     $rally->{players}{0}{bot}{damage}    = 5;
     $rally->{players}{0}{bot}{locked}    = [ 0, 0, 0, 0, 1 ];
-    $rally->{players}{0}{bot}{registers} = [ [], [], [], [], ['u20'] ];
+    $rally->{players}{0}{bot}{registers} = [
+        { damaged => 0, program => [] },
+        { damaged => 0, program => [] },
+        { damaged => 0, program => [] },
+        { damaged => 0, program => [] },
+        { damaged => 1, program => ['u20'] } ];
 
     # Simulating a player that has had 'Fire Control' used on them
     $rally->{players}{1}{bot}{locked} = [ 0, 0, 1, 0, 0 ];
-    $rally->{players}{1}{bot}{registers} = [ [], [], ['3840'], [], [] ];
+    $rally->{players}{1}{bot}{registers} = [
+        { damaged => 0, program => [] },
+        { damaged => 0, program => [] },
+        { damaged => 1, program => ['3840'] },
+        { damaged => 0, program => [] },
+        { damaged => 0, program => [] } ];
 
     $rally->{state}->on_enter_state($rally);
     $p1->reset;

@@ -35,7 +35,7 @@ on 'program' => sub {
 	my @cards;
     my $game = $self->{game};
 
-	if ($player_data->{ready}) {
+	if ($player_data->{public}{ready}) {
 		$player->err('Registers are already programmed');
 		return;
 	}
@@ -53,7 +53,7 @@ on 'program' => sub {
 			$player->err("Invalid program");
 			return;
 		}
-		push @cards, @$r unless $player_data->{public}{bot}{locked}[$i];
+		push @cards, @$r unless $player_data->{public}{bot}{registers}[$i]{damaged};
 	}
 
 	for my $c (@cards) {
@@ -100,7 +100,7 @@ on 'quit' => sub {
 
 sub locked_but_not_matching {
 	my ($i, $register, $player_data) = @_;
-	return unless $player_data->{public}{bot}{register}[$i]{damaged};
+	return unless $player_data->{public}{bot}{registers}[$i]{damaged};
 
 	my $locked = $player_data->{public}{bot}{registers}[$i]{program};
 
@@ -120,7 +120,7 @@ sub handle_time_up {
 
 		my $cards = Gamed::Object::Bag->new($p->{private}{cards}->values);
 		for my $i ( 0 .. 4) {
-			$cards->remove($p->{private}{registers}[$i]) unless $p->{bot}{locked}[$i];
+			$cards->remove($p->{private}{registers}[$i]) unless $p->{bot}{registers}[$i]{damaged};
 		}
 
 		my @available = shuffle $cards->values;
@@ -128,8 +128,8 @@ sub handle_time_up {
 			$p->{private}{registers}[$i] ||= [];
 			my $r = $p->{private}{registers}[$i];
 			if (@$r == 0) { 
-				if ($p->{bot}{locked}[$i]) {
-					push @$r, @{$p->{bot}{registers}[$i]};
+				if ($p->{bot}{registers}[$i]{damaged}) {
+					push @$r, @{$p->{bot}{registers}[$i]{program}};
 				}
 				else {
 					push @$r, shift @available;
