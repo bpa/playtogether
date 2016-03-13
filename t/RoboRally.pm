@@ -14,13 +14,13 @@ sub bot {
     if ($registers) {
         for my $i ( 0 .. $#$registers ) {
             if ( ref( $registers->[$i] ) eq 'HASH' ) {
-                $bot->{register}[$i] = $registers->[$i];
+                $bot->{registers}[$i] = $registers->[$i];
             }
             elsif ( ref( $registers->[$i] ) eq 'ARRAY' ) {
-                $bot->{register}[$i]{program} = $registers->[$i];
+                $bot->{registers}[$i]{program} = $registers->[$i];
             }
             elsif ( $registers->[$i] ) {
-                $bot->{register}[$i]{program} = [ $registers->[$i] ];
+                $bot->{registers}[$i]{program} = [ $registers->[$i] ];
             }
         }
     }

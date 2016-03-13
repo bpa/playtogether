@@ -38,7 +38,7 @@ sub Bot {
 		damage    => 0,
         solid     => 1,
         options   => [],
-        register  => \@register,
+        registers => \@register,
     };
 }
 

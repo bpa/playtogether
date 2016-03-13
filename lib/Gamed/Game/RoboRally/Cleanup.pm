@@ -17,7 +17,7 @@ sub on_enter_state {
         $flags[$p->{y}][$p->{x}] = 1 if $p->{type} eq 'flag';
     }
 
-    my %cleanup = ( repair => {}, options => {}, pieces => {} );
+    my %cleanup = ( repairs => {}, options => {}, pieces => {} );
 	$self->{placing} = [];
 	$self->{repairs} = 0;
 
@@ -28,10 +28,10 @@ sub on_enter_state {
 		if ($bot->{active}) {
 			my $action = $self->tile_actions($bot, \@flags);
 
-			if ( $action->{repair} ) {
+			if ( $action->{repairs} ) {
 				my $repaired = $self->repair($bot, 1);
-				$player->{repair} = 1 - $repaired;
-				$cleanup{repair}{ $bot->{id} } = $repaired if $repaired;
+				$player->{repairs} = 1 - $repaired;
+				$cleanup{repairs}{ $bot->{id} } = $repaired if $repaired;
 			}
 
 			if ( $action->{upgrade} ) {
@@ -39,12 +39,12 @@ sub on_enter_state {
 				push (@{ $cleanup{options}{ $bot->{id} } }, $card) if $card;
 			}
 
-			if ( $player->{repair} ) {
-				$self->{repairs} += $player->{repair};
+			if ( $player->{repairs} ) {
+				$self->{repairs} += $player->{repairs};
 			}
 		}
 		else {
-			$self->restore($player);
+			$self->restore($bot);
 		}
 		
 		$self->clear_registers($bot);
@@ -63,7 +63,6 @@ sub on_enter_state {
         if ($piece->{type} eq 'bot') {
             if (!$need_input) {
                 push(@{$self->{placing}}, $piece->{id});
-                $game->{players}{$game->{public}{bots}{$piece->{id}}{player}}{client}->send('place');
             }
             $need_input = 1;
         }
@@ -86,12 +85,12 @@ sub tile_actions {
 	my ($self, $bot, $flags) = @_;
 	my %action;
 
-	$action{repair} = 1 if $flags->[$bot->{y}][$bot->{x}];
+	$action{repairs} = 1 if $flags->[$bot->{y}][$bot->{x}];
 
 	my $tile = $self->{game}{public}{course}{tiles}[ $bot->{y} ][ $bot->{x} ];
 	return \%action unless $tile->{t};
 
-	$action{repair} = 1 if $tile->{t} eq 'upgrade' || $tile->{t} eq 'wrench';
+	$action{repairs} = 1 if $tile->{t} eq 'upgrade' || $tile->{t} eq 'wrench';
 	$action{upgrade} = 1 if $tile->{t} eq 'upgrade';
 	return \%action;
 }
@@ -103,8 +102,8 @@ sub repair {
 		$bot->{damage}--;
 
         for ( 0 .. 8 ) {
-            if ($bot->{register}[$_]{damaged}) {
-                $bot->{register}[$_]{damaged} = 0;
+            if ($bot->{registers}[$_]{damaged}) {
+                $bot->{registers}[$_]{damaged} = 0;
                 last;
             }
         }
@@ -116,9 +115,13 @@ sub repair {
 
 sub restore {
 	my ($self, $bot) = @_;
+    for my $r (@{$bot->{registers}}) {
+        $r->{damaged} = 0;
+        $r->{program} = [] if $r->{program};
+    }
 	if ($bot->{lives}) {
 		$bot->{damage} = 2;
-		push @{$self->{placing}}, $bot->{id};
+		push @{$self->{placing}}, $bot;
 	}
 }
 
@@ -126,7 +129,7 @@ sub clear_registers {
 	my ($self, $bot) = @_;
 
 	for my $r ( 0 .. 4 ) {
-		$bot->{register}[$r]{program} = [] unless $bot->{register}[$r]{damaged};
+		$bot->{registers}[$r]{program} = [] unless $bot->{registers}[$r]{damaged};
 	}
 }
 
@@ -140,8 +143,8 @@ on 'place' => sub {
 
     my $game = $self->{game};
     my $course = $game->{public}{course};
-    $msg->{piece} = $player_data->{public}{bot}{id};
-    my $bot = $game->{public}{course}{pieces}{$msg->{piece}};
+    $msg->{bot} = $player_data->{public}{bot}{id};
+    my $bot = $game->{public}{course}{pieces}{$msg->{bot}};
     my $tile = $course->tile($msg->{x}, $msg->{y});
     if (!defined $tile || grep { $_->{solid} } @{ $tile->{pieces} }) {
         $player->err("Invalid Placement");

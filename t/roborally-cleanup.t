@@ -28,7 +28,7 @@ cleanup(
             p    => 'all',
             recv => {
                 cmd    => 'repairs',
-                repair => { a => 1, c => 1, d => 1},
+                repairs => { a => 1, c => 1, d => 1},
                 pieces => {
                     bot( 'a', 0, 0, N, { damage => 0 } ),
                     bot( 'b', 5, 5, N, { damage => 2 } ),
@@ -61,9 +61,8 @@ cleanup(
             }),
 	},
     messages => [
-        { p => 'all', recv => { cmd => 'repairs', repair => { f => 1 }, options => { }, pieces => ignore() } },
-        { p => 'all', recv => { cmd => 'placing', bot => 'a' } },
-        { p => 'all', recv => { cmd => 'place' } } ] );
+        { p => 'all', recv => { cmd => 'repairs', repairs => { f => 1 }, options => { }, pieces => ignore() } },
+        { p => 'all', recv => { cmd => 'placing', bot => 'a' } } ] );
 
 cleanup(
     'Died by falling',
@@ -79,8 +78,9 @@ cleanup(
         dead('c', 0),
 	},
     messages => [
-        { p => 'all', recv => { cmd => 'repairs', repair => {}, options => {}, pieces => ignore() } },
+        { p => 'all', recv => { cmd => 'repairs', repairs => {}, options => {}, pieces => ignore() } },
         { p => 'all', recv => { cmd => 'placing', bot => 'b' } },
+        { p => 'all', recv => { cmd => 'placing', bot => 'a' } },
       ]);
 
 cleanup(
@@ -222,14 +222,17 @@ sub cleanup {
         my $rally = $p1->create( 'RoboRally', 'test', { course => 'risky_exchange' } );
         $rally->{public}{bots}{a} = {};
         $rally->{public}{course}->add_bot('a');
+        $rally->{public}{course}->place($rally->{public}{course}{pieces}{a}, 1);
         my %player = ( a => $p1 );
         $p1->broadcast( { cmd => 'bot', 'bot' => 'a', player => 0 } );
+        my $pos = 2;
         for my $p ( grep { $_ ne 'a' && !/_archive/ } keys %{ $a{before} } ) {
             my $p1 = Gamed::Test::Player->new($p);
             $player{$p} = $p1;
             $p1->join('test');
             $rally->{public}{bots}{$p} = {};
             $rally->{public}{course}->add_bot($p);
+            $rally->{public}{course}->place($rally->{public}{course}{pieces}{$p}, $pos++);
             $p1->broadcast( { cmd => 'bot', 'bot' => $p }, { cmd => 'bot', 'bot' => $p, player => ignore() } );
         }
         while ( my ( $k, $v ) = each %{ $a{before} } ) {
@@ -258,13 +261,16 @@ sub cleanup {
             }
         }
 
+print "x"x120,"\n";
         while ( my ( $id, $bot ) = each( %{ $a{after} } ) ) {
+        print Dumper [$rally->{public}{course}{pieces}{$id}, $bot];
             my ($ok, $stack) = cmp_details( $rally->{public}{course}{pieces}{$id}, $bot);
             ok($ok, $id);
             if (!$ok) {
               diag deep_diag($stack);
             }
         }
+print "-"x120,"\n";
 
         delete $Gamed::instance{test};
         done_testing();

@@ -48,7 +48,6 @@ sub pusher {
         $course->{pieces} = $a{before};
         my $actions = $course->do_pushers($a{register});
 		@$actions = sort { $a->{piece} cmp $b->{piece} } @$actions if $actions;
-		print Dumper $actions;
         is_deeply( $actions, $a{actions} );
         while ( my ( $piece, $data ) = each %{ $a{final} } ) {
             is_deeply( $course->{pieces}{$piece}, $data, "$piece final position" );
