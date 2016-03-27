@@ -2,7 +2,6 @@ package Gamed::Game::RoboRally::Cleanup;
 
 use Gamed::Handler;
 use parent 'Gamed::State';
-use Data::Dumper;
 
 sub new {
     my ( $pkg, %opts ) = @_;
@@ -43,32 +42,36 @@ sub on_enter_state {
 				$self->{repairs} += $player->{repairs};
 			}
 		}
-		else {
-			$self->restore($bot);
-		}
-		
+        else {
+            $self->restore($bot);
+        }
+
 		$self->clear_registers($bot);
     }
 
     $game->broadcast( repairs => \%cleanup );
 
-	if (@{$self->{placing}}) {
-		my $bot = shift @{$self->{placing}};
-		$game->{public}{placing} = $bot->{id};
-		$game->broadcast( placing => { bot => $bot->{id} } );
-	}
-
-    my $need_input = 0;
     for my $piece (@{ $game->{deaths}}) {
-        if ($piece->{type} eq 'bot') {
-            if (!$need_input) {
-                push(@{$self->{placing}}, $piece->{id});
-            }
-            $need_input = 1;
+        if ($piece->{type} eq 'bot' && $piece->{lives}) {
+            push(@{$self->{placing}}, $piece->{id});
         }
     }
-    $game->change_state('PROGRAMMING') unless $need_input;
-   	$game->change_state('PROGRAMMING') unless @{$self->{placing}} || $self->{repairs};
+
+    $self->check_for_placing;
+}
+
+sub check_for_placing {
+    my $self = shift;
+    my $game = $self->{game};
+
+    if (@{$self->{placing}}) {
+        my $arch = $game->{public}{course}->piece($self->{placing}[0] . '_archive');
+        $self->{placing_options} = $game->{public}{course}->available_placements($arch->{x}, $arch->{y});
+	    $game->broadcast( placing => { bot => $self->{placing}[0], available => $self->{placing_options} } );
+    }
+    else {
+   	    $game->change_state('PROGRAMMING');
+    }
 }
 
 sub upgrade {
@@ -121,8 +124,12 @@ sub restore {
     }
 	if ($bot->{lives}) {
 		$bot->{damage} = 2;
-		push @{$self->{placing}}, $bot;
+        $bot->{registers}[-1]{damaged} = 1;
+        $bot->{registers}[-2]{damaged} = 1;
 	}
+    else {
+        $bot->{damage} = 0;
+    }
 }
 
 sub clear_registers {
@@ -141,26 +148,45 @@ on 'place' => sub {
         return;
     }
 
+    if (!(defined $msg->{x} && defined $msg->{y})) {
+        $player->err("Invalid placement, require x, y");
+        return;
+    }
+
+    if (!defined $msg->{o} || $msg->{o} < 0 || $msg->{o} > 3) {
+        $player->err("Invalid placement, o must be one of 0 - 3");
+        return;
+    }
+    
+    if (!$self->valid_placement($msg)) {
+        $player->err("Invalid placement");
+        return;
+    }
+
     my $game = $self->{game};
     my $course = $game->{public}{course};
-    $msg->{bot} = $player_data->{public}{bot}{id};
-    my $bot = $game->{public}{course}{pieces}{$msg->{bot}};
-    my $tile = $course->tile($msg->{x}, $msg->{y});
-    if (!defined $tile || grep { $_->{solid} } @{ $tile->{pieces} }) {
-        $player->err("Invalid Placement");
-        return;
-    }
+    my $bot = $course->piece($self->{placing}[0]);
 
-    my $archive = $course->{pieces}{$bot->{id} . "_archive"};
-    if ($msg->{x} != $archive->{x} || $msg->{y} != $archive->{y}) {
-        $player->err("Invalid Placement");
-        return;
-    }
-
-    $bot->{damage} = 2;
+    $bot->{lives}--;
     $bot->{active} = 1;
-    $game->{public}{course}->move($bot, $msg->{x}, $msg->{y});
-    $self->{game}->broadcast( place => $msg );
+    $bot->{o} = $msg->{o};
+    $course->move($bot, $msg->{x}, $msg->{y});
+    $game->broadcast( place => { piece => $bot } );
+
+    shift @{$self->{placing}};
+    $self->check_for_placing;
 };
+
+sub valid_placement {
+    my ($self, $msg) = @_;
+
+    my $a = $self->{placing_options}{$msg->{x}};
+    return unless defined $a;
+
+    $a = $a->{$msg->{y}};
+    return unless defined $a;
+
+    return $a->[$msg->{o}];
+}
 
 1;

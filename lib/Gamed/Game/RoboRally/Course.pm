@@ -7,7 +7,6 @@ use File::Slurp;
 use File::Spec::Functions 'catdir';
 use List::Util 'min';
 use Gamed::Game::RoboRally::Pieces;
-use Data::Dumper;
 
 my $json              = JSON::MaybeXS->new;
 my %rotations         = ( r => 1, u => 2, l => 3 );
@@ -109,6 +108,8 @@ sub tile {
 }
 
 sub pieces { return $_[0]->{course}{pieces} }
+
+sub piece { return $_[0]->{course}{pieces}{$_[1]} }
 
 sub do_movement {
     my ( $self, $register, $cards ) = @_;
@@ -313,6 +314,11 @@ sub do_gears {
 sub do_lasers {
     my ( $self, $register ) = @_;
     return [];
+}
+
+sub available_placements {
+    my ($self, $x, $y) = @_;
+    return { $x => { $y => [ 1, 1, 1, 1 ] } };
 }
 
 sub TO_JSON {

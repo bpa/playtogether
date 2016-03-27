@@ -24,6 +24,11 @@ sub bot {
             }
         }
     }
+    if ($opts->{damage}) {
+        for my $i (9 - $opts->{damage} .. 8) {
+            $bot->{registers}[$i]{damaged} = 1;
+        }
+    }
     $opts->{active} = 1 unless exists $opts->{active};
 	while (my ($k, $v) = each(%$opts) ) {
 		$bot->{$k} = $v;
@@ -35,7 +40,7 @@ sub dead {
     my ( $id, $lives, $opts ) = @_;
 	$opts ||= {};
 	$opts->{active} = 0;
-    $opts->{lives} = $lives || 2;
+    $opts->{lives} = defined $lives ? $lives : 2;
     return bot( $id, 0, 0, N, $opts );
 }
 

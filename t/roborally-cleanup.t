@@ -22,196 +22,117 @@ cleanup(
         bot( 'b', 5, 5, N, { damage => 2 } ),
         bot( 'c', 7, 7, N, { damage => 1, options => ['Brakes'] } ),
         bot( 'd', 1, 4, N, { damage => 1 } ),
-        bot( 'e', 9, 7, N, { damage => 0 } ),
-    },
-    messages => [ {
-            p    => 'all',
+        bot( 'e', 9, 7, N, { damage => 0 } ), },
+    messages => [
+        {   p    => 'all',
             recv => {
-                cmd    => 'repairs',
-                repairs => { a => 1, c => 1, d => 1},
-                pieces => {
+                cmd     => 'repairs',
+                repairs => { a => 1, c => 1, d => 1 },
+                pieces  => {
                     bot( 'a', 0, 0, N, { damage => 0 } ),
                     bot( 'b', 5, 5, N, { damage => 2 } ),
                     bot( 'c', 7, 7, N, { damage => 1, options => ['Brakes'] } ),
                     bot( 'd', 1, 4, N, { damage => 1 } ),
-                    bot( 'e', 9, 7, N, { damage => 0 } )
-                },
-                options => { c => ['Brakes'] } } } ] );
+                    bot( 'e', 9, 7, N, { damage => 0 } ) },
+                options => { c => ['Brakes'] } } },
+        { p => 'all', recv => { cmd => 'programming', cards => ignore() } } ] );
 
 cleanup(
     'Damage related cleanup',
-	deaths => [ 'a' ],
+    deaths => ['a'],
     before => {
-        dead('a', 2, {
-            registers => [ dmg('r90'), dmg('l60'), dmg('r70'), dmg('3840'), dmg('u20') ],
-            damage    => 10,
-        } ),
-		archive('a', 7, 9),
-        bot('f', 11, 11, N, {    #wrench
-            registers => [ 'r90', 'l60', dmg('r70'), dmg('3840'), dmg('u20') ],
-            damage    => 7,
-        } ),
-    },
-    after     => {
-        dead('a', 2, { damage => 2 }),
-		archive('a', 7, 9),
-        bot('f', 11, 11, N, {
-            registers => [ undef, undef, undef, dmg('3840'), dmg('u20') ],
-            damage    => 6,
-            }),
-	},
+        dead( 'a', 2, { registers => [ dmg('r90'), dmg('l60'), dmg('r70'), dmg('3840'), dmg('u20') ], damage => 10, } ),
+        archive( 'a', 7, 9 ),
+        bot('f', 11, 11, N,    #wrench
+            {   registers => [ 'r90', 'l60', dmg('r70'), dmg('3840'), dmg('u20') ],
+                damage    => 7, } ), },
+    after => {
+        dead( 'a', 2, { damage => 2 } ),
+        archive( 'a', 7, 9 ),
+        bot( 'f', 11, 11, N, { registers => [ undef, undef, undef, dmg('3840'), dmg('u20') ], damage => 6, } ), },
     messages => [
-        { p => 'all', recv => { cmd => 'repairs', repairs => { f => 1 }, options => { }, pieces => ignore() } },
-        { p => 'all', recv => { cmd => 'placing', bot => 'a' } } ] );
+        { p => 'all', recv => { cmd => 'repairs', repairs => { f => 1 }, options => {}, pieces => ignore() } },
+        { p => 'all', recv => { cmd => 'placing', bot     => 'a', available => ignore() } } ] );
 
 cleanup(
-    'Died by falling',
-	deaths => [ 'c', 'b', 'a' ],
-    before => {
-        dead('a', 2),
-        dead('b', 1),
-        dead('c', 0),
-    },
-    after => {
-        dead('a', 2, { damage => 2 }),
-        dead('b', 1, { damage => 2 }),
-        dead('c', 0),
-	},
+    'Died by falling - placing order',
+    deaths => [ 'c', 'b', 'a' ],
+    before => { dead( 'a', 3 ), dead( 'b', 2 ), dead( 'c', 1 ), archive( 'a', 11, 11 ), archive( 'b', 0, 0 ), archive( 'c', 5, 15 ) },
+    after  => {
+        bot( 'a', 11, 11, E, { damage => 2, lives => 2 } ),
+        bot( 'b', 0,  0,  E, { damage => 2, lives => 1 } ),
+        bot( 'c', 5,  15, E, { damage => 2, lives => 0 } ), },
     messages => [
-        { p => 'all', recv => { cmd => 'repairs', repairs => {}, options => {}, pieces => ignore() } },
-        { p => 'all', recv => { cmd => 'placing', bot => 'b' } },
-        { p => 'all', recv => { cmd => 'placing', bot => 'a' } },
-      ]);
+        { p => 'all', recv => { cmd => 'repairs', repairs => {},  options   => {}, pieces => ignore() } },
+        { p => 'all', recv => { cmd => 'placing', bot     => 'c', available => ignore() } },
+        { p => 'b',   send => { cmd => 'place',   x       => 5,   y         => 15, o      => E } },
+        { p => 'b',   recv => { cmd => 'error',   reason  => 'Not your turn' } },
+        { p => 'c',   send => { cmd => 'place',   x       => 5,   y         => 15, o      => E } },
+        { p => 'all', recv => { cmd => 'place', piece => ( bot( 'c', 5, 15, E, { damage => 2, lives => 0 } ) )[1] }, msg => 'c placed' },
+        { p => 'all', recv => { cmd => 'placing', bot => 'b', available => ignore() } },
+        { p => 'c',   send => { cmd => 'place',   x   => 5,   y         => 15, o => E } },
+        { p => 'c',   recv => { cmd => 'error', reason => 'Not your turn' } },
+        { p => 'b',   send => { cmd => 'place', x      => 0, y => 0, o => E } },
+        { p => 'all', recv => { cmd => 'place', piece  => ( bot( 'b', 0, 0, E, { damage => 2, lives => 1 } ) )[1] }, msg => 'b placed' },
+        { p => 'all', recv => { cmd => 'placing', bot => 'a', available => ignore() } },
+        { p => 'a',   send => { cmd => 'place',   x   => 11,  y         => 11, o => E } },
+        { p => 'all', recv => { cmd => 'place',       piece => ( bot( 'a', 11, 11, E, { damage => 2, lives => 2 } ) )[1] }, msg => 'a placed' },
+        { p => 'all', recv => { cmd => 'programming', cards => ignore() } } ] );
+
+cleanup(
+    'No lives left',
+    deaths => [ 'a', 'b' ],
+    before => { dead( 'a', 0 ), dead( 'b', 2 ), archive( 'a', 0, 0 ), archive( 'b', 11, 11 ) },
+    after    => { dead( 'a', 0, { lives => 0 } ), bot( 'b', 11, 11, E, { damage => 2, lives => 1 } ) },
+    messages => [
+        { p => 'all', recv => { cmd => 'repairs', repairs => {},  options   => {}, pieces => ignore() } },
+        { p => 'all', recv => { cmd => 'placing', bot     => 'b', available => ignore() } },
+        { p => 'a',   send => { cmd => 'place',   x       => 0,   y         => 0,  o      => E } },
+        { p => 'a',   recv => { cmd => 'error',   reason  => 'Not your turn' } },
+        { p => 'b',   send => { cmd => 'place',   x       => 11,  y         => 11, o      => E } },
+        { p => 'all', recv => { cmd => 'place',       piece => ( bot( 'b', 11, 11, E, { damage => 2, lives => 1 } ) )[1] }, msg => 'b placed' },
+        { p => 'all', recv => { cmd => 'programming', cards => ignore() } } ] );
 
 cleanup(
     'Cleanup registers',
-    deaths => [ 'a' ],
+    deaths => ['a'],
     before => {
-        dead('a', 2, {
-                registers => [ dmg('r90'), dmg('l60'), dmg('r70'), dmg('3840'), dmg('u20') ],
-                damage    => 10,
-            }
-        ),
+        dead( 'a', 2,
+            {   registers => [ dmg('r90'), dmg('l60'), dmg('r70'), dmg('3840'), dmg('u20') ],
+                damage    => 10, } ),
         archive( 'a', 3, 14 ),
         bot( 'b', 7, 7, S ),    #upgrade
         bot('c', 11, 11, N,     #wrench
             {   damage    => 7,
-                registers => [ 'r90', 'l60', dmg('r70'), dmg('3840'), dmg('u20') ] } )
-    },
+                registers => [ 'r90', 'l60', dmg('r70'), dmg('3840'), dmg('u20') ] } ) },
     after => {
-        bot( 'a', 3, 14, N, { damage  => 2, lives => 2 } ),
+        bot( 'a', 3, 14, E, { damage  => 2, lives => 1 } ),
         bot( 'b', 7, 7,  S, { options => ['Brakes'] } ),
         bot('c', 11, 11, N,
             {   damage    => 6,
-                registers => [ undef, undef, undef, dmg('3840'), dmg('u20') ],
-            } ) },
-    messages => [ {
-            p    => 'all',
+                registers => [ undef, undef, undef, dmg('3840'), dmg('u20') ], } ) },
+    messages => [
+        {   p    => 'all',
             recv => {
-                cmd    => 'repairs',
-                pieces => {
+                cmd     => 'repairs',
+                repairs => { c => 1 },
+                pieces  => {
+                    dead( 'a', 2, { damage => 2 } ),
                     bot( 'b', 7, 7, S, { options => ['Brakes'] } ),
                     bot('c', 11, 11, N,
                         {   damage    => 6,
-                            registers => [ undef, undef, undef, dmg('3840'), dmg('u20') ],
-                        } ),
-                  },
-                options => { b => ['Brakes'] }
-            },
-            msg => 'Initial'
-        },
-        { p => 'a',   recv => { cmd => 'place' }, msg => 'A told to place' },
-        { p => 'a',   send => { cmd => 'place', x => 3, y => 14, o => E } },
-        { p => 'all', recv => { cmd => 'place', piece => ( bot( 'a', 3, 14, E, { damage => 2, lives => 2 } ) )[0] }, msg => 'Placement broadcast' },
-    ] );
-
-cleanup(
-    'Place bot on archive marker',
-    deaths => [ 'a', 'e', 'f', 'g' ],
-    before => {
-        dead( 'a', 2 ),
-        bot( 'b', 0, 4, E ),
-        bot( 'c', 3, 4, W ),
-        bot( 'd', 1, 7, N ),
-        dead('e'),
-        dead( 'f', 1 ),
-        dead( 'g', 0 ),
-        archive( 'a', 1,  4 ),
-        archive( 'e', 0,  0 ),
-        archive( 'f', 13, 11 ),
-    },
-    after => {
-        bot( 'a', 1, 4, N ),
-        bot( 'b', 0, 4, E ),
-        bot( 'c', 3, 4, W ),
-        bot( 'd', 1, 7, N ),
-        bot( 'e', 0, 0, W ),
-        bot( 'f', 13, 11, E, { damage => 2, lives => 1 } ),
-        dead( 'g', 0 ),
-    },
-    messages => [
-        { p => 'all', recv => { cmd => 'repairs' } },
-        { p => 'a',   recv => { cmd => 'place' } },
-        { p => 'a',   send => { cmd => 'place', x => 2, y => 4, o => E } },
-        { p => 'a', recv => { cmd => 'error', reason => 'Invalid placement' }, msg => "Must place on archive" },
-        { p => 'a', send => { cmd => 'place', x => 1, y => 4, o => W } },
-        { p => 'a', recv => { cmd => 'error', reason => 'Invalid placement' }, msg => "Can't face bot next to you" },
-        { p => 'a', send => { cmd => 'place', x => 1, y => 4, o => E } },
-        { p => 'a', recv => { cmd => 'error', reason => 'Invalid placement' }, msg => "Can't face bot 2 tiles away" },
-        { p => 'a', send => { cmd => 'place', x => 1, y => 4, o => S } },
-        { p => 'a', recv => { cmd => 'error', reason => 'Invalid placement' }, msg => "Can't face bot 3 tiles away" },
-        { p => 'a', send => { cmd => 'place', x => 1, y => 4, o => N } },
-        { p => 'all', recv => { cmd => 'place', piece => ( bot( 'a', 1, 4, N, { damage => 2, lives => 2 } ) )[0] } },
-        { p => 'e',   recv => { cmd => 'place' } },
-        { p => 'e', send => { cmd => 'place', x => 0, y => 0, o => W } },
-        { p => 'all', recv => { cmd => 'place', piece => ( bot( 'e', 0, 0, W, { damage => 2, lives => 2 } ) )[0] } },
-        { p => 'f', send => { cmd => 'place', x => 13, y => 11, o => E } },
-        { p => 'all', recv => { cmd => 'place', piece => ( bot( 'f', 13, 11, E, { damage => 2, lives => 1 } ) )[0] } },
-    ], );
-
-cleanup(
-    'Place next to archive marker',
-    deaths => [ 'a' ],
-    before => { dead( 'a', 2 ), bot( 'b', 0, 0, E ), bot( 'c', 0, 2, W ), archive( 'a', 0, 0 ), },
-    after  => { bot( 'a', 1, 0, { damage => 2, lives => 2 } ), bot( 'b', 0, 0, E ), bot( 'c', 0, 2, W ) },
-    messages => [
-        { p => 'all', recv => { cmd => 'repairs' } },
-        { p => 'a',   recv => { cmd => 'place' } },
-        { p => 'a',   send => { cmd => 'place', x => 0, y => 0, o => E } },
-        { p => 'a', recv => { cmd => 'error', reason => 'Invalid placement' }, msg => "Can't place on occupied tile" },
-        { p => 'a', send => { cmd => 'place', x => 0, y => 1, o => S } },
-        { p => 'a', recv => { cmd => 'error', reason => 'Invalid placement' }, msg => "Can't face bot next to you" },
-        { p => 'a', send => { cmd => 'place', x => 1, y => 0, o => E } },
-        { p => 'all', recv => { cmd => 'place', piece => ( bot( 'a', 1, 0, E, { damage => 2, lives => 2 } ) )[0] } },
-    ] );
-
-cleanup(
-    'Corner case with no placement options on or adjacent to archive marker',
-    deaths => [ 'a' ],
-    before => {
-        dead('a'),
-        bot( 'b', 0, 0, E ),
-        bot( 'c', 0, 1, W ),
-        bot( 'd', 1, 1, N ),
-        bot( 'e', 1, 0, S ),
-        archive( 'a', 0, 0 ),
-    },
-    after =>
-      { bot( 'a', 0, 0, E ), bot( 'b', 0, 0, E ), bot( 'c', 0, 1, W ), bot( 'd', 1, 1, N ), bot( 'e', 1, 0, S ), },
-    messages => [
-        { p => 'all', recv => { cmd => 'repairs' } },
-        { p => 'a',   recv => { cmd => 'place' } },
-        { p => 'a',   send => { cmd => 'place', x => 2, y => 0, o => W } },
-        { p => 'a', recv => { cmd => 'error', reason => 'Invalid placement' }, msg => "Facing bot" },
-        { p => 'a', send => { cmd => 'place', x => 2, y => 0, o => E } },
-        { p => 'all', recv => { cmd => 'place', piece => ( bot( 'a', 0, 0, E, { damage => 2, lives => 2 } ) )[0] } },
-    ] );
+                            registers => [ undef, undef, undef, dmg('3840'), dmg('u20') ], } ), },
+                options => { b => ['Brakes'] } },
+            msg => 'Initial' },
+        { p => 'all', recv => { cmd => 'placing', bot => 'a', available => ignore() }, msg => 'A placing' },
+        { p => 'a',   send => { cmd => 'place',   x   => 3,   y         => 14,         o   => E } },
+        { p => 'all', recv => { cmd => 'place', piece => ( bot( 'a', 3, 14, E, { damage => 2, lives => 1 } ) )[1] }, msg => 'Placement broadcast' }, ] );
 
 done_testing();
 
 sub dmg {
     my $program = shift;
-    return { damaged => 1, program => [ $program ] };
+    return { damaged => 1, program => [$program] };
 }
 
 sub cleanup {
@@ -222,25 +143,31 @@ sub cleanup {
         my $rally = $p1->create( 'RoboRally', 'test', { course => 'risky_exchange' } );
         $rally->{public}{bots}{a} = {};
         $rally->{public}{course}->add_bot('a');
-        $rally->{public}{course}->place($rally->{public}{course}{pieces}{a}, 1);
+        $rally->{public}{course}->place( $rally->{public}{course}{pieces}{a}, 1 );
         my %player = ( a => $p1 );
         $p1->broadcast( { cmd => 'bot', 'bot' => 'a', player => 0 } );
         my $pos = 2;
+
         for my $p ( grep { $_ ne 'a' && !/_archive/ } keys %{ $a{before} } ) {
             my $p1 = Gamed::Test::Player->new($p);
             $player{$p} = $p1;
             $p1->join('test');
             $rally->{public}{bots}{$p} = {};
             $rally->{public}{course}->add_bot($p);
-            $rally->{public}{course}->place($rally->{public}{course}{pieces}{$p}, $pos++);
+            $rally->{public}{course}->place( $rally->{public}{course}{pieces}{$p}, $pos++ );
+            $rally->{public}{course}->move( $rally->{public}{course}{pieces}{$p}, $a{before}{$p}{x}, $a{before}{$p}{y} );
             $p1->broadcast( { cmd => 'bot', 'bot' => $p }, { cmd => 'bot', 'bot' => $p, player => ignore() } );
         }
         while ( my ( $k, $v ) = each %{ $a{before} } ) {
             my $bot = $rally->{public}{course}{pieces}{$k};
             while ( my ( $bk, $bv ) = each %$v ) {
                 $bot->{$bk} = $bv;
-            }
-            push @{$rally->{deaths}}, $bot if $bot->{type} eq 'bot' && !$bot->{active};
+            } }
+        if ( defined $a{deaths} ) {
+            $rally->{deaths} = [ map { $rally->{public}{course}{pieces}{$_} } @{ $a{deaths} } ];
+        }
+        else {
+            $rally->{deaths} = [];
         }
         $rally->{option_cards} = bless { cards => ['Brakes'] }, 'Gamed::Object::Deck';
         $rally->{state} = undef;
@@ -254,25 +181,18 @@ sub cleanup {
                 }
                 else {
                     $player{ $msg->{p} }->got_one( $msg->{recv}, $msg->{msg} );
-                }
-            }
+                } }
             else {
                 $player{ $msg->{p} }->handle( $msg->{send} );
-            }
-        }
+            } }
 
-print "x"x120,"\n";
         while ( my ( $id, $bot ) = each( %{ $a{after} } ) ) {
-        print Dumper [$rally->{public}{course}{pieces}{$id}, $bot];
-            my ($ok, $stack) = cmp_details( $rally->{public}{course}{pieces}{$id}, $bot);
-            ok($ok, $id);
-            if (!$ok) {
-              diag deep_diag($stack);
-            }
-        }
-print "-"x120,"\n";
+            my ( $ok, $stack ) = cmp_details( $rally->{public}{course}{pieces}{$id}, $bot );
+            ok( $ok, $id );
+            if ( !$ok ) {
+                diag deep_diag($stack);
+            } }
 
         delete $Gamed::instance{test};
         done_testing();
-      }
-}
+      } }
