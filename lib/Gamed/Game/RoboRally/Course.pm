@@ -5,7 +5,7 @@ use warnings;
 use JSON::MaybeXS;
 use File::Slurp;
 use File::Spec::Functions 'catdir';
-use List::Util 'min';
+use List::Util qw/min reduce sum/;
 use Gamed::Game::RoboRally::Pieces;
 
 my $json              = JSON::MaybeXS->new;
@@ -318,7 +318,62 @@ sub do_lasers {
 
 sub available_placements {
     my ($self, $x, $y) = @_;
-    return { $x => { $y => [ 1, 1, 1, 1 ] } };
+    my %valid;
+    my $size = 0;
+    my @ind = (0);
+    $self->add_if_valid(\%valid, $x, $y);
+    while (!%valid) {
+        $size++;
+        for my $i (@ind) {
+            $self->add_if_valid(\%valid, $x + $size, $y + $i);
+            $self->add_if_valid(\%valid, $x - $size, $y + $i);
+        }
+        push @ind, -$size, $size;
+        for my $i (@ind) {
+            $self->add_if_valid(\%valid, $x + $i, $y + $size);
+            $self->add_if_valid(\%valid, $x + $i, $y - $size);
+        }
+    }
+    return \%valid;
+}
+
+sub add_if_valid {
+    my ($self, $valid, $x, $y) = @_;
+    return if $x < 0 || $y < 0 || $x >= $self->{w} || $y >= $self->{h};
+    my $tile = $self->{tiles}[$y][$x];
+    return if $tile->{t} eq 'pit';
+    for my $p ( @{ $tile->{pieces} } ) {
+        return if $p->{solid} && $p->{active};
+    }
+    my $seen = $self->line_of_sight($x, $y);
+    return unless sum(@$seen);
+
+    $valid->{$x}{$y} = $seen;
+}
+
+sub line_of_sight {
+    my ($self, $x, $y) = @_;
+
+    return [
+        $self->look( $x, $y,  0, -1 ),
+        $self->look( $x, $y,  1,  0 ),
+        $self->look( $x, $y,  0,  1 ),
+        $self->look( $x, $y, -1,  0 ),
+    ];
+}
+
+sub look {
+    my ($self, $x, $y, $dx, $dy) = @_;
+    for my $d ( 1 .. 3 ) {
+        $x += $dx;
+        $y += $dy;
+        return 1 if $x < 0 || $y < 0 || $x >= $self->{w} || $y >= $self->{h};
+        for my $p ( @{ $self->{tiles}[$y][$x]{pieces} } ) {
+            return if $p->{type} eq 'bot';
+            return 1 if $p->{solid};
+        }
+    }
+    return 1;
 }
 
 sub TO_JSON {

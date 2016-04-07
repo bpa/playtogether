@@ -4,7 +4,6 @@ use Gamed::Handler;
 use Gamed::Object::Bag;
 use List::Util qw/shuffle/;
 use parent 'Gamed::State';
-use Data::Dumper;
 
 sub new {
     my ( $pkg, %opts ) = @_;
