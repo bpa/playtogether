@@ -110,7 +110,6 @@ Player Data
     + bot: hashref of game.public.course.pieces Bot instance
         - number: starting position
     + ready: bool
-    + registers: Array
 * private
     + cards: Bag of cards
     + registers: Array
