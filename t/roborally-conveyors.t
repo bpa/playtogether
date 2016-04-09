@@ -36,7 +36,7 @@ conveyor(
 conveyor(
     scenario => "Conveyed off board",
     before   => { bot( 'a', 3, 0, N ) },
-    after    => { dead( 'a', 2) },
+    after    => { dead( 'a', 0, 0 ) },
     actions  => [ { piece => 'a', move => 1, dir => 0, die => 'fall' } ] );
 
 conveyor(
@@ -162,15 +162,15 @@ conveyor(
 $course = Gamed::Game::RoboRally::Course->new('risky_exchange');
 
 conveyor(
-    scenario => "Flags and archive markers move through bots",
-    before   => { bot( 'a', 3, 3, N ), flag( 1, 2, 3 ), archive ('a', 2, 3) },
-    after    => { bot( 'a', 3, 3, N ), flag( 1, 3, 3 ), archive ('a', 3, 3) },
-    actions  => [ { piece => 'a_archive', move => 1, dir => 1 }, { piece => 'flag_1', move => 1, dir => 1 } ] );
+    scenario => "Flags move through bots",
+    before   => { bot( 'a', 3, 3, N ), flag( 1, 2, 3 ) },
+    after    => { bot( 'a', 3, 3, N ), flag( 1, 3, 3, { archive => [ 2, 3 ] } ) },
+    actions  => [ { piece => 'flag_1', move => 1, dir => 1 } ] );
 
 conveyor(
     scenario => "Flags move through bot column",
     before   => { bot( 'a', 3, 3, N ), bot( 'b', 2, 3, N ), flag( 1, 1, 3 ) },
-    after    => { bot( 'a', 3, 3, N ), bot( 'b', 2, 3, N ), flag( 1, 2, 3 ) },
+    after    => { bot( 'a', 3, 3, N ), bot( 'b', 2, 3, N ), flag( 1, 2, 3, { archive => [ 1, 3 ] } ) },
     actions => [ { piece => 'flag_1', move => 1, dir => 1 } ] );
 
 sub conveyor {

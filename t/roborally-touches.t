@@ -7,7 +7,7 @@ use Gamed;
 use Gamed::Test;
 use Data::Dumper;
 use Gamed::Game::RoboRally;
-use Gamed::Game::RoboRally::Pieces;
+use t::RoboRally;
 
 touches(
     scenario => "Nothing",
@@ -30,8 +30,8 @@ touches(
         archive => {
             a => { x => 0, y => 0 },
             c => { x => 7, y => 7 },
-            d => { x => 1, y => 4 },
-            e => { x => 9, y => 7 } } } );
+            d => { x => 1, y => 4, archive => ignore(), active => 1, flag => 3, id => 'flag_3', o => 0, solid => 0, type => 'flag' },
+            e => { x => 9, y => 7, archive => ignore(), active => 1, flag => 2, id => 'flag_2', o => 0, solid => 0, type => 'flag' }, } } );
 
 touches(
     scenario => "Flags",
@@ -43,13 +43,16 @@ touches(
     },
     state   => 'GAME OVER',
     touches => {
-        archive => { a => { x => 7, y => 1 }, b => { x => 9, y => 7 }, c => { x => 1, y => 4 } },
+        archive => {
+            a => { x => 7, y => 1, archive => ignore(), active => 1, flag => 1, id => 'flag_1', o => 0, solid => 0, type => 'flag' },
+            b => { x => 9, y => 7, archive => ignore(), active => 1, flag => 2, id => 'flag_2', o => 0, solid => 0, type => 'flag' },
+            c => { x => 1, y => 4, archive => ignore(), active => 1, flag => 3, id => 'flag_3', o => 0, solid => 0, type => 'flag' } },
         flag => { a => 1, c => 3 } } );
 
 sub touches {
     my (%a) = @_;
-    local $Test::Builder::Level = $Test::Builder::Level + 1;
     subtest $a{scenario} => sub {
+        local $Test::Builder::Level = $Test::Builder::Level - 1;
         my $rally = Gamed::Test::Player->new('a')->create( 'RoboRally', 'test', { course => 'risky_exchange' } );
         my ( %pieces, @bots );
         my $id = 0;
@@ -59,13 +62,12 @@ sub touches {
         }
         while ( my ( $k, $v ) = each( %{ $a{bots} } ) ) {
             my $bot = shift @bots;
-            my $piece = Bot( $k, $v->{pos}[0], $v->{pos}[1], N );
+            my $piece = bot( $k, $v->{pos}[0], $v->{pos}[1], N, { archive => $v->{archive} });
             $rally->{public}{course}{pieces}{$k} = $piece;
             $rally->{players}{$k} ||= {};
             $rally->{players}{$k}{bot} = $piece;
             $piece->{flag} = $v->{flag};
             $piece->{active} = 1;
-            $rally->{public}{course}{pieces}{"$k\_archive"} = Archive( $k, $v->{archive}[0], $v->{archive}[1] );
             $id++;
         }
         $rally->{states}{EXECUTING}{register} = $a{register};
@@ -77,9 +79,9 @@ sub touches {
             broadcast( $rally, $a{touches} );
             if ( defined $a{touches}{archive} ) {
                 while ( my ( $bot, $pos ) = each %{ $a{touches}{archive} } ) {
-                    my $archive = $rally->{public}{course}{pieces}{"$bot\_archive"};
+                    my $piece = $rally->{public}{course}{pieces}{$bot};
                     is_deeply(
-                        { x => $archive->{x}, y => $archive->{y} },
+                        { x => $piece->{archive}{loc}{x}, y => $piece->{archive}{loc}{y} },
                         { x => $pos->{x},     y => $pos->{y} },
                         "$bot archive moved"
                     );

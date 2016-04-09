@@ -46,10 +46,10 @@ sub new {
 
     for my $p ( values %{ $course->{pieces} } ) {
         if ( $p->{type} eq 'flag' ) {
-            $p = Flag( $p->{flag}, $p->{x}, $p->{y} );
+            $p = Gamed::Game::RoboRally::Flag->new( $p->{flag}, $p->{x}, $p->{y} );
         }
         else {
-            $p = Piece( $p->{id}, $p->{type}, $p->{x}, $p->{y}, $p->{o} || 0, $p->{solid} || 0 );
+            $p = Gamed::Game::RoboRally::Piece->new( $p->{id}, $p->{type}, $p->{x}, $p->{y}, $p->{o} || 0, $p->{solid} || 0 );
         }
         push @{ $course->{tiles}[ $p->{y} ][ $p->{x} ]{pieces} }, $p;
     }
@@ -77,7 +77,7 @@ sub died {
 
 sub add_bot {
     my ( $self, $bot ) = @_;
-    my $piece = Bot( $bot, 0, 0, N );
+    my $piece = Gamed::Game::RoboRally::Bot->new( $bot, 0, 0, N );
     $self->{course}{pieces}{$bot} = $piece;
     push @{$self->{tiles}[0][0]{pieces}}, $piece;
 }
@@ -85,11 +85,10 @@ sub add_bot {
 sub place {
     my ( $self, $bot, $num ) = @_;
     my $loc = $self->{start}{$num};
-    $self->move($bot, $loc->[0], $loc->[1]);
+    $bot->{archive}{loc}{x} = $loc->[0];
+    $bot->{archive}{loc}{y} = $loc->[1];
+    $self->move($bot, @$loc);
     $bot->{active} = 1;
-    my $archive = Archive( $bot->{id}, $loc->[0], $loc->[1] );
-    $self->{course}{pieces}{ $bot->{id} . "_archive" } = $archive;
-    push @{$self->{tiles}[$loc->[1]][$loc->[0]]{pieces}}, $archive;
 }
 
 sub move {

@@ -65,8 +65,8 @@ sub check_for_placing {
     my $game = $self->{game};
 
     if (@{$self->{placing}}) {
-        my $arch = $game->{public}{course}->piece($self->{placing}[0] . '_archive');
-        $self->{placing_options} = $game->{public}{course}->available_placements($arch->{x}, $arch->{y});
+        my $bot = $game->{public}{course}->piece($self->{placing}[0]);
+        $self->{placing_options} = $game->{public}{course}->available_placements($bot->{archive}{loc}{x}, $bot->{archive}{loc}{y});
 	    $game->broadcast( placing => { bot => $self->{placing}[0], available => $self->{placing_options} } );
     }
     else {

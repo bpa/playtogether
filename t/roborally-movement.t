@@ -10,12 +10,12 @@ use t::RoboRally;
 my $course = Gamed::Game::RoboRally::Course->new('checkmate');
 $course->add_bot( 'a' );
 $course->place( $course->{course}{pieces}{a}, 1 );
-is_deeply( $course->{course}{pieces}{a}, (bot('a', 5, 14, N ))[1] );
+is_deeply( $course->{course}{pieces}{a}, ( bot( 'a', 5, 14, N, { archive => [ 5, 14 ] } ) )[1] );
 
 $course->add_bot( 'b' );
 $course->place( $course->{course}{pieces}{b}, 2 );
-is_deeply( $course->{course}{pieces}{a}, (bot('a', 5, 14, N ))[1] );
-is_deeply( $course->{course}{pieces}{b}, (bot('b', 6, 14, N ))[1] );
+is_deeply( $course->{course}{pieces}{a}, ( bot( 'a', 5, 14, N, { archive => [ 5, 14 ] } ) )[1] );
+is_deeply( $course->{course}{pieces}{b}, ( bot( 'b', 6, 14, N, { archive => [ 6, 14 ] } ) )[1] );
 
 move(
     scenario => 'Rotate Right',
@@ -241,13 +241,11 @@ move(
     cards    => [ [ 'a', ['3100'] ] ],
     actions  => [ [ { piece => 'a', move => 3, dir => 2 } ] ],
     before   => {
-        bot('a', 0, 0, S),
-        archive('a', 0, 2),
-        flag(1, 0, 1), },
+        bot('a', 0, 0, S, { archive => [ 0, 2 ] }),
+        flag(1, 0, 1) },
     after => {
-        bot('a', 0, 3, S),
-        flag(1, 0, 1),
-        archive('a', 0, 2) } );
+        bot('a', 0, 3, S, { archive => [ 0, 2 ] }),
+        flag(1, 0, 1) } );
 
 sub move {
     my %a = @_;

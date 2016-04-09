@@ -2,6 +2,7 @@ package Gamed::Test::Player;
 
 use JSON::MaybeXS;
 use Data::UUID;
+use Data::Dumper;
 use Test::Builder;
 use Test::Deep::NoTest;
 use Hash::Merge 'merge';
@@ -25,6 +26,7 @@ sub handle {
     local $Test::Builder::Level = $Test::Builder::Level + 1;
     my ( $self, $msg ) = @_;
     eval { Gamed::Player::handle( $self, $json->encode($msg) ); };
+    print Dumper $@ if $@;
     $self->err($@) if $@;
 }
 

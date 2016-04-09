@@ -4,7 +4,6 @@ use Test::More;
 use Test::Deep qw/cmp_details deep_diag ignore/;
 use Gamed::Game::RoboRally::Course;
 use Gamed::Game::RoboRally::Cleanup;
-use Gamed::Game::RoboRally::Pieces;
 use File::Spec::Functions 'catdir';
 use Data::Dumper;
 use t::RoboRally;
@@ -25,7 +24,7 @@ subtest 'Place bot on archive marker' => sub {
 
 subtest 'Placing on dead bot ok' => sub {
     my $available = setup(
-        {   pieces  => { dead( 'a', 2 ) },
+        {   pieces  => { dead( 'a', 0, 0, 2 ) },
             archive => [ 0, 0 ] } );
 
     place_ok($available, 0, 0, S, "OK to place on dead bot"),
@@ -42,7 +41,7 @@ subtest 'Place next to archive marker' => sub {
 };
 
 subtest "Blocks" => sub {
-    my $available = setup( { pieces => { b => Piece( 'b', 'block', 0, 0, N, 1, 1 ) }, archive => [ 0, 0 ] } );
+    my $available = setup( { pieces => { piece( 'b', 'block', 0, 0, N, 1, 1 ) }, archive => [ 0, 0 ] } );
 
     place_err($available, 0, 0, S, "Can't place on block");
     place_ok ($available, 0, 1, S, "Block makes next tier available");
@@ -68,9 +67,9 @@ subtest 'Visibility impedence' => sub {
     my $available = setup(
         {   pieces => {
                 bot( 'a', 6, 14, N ),
-                b => Piece( 'b', 'block', 5, 14, N, 1, 1 ),
+                piece( 'b', 'block', 5, 14, N, 1, 1 ),
                 bot( 'c', 5, 13, S ),
-                flag( '1', 5, 14, S ) },
+                flag( '1', 5, 14 ) },
             archive => [ 5, 15 ] } );
 
     place_ok($available, 5, 15, N, "Block impedes line of sight");

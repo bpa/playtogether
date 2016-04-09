@@ -86,12 +86,14 @@ sub do_touches {
                 }
             }
             my $tile = $tiles->[$bot->{y}][$bot->{x}]->{t};
-            if (@flags || $tile eq 'upgrade' || $tile eq 'wrench') {
-                my $archive = $self->{game}{public}{course}{pieces}{ $bot->{id} . "_archive" };
-                if ( $archive->{x} != $bot->{x} || $archive->{y} != $bot->{y} ) {
-                    $archive->{x} = $bot->{x};
-                    $archive->{y} = $bot->{y};
-                    $phase{archive}{ $bot->{id} } = { x => $bot->{x}, y => $bot->{y} };
+            if (@flags) {
+                $bot->{archive}{loc} = $self->{game}{public}{course}{pieces}{"flag_".$flags[-1]};
+                $phase{archive}{ $bot->{id} } = $bot->{archive}{loc};
+            }
+            elsif ($tile eq 'upgrade' || $tile eq 'wrench') {
+                if ( $bot->{archive}{loc}{x} != $bot->{x} || $bot->{archive}{loc}{y} != $bot->{y} ) {
+                    $bot->{archive}{loc} = { x => $bot->{x}, y => $bot->{y} };
+                    $phase{archive}{ $bot->{id} } = $bot->{archive}{loc};
                 }
             }
         }
