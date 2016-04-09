@@ -6,7 +6,7 @@ use Gamed::Test;
 use Data::Dumper;
 use t::RoboRally;
 
-my $course = Gamed::Game::RoboRally::Course->new('risky_exchange');
+my $course = Gamed::Game::RoboRally::Course->new('dizzy_dash');
 
 SKIP: {
     skip "No tests written", 1;

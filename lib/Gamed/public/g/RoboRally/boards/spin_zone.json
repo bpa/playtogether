@@ -1,0 +1,32 @@
+{
+   "name" : "Spin Zone",
+   "width" : 12,
+   "height" : 12,
+   "author": "WotC",
+   "date": 2005,
+   "lasers":[
+        {"x":3,"y":6,"l":1,"d":1},
+        {"x":6,"y":3,"l":1,"d":8},
+        {"x":8,"y":5,"l":1,"d":4},
+        {"x":5,"y":8,"l":1,"d":2}
+   },
+   "tiles": [
+   [{},{},{"w":1},{},{"w":1},{},{},{"w":1},{},{"w":1},{},{}],
+
+   [{},{"t":"conveyor2r","o":1},{"t":"conveyor2","o":1},{"t":"conveyor2","o":1},{"t":"conveyor2r","o":2},{},{},{"t":"conveyor2r","o":1},{"t":"conveyor2","o":1},{"t":"conveyor2","o":1},{"t":"conveyor2r","o":2},{}],
+   [{"w":8},{"t":"conveyor2"},{"t":"gear_r"},{"w":4},{"t":"conveyor2","o":2},{"t":"gear_l"},{},{"t":"conveyor2"},{"t":"gear_r"},{},{"t":"conveyor2","o":2},{"w":2}],
+   [{},{"t":"conveyor2"},{"t":"wrench"},{"t":"gear_r"},{"t":"conveyor2","o":2},{"w":8},{"w":2},{"t":"conveyor2"},{"t":"upgrade"},{"t":"gear_r"},{"t":"conveyor2","o":2},{}],
+   [{"w":8},{"t":"conveyor2r"},{"t":"conveyor2","o":3},{"t":"conveyor2","o":3},{"t":"conveyor2","o":3},{},{"t":"gear_l"},{"t":"conveyor2r"},{"t":"conveyor2","o":3},{"t":"conveyor2","o":3},{"t":"conveyor2r","o":3},{"w":2}],
+
+   [{},{},{},{},{"t":"gear_l"},{},{},{},{"w":1},{"t":"gear_l"},{},{}],
+   [{},{},{"t":"gear_l"},{"w":4},{},{},{},{"t":"gear_l"},{},{},{},{}],
+
+   [{"w":8},{"t":"conveyor2r","o":1},{"t":"conveyor2","o":1},{"t":"conveyor2","o":1},{"t":"conveyor2r","o":2},{"t":"gear_l"},{},{"t":"conveyor2r","o":1},{"t":"conveyor2","o":1},{"t":"conveyor2","o":1},{"t":"conveyor2r","o":2},{"w":2}],
+   [{},{"t":"conveyor2"},{"t":"gear_r"},{"t":"upgrade"},{"t":"conveyor2","o":2},{"w":8},{"w":2},{"t":"conveyor2"},{"t":"gear_r"},{"t":"wrench"},{"t":"conveyor2","o":2},{}],
+   [{"w":8},{"t":"conveyor2"},{},{"t":"gear_r"},{"t":"conveyor2","o":2},{},{"t":"gear_l"},{"t":"conveyor2"},{"w":1},{"t":"gear_r"},{"t":"conveyor2","o":2},{"w":2}],
+   [{},{"t":"conveyor2r"},{"t":"conveyor2","o":3},{"t":"conveyor2","o":3},{"t":"conveyor2","o":3},{},{},{"t":"conveyor2r"},{"t":"conveyor2","o":3},{"t":"conveyor2","o":3},{"t":"conveyor2r","o":3},{}],
+
+   [{},{},{"w":4},{},{"w":4},{},{},{"w":4},{},{"w":4},{},{}]
+
+   ]
+}
