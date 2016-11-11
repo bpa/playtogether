@@ -2,8 +2,9 @@
 Perl version of gamed (casual game server &amp; clients)
 
 ### Getting Started
-Start off by making sure you have a working install of Perl5.  If you're on Windows, using Strawberry Perl (http://strawberryperl.com/)
-is highly recommended.
+Start off by making sure you have a working install of Perl5.  If you're on Windows, using Strawberry Perl (http://strawberryperl.com/) is highly recommended.
+
+Node.js is now required as well in order to package the html5 website.
 
 You'll next want to invoke the install script for your platform.  It takes care of installing various libraries you'll need.
 

@@ -21,3 +21,4 @@ data
 .secret
 *.session
 bots/*.yaml
+node_modules

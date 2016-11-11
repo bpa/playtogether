@@ -1,6 +1,26 @@
 use 5.014002;
 use ExtUtils::MakeMaker;
 
+# For some reason MY::all_target doesn't actually work as it should
+sub MM::all_target {
+    my $self = shift;
+
+    return <<'MAKE_EXT';
+all :: pure_all node_modules webpack manifypods
+	$(NOECHO) $(NOOP)
+MAKE_EXT
+}
+
+sub MY::postamble {
+    return <<'WEBPACK';
+webpack:
+	node node_modules/webpack/bin/webpack.js
+
+node_modules:
+	node install
+WEBPACK
+}
+
 # See lib/ExtUtils/MakeMaker.pm for details of how to influence
 # the contents of the Makefile that is written.
 WriteMakefile(
