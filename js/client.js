@@ -1,5 +1,12 @@
 import Lobby from './lobby';
 import Login from './login';
+import HiLo from './hilo';
+import Rook from './rook';
+
+export let games = {
+    HiLo: HiLo,
+    Rook: Rook,
+}
 
 export function together() {
 	ReactDOM.render(<Client/>, document.getElementById('root'));
@@ -26,6 +33,7 @@ let Socket = function(on_message) {
 
     self._ign = function(msg) {};
     self._send = function(msg) {
+        console.log('<', msg);
         self.ws.send(JSON.stringify(msg));
     };
 
@@ -49,8 +57,7 @@ function deliver(msg, obj) {
 
 function on_message(m) {
 	let msg = JSON.parse(m.data);
-	console.log(msg);
-	console.log(this);
+	console.log('>', msg);
 	deliver(msg, this);
 	deliver(msg, this.game);
 }
@@ -84,19 +91,25 @@ export class Client extends React.Component {
 			});
       }
       else {
-        this.setState({game: Login});
+        this.setState({game: Login, name: 'Login'});
       }
 	}
 
 	on_delete(msg) {
 		if (msg.game !== undefined && msg.name !== undefined) {
-			this.setState({game: Lobby});
+			this.setState({game: Lobby, name: 'Lobby'});
 		}
 	}
 
   	on_welcome(msg) {
 		window.sessionStorage.token = msg.token;
 		window.localStorage.username = msg.username;
-		this.setState({game: Lobby});
+		this.setState({game: Lobby, name: 'Lobby'});
 	}
+
+    on_join(msg) {
+        if (this.state.name !== msg.game) {
+            this.setState({game: games[msg.game], name: msg.game});
+        }
+    }
 }
