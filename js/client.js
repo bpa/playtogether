@@ -1,11 +1,17 @@
 import Lobby from './lobby';
 import Login from './login';
-import HiLo from './hilo';
-import Rook from './rook';
+import HiLo from './HiLo';
+import RoboRally from './RoboRally';
+import Rook from './Rook';
+import SpeedRisk from './SpeedRisk';
+import Spitzer from './Spitzer';
 
 export let games = {
     HiLo: HiLo,
+    RoboRally: RoboRally,
     Rook: Rook,
+    SpeedRisk: SpeedRisk,
+    Spitzer: Spitzer,
 }
 
 export function together() {

@@ -1,15 +1,10 @@
-class Game extends React.Component {
-    render() { return (
-<label className="btn btn-success" key={g}>
-  <input type="radio" autoComplete="off" onClick={this.select.bind(this, g)}/>{g}
-</label>
-    )}
-}
+import { RadioButtonGroup } from './html';
 
 export default class Lobby extends React.Component {
     constructor(props) {
         super(props);
         this.config = {};
+        this.pick = this.pick.bind(this);
         this.create = this.create.bind(this);
         this.setConfig = this.setConfig.bind(this);
         this.nameChanged = this.nameChanged.bind(this);
@@ -25,12 +20,8 @@ export default class Lobby extends React.Component {
     }
 
     on_games(msg) {
-        let games = msg.games.map((g) => (
-<label className="btn btn-success" key={g}>
-  <input type="radio" autoComplete="off" onClick={this.select.bind(this, g)}/>{g}
-</label>));
         this.setState({
-            games: games,
+            games: msg.games,
             instances: msg.instances
         });
     }
@@ -44,9 +35,7 @@ export default class Lobby extends React.Component {
             <div className="row">
               <div className="col-md-2">
                 <h4>Available games:</h4>
-                <div className="btn-group-vertical form-inline" data-toggle="buttons">
-                  {this.state.games}
-                </div>
+                <RadioButtonGroup items={this.state.games} onChange={this.pick} vertical/>
               </div>
               <form className="col-md-10">
                 <div className="form-inline">
@@ -68,7 +57,7 @@ export default class Lobby extends React.Component {
         </div>
     )}
 
-    select(e) {
+    pick(e) {
         this.game = e;
         this.config = {};
         this.setState({config: play.games[e].config});

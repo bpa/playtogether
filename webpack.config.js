@@ -6,6 +6,7 @@ var HtmlWebpackPlugin = require('html-webpack-plugin'),
     copy = ['react/dist',
             'react-dom/dist',
             'pixi.js/bin',
+            'jquery/dist',
             'bootstrap/dist'].map(function(d) {
         return glob.sync("node_modules/"+d+"/**/*.*");
     }).reduce(function(a,b){
@@ -34,7 +35,10 @@ module.exports = {
     module: {
         loaders: [
             {   test: /\.jsx?$/,
-                include: __dirname + '/js',
+                include: [
+                    __dirname + '/js',
+                    __dirname + '/node_modules/react-bootstrap',
+                ],
                 loader: 'babel',
                 query: {
                     presets: ['es2015', 'react']
